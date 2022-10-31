@@ -752,3 +752,26 @@ function theme_boost_union_register_webfonts_filetypes() {
         core_filetypes::add_type($f['extension'], $f['mimetype'], $f['coreicon']);
     }
 }
+
+    /* Get the course image if added to course.
+     *
+     * @param object $course
+     * @return string url of course image
+     */
+    function theme_boost_union_get_course_image($course) {
+        global $CFG;
+        $courseinlist = new \core_course_list_element($course);
+        foreach ($courseinlist->get_course_overviewfiles() as $file) {
+            if ($file->is_valid_image()) {
+                $pathcomponents = [
+                '/pluginfile.php',
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea() . $file->get_filepath() . $file->get_filename()
+                ];
+                $path = implode('/', $pathcomponents);
+                return (new moodle_url($path))->out();
+            }
+        }
+        return false;
+    }
