@@ -100,12 +100,13 @@ class core_renderer extends \theme_boost\output\core_renderer {
     
     public function full_header() {
         // MODIFICATION START.
-        global $USER, $COURSE, $CFG, $DB, $OUTPUT;
+        global $USER, $COURSE, $CFG, $DB, $OUTPUT, $PAGE;
         $header = new stdClass();
         
         $sitecontextheader = '<div class="page-context-header"><div class="page-header-headings"><h1>'.$COURSE->fullname.'</h1></div></div>';
         
         $headertext = (!empty($this->context_header())) ? $this->context_header() : $sitecontextheader;
+	
         
         //Little hack to add back missing header for dashboard
         //The context header the comes through is not formated properly
@@ -119,15 +120,26 @@ class core_renderer extends \theme_boost\output\core_renderer {
          $header->contextheader = '<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'">'.$COURSE->fullname.'</a></h2>';
          }
          */
-        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'">'.$headertext.'</a>';
+		//error_log('pg url:'.$PAGE->url);
+		
+		if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&$PAGE->url->get_param('bui_editid')===null) {
+	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'">'.$headertext.'</a>';
+        	
+		} else {
+			
+			$headertext = $COURSE->fullname;
+	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'">'.$headertext.'</a>';
         
-        $header->mycourseheader = '';
+		}
+		
         
-        $header->mycourseheader = '<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'">'.$COURSE->fullname.'</a></h2>';
+        $header->mycourseheader = '<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'" title="'.$PAGE->url.'">'.$COURSE->fullname.'</a></h2>';
         
         $header->iscoursepage = false;
         
-        if (strip_tags($this->context_header()) == $COURSE->fullname) {
+		//$isgrader = ($PAGE->get_url()) ? : false;
+		
+        if (strip_tags($headertext) == $COURSE->fullname) {
             $header->contextheader = '<!-- hello -->';//'<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'">'.$COURSE->fullname.'</a></h2>';
             $header->iscoursepage = true;
         }
