@@ -156,7 +156,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
          */
 		//error_log('pg url:'.$PAGE->url);
 		
-		if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'report/')===false) {
+		if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'report/')===false&&strpos($PAGE->url,'my/courses.php')===false) {
 	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'">'.$headertext.'</a>';
         	
 		} else {
