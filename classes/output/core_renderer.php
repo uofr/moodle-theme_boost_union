@@ -156,7 +156,30 @@ class core_renderer extends \theme_boost\output\core_renderer {
          */
 		//error_log('pg url:'.$PAGE->url);
 		
-		if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'report/')===false&&strpos($PAGE->url,'my/courses.php')===false) {
+		$activityheader = false;
+		
+		//error_log('$PAGE->url:'.$PAGE->url);
+		//error_log('component:'.$PAGE->url->get_param('component'));
+		
+		if (strpos($PAGE->url,'grade/')==true&&$PAGE->url->get_param('component')!==null) {
+			// advanced grading page for forum, etc
+			$activityheader = true;
+		} else if (strpos($PAGE->url,'grade/')==true&&$PAGE->url->get_param('areaid')!==null) {
+			// advanced grading page for forum, etc
+			$activityheader = true;
+		} else if (strpos($PAGE->url,'mod/')==true&&strpos($PAGE->url,'report/')!==false) {
+			// forum report, for example
+			$activityheader = true;
+		} else if (strpos($PAGE->url,'admin/')==true&&strpos($PAGE->url,'permissions.php')==true&&$PAGE->url->get_param('contextid')!==null) {
+			// permissions within activity
+			$activityheader = true;
+		} else if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&strpos($PAGE->url,'report/')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'my/courses.php')===false&&strpos($PAGE->url,'admin/')===false) {
+			$activityheader = true;
+		}
+		
+		
+		
+		if ($activityheader === true) {
 	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'">'.$headertext.'</a>';
         	
 		} else {
@@ -521,7 +544,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		
 		
 		$am->attributes['id'] = 'user-menu-toggle';
-		error_log('action_menu'.print_r($am,1));
+		//error_log('action_menu'.print_r($am,1));
 		
 	    return html_writer::div(
 	        $this->render($am),
