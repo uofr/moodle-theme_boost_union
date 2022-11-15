@@ -244,3 +244,35 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
         send_file_not_found();
     }
 }
+
+
+function theme_boost_union_extend_navigation_user_settings($navigation, $user, $usercontext, $course, $coursecontext) {
+    global $USER, $PAGE;
+	
+	error_log('darkmode pref');
+	
+    // Don't bother doing needless calculations unless we are on the relevant pages.
+    $onpreferencepage = $PAGE->url->compare(new moodle_url('/user/preferences.php'), URL_MATCH_BASE);
+    $ondarkmodepage = $PAGE->url->compare(new moodle_url('/theme/boost_union/darkmode.php'), URL_MATCH_BASE);
+    if (!$onpreferencepage && !$ondarkmodepage) {
+	
+		error_log('not on pref page');
+        return null;
+    }
+
+    // Don't show the setting if the event monitor isn't turned on. No access to other peoples subscriptions.
+    //if (get_config('theme_boost_union', 'enabledarkmode') && $USER->id == $user->id) {
+	//if (get_config('theme_boost_union', 'enabledarkmode')) {
+        $url = new moodle_url('/theme/boost_union/darkmode.php');
+        $darkmodenode = navigation_node::create(get_string('darkmodepref', 'theme_boost_union'), $url,
+                navigation_node::TYPE_SETTING, null, 'darkmode', new pix_icon('i/settings', ''));
+		
+		error_log('$darkmodenode: '.print_r($darkmodenode,1));
+		
+        if (isset($darkmodenode) && !empty($navigation)) {
+            $navigation->add_node($darkmodenode);
+	
+			error_log('darkmodenode added');
+        }
+		//}
+}

@@ -72,6 +72,40 @@ $buildregionmainsettings = !$PAGE->include_region_main_settings_in_header_action
 // If the settings menu will be included in the header then don't add it here.
 $regionmainsettingsmenu = $buildregionmainsettings ? $OUTPUT->region_main_settings_menu() : false;
 
+//including Dark Mode css if darkmode==1 if query string is set
+//darkmode toggle code
+$setdarkmode = optional_param('darkmode', -1, PARAM_INT);
+
+if ($setdarkmode > -1) {
+    $userid = $USER->id;
+    $table = 'theme_urcourses_darkmode';
+
+    $newrecord = new stdClass();
+    $newrecord->userid = $userid;
+
+    //database check if user has a record, insert if not
+    if ($record = $DB->get_record($table, array('userid'=>$userid))) {
+     //if has a record, update record to $setdarkmode
+     
+     $newrecord->darkmode = $setdarkmode;
+     $newrecord->id = $record->id;
+     $DB->update_record($table, $newrecord);
+    }
+    else {
+        //create a record
+        $newrecord->darkmode = $setdarkmode;
+        $DB->insert_record($table, $newrecord);
+    }  
+    
+ }
+
+ $darkmodecheck = $DB->get_record('theme_urcourses_darkmode', array('userid'=>$USER->id, 'darkmode'=>1));
+ error_log('darkmode:'.print_r($darkmodecheck,1));
+//check if user has darkmode on in database and include if so
+if($darkmodecheck){
+   $PAGE->requires->css('/theme/boost_union/style/darkmode.css');
+}
+
 $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
 

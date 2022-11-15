@@ -278,3 +278,8 @@ $string['privacy:metadata'] = 'The Boost Union theme does not store any personal
 $string['boost_union:configure'] = 'To be able to configure the theme as non-admin';
 $string['boost_union:viewhintcourseselfenrol'] = 'To be able to see a hint for unrestricted self enrolment in a visible course.';
 $string['boost_union:viewhintinhiddencourse'] = 'To be able to see a hint in a hidden course.';
+
+// UofR Customizations
+
+$string['darkmode'] = 'Darkmode';
+$string['darkmodepref'] = 'Darkmode preferences';
