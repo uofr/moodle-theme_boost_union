@@ -226,10 +226,14 @@ class core_renderer extends \theme_boost\output\core_renderer {
         
         $preheader = $header->courseimage = theme_boost_union_get_course_image($COURSE);
         
+		$header->courselink = $CFG->wwwroot.'/course/view.php?id='.$COURSE->id;
+		
         if (!$header->courseimage) {
             $header->courseimage = $OUTPUT->get_generated_image_for_id($COURSE->id);
         }
-        if ($COURSE->id == 1) $header->courseimage = $CFG->wwwroot.'/theme/urcourses_default/pix/siteheader.jpg';
+        if ($COURSE->id == 1) {
+        	$header->courseimage = $CFG->wwwroot.'/theme/urcourses_default/pix/siteheader.jpg';
+        }	
         
         
         $header->coursenavicon = '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'"><img class="instr-avatar img-rounded" style="border-radius: 0.25em" src="'.$header->courseimage.'" height="18" width="18" title="'.$COURSE->fullname.'" alt="'.$COURSE->fullname.'" /></a>';
