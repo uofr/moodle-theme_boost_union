@@ -493,7 +493,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	        $returnstr
 	    );
 	    $am->set_action_label(get_string('usermenu'));
-		$am->set_menu_left();
+		//$am->set_menu_left();
 	    //$am->set_alignment(action_menu::TR, action_menu::BR);
 	    $am->set_nowrap_on_items();
 	    if ($withlinks) {
