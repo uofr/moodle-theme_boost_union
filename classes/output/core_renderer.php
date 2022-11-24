@@ -201,9 +201,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
             $header->iscoursepage = true;
         }
         
+        //error_log('Header actions:'.print_r($PAGE->get_header_actions(),1));
         
-        
-        
+        $header->headeractions = $PAGE->get_header_actions();
         
         /*
          if (strip_tags($this->context_header()) != $COURSE->fullname) {
@@ -238,6 +238,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
         
         $header->coursenavicon = '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'"><img class="instr-avatar img-rounded" style="border-radius: 0.25em" src="'.$header->courseimage.'" height="18" width="18" title="'.$COURSE->fullname.'" alt="'.$COURSE->fullname.'" /></a>';
         
+		//error_log('navbar'.$header->navbar);
         
         $html = $this->render_from_template('theme_boost_union/full_header', $header);
         
@@ -328,7 +329,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	public function user_menu($user = null, $withlinks = null) {
 	    global $USER, $CFG, $DB;
 	    require_once($CFG->dirroot . '/user/lib.php');
-		error_log('ahoy, the user menu');
+		//error_log('ahoy, the user menu');
 	    if (is_null($user)) {
 	        $user = $USER;
 	    }
@@ -399,13 +400,13 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	    $usedarkmodeurl = ($darkchk == 1) ? 0 : 1;
 	    //dark mode variable for if on/off to swap icon
 	    $mynodelabel = ($darkchk == 1) ? "i/item" : "i/marker";
-	    $darkstate = ($darkchk == 1) ? "off" : "on";
+	    $darkstate = ($darkchk == 1) ? "on" : "off";
 
 	    //creating dark mode object 
 	    $mynode = new stdClass();
 	    $mynode->itemtype = "link";
 	    $mynode->url = new moodle_url($this->page->url,array("darkmode"=>$usedarkmodeurl));
-	    $mynode->title = "Darkmode " . $darkstate;
+	    $mynode->title = "Darkmode is " . $darkstate;
 	    $mynode->titleidentifier = "darkmode, theme_urcourses_default";
 	    $mynode->pix = $mynodelabel;
 
@@ -413,12 +414,34 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	    //$lnode = $opts->navitems[count($opts->navitems)]; //get logout node
 	    
 		$allnodes = $opts->navitems; //get logout node
-		$opts->navitems[7] = $mynode; //dark node placed in 5
-		error_log('COUNT: '.count($allnodes));
 		
-		for ($i=7; $i < count($allnodes); $i++) {
-			$opts->navitems[$i+1] = $allnodes[$i];
+		//if (has_capability('moodle/role:switchroles', $PAGE->context)) {
+		    // Do or display something.
+			//} else {
+			
+		//}
+		
+		//error_log('navitems:'.print_r($opts->navitems,1));
+		
+		
+		//$lastnode = array_pop($opts->navitems);
+		
+		//$opts->navitems[] = $mynode; //dark node placed in 5
+		//$opts->navitems[] = $lastnode;
+		//error_log('COUNT: '.count($allnodes));
+		
+		$menukey = count($opts->navitems);
+		for ($i=0; $i < count($allnodes); $i++) {
+			if (isset($opts->navitems[$i]->title) && $opts->navitems[$i]->title == 'Preferences') {
+				$menukey = $i+1;
+				$i = count($allnodes);
+			}
 		}
+		$opts->navitems[$menukey] = $mynode;
+		for ($i=$menukey+1; $i<count($allnodes)+1; $i++) {
+			$opts->navitems[$i] = $allnodes[$i-1];
+		}
+		
 	    //$opts->navitems[] = $lnode; //placing log out back in at the end
 		
 		
@@ -540,7 +563,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	            $idx++;
 
 	            // Add dividers after the first item and before the last item.
-	            if ($idx == $navitemcount - 2) {
+	            if ($idx == $navitemcount - 1) {
 	                $am->add($divider);
 	            }
 	        }
