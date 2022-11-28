@@ -23,6 +23,7 @@
  */
 
 use \theme_boost_union\admin_setting_configdatetime;
+use \theme_boost_union\admin_setting_configstoredfilealwayscallback;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -225,7 +226,8 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $name = 'theme_boost_union/backgroundimage';
         $title = get_string('backgroundimage', 'theme_boost', null, true);
         $description = get_string('backgroundimage_desc', 'theme_boost', null, true);
-        $setting = new admin_setting_configstoredfile($name, $title, $description, 'backgroundimage');
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'backgroundimage', 0,
+                array('maxfiles' => 1, 'accepted_types' => 'web_image'));
         $setting->set_updatedcallback('theme_reset_all_caches');
         $tab->add($setting);
 
@@ -361,6 +363,128 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->add($tab);
 
 
+        // Create E_Mail branding tab.
+        $tab = new admin_settingpage('theme_boost_union_look_emailbranding',
+                get_string('emailbrandingtab', 'theme_boost_union', null, true));
+
+        // Create E_Mail branding introduction heading.
+        $name = 'theme_boost_union/emailbrandingintroheading';
+        $title = get_string('emailbrandingintroheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Create E-Mail branding introduction note.
+        $name = 'theme_boost_union/emailbrandingintronote';
+        $title = '';
+        $description = '<div class="alert alert-info" role="alert">'.
+                get_string('emailbrandingintronote', 'theme_boost_union', null, true).'</div>';
+        $setting = new admin_setting_description($name, $title, $description);
+        $tab->add($setting);
+
+        // Create E-Mail branding instruction.
+        $name = 'theme_boost_union/emailbrandinginstruction';
+        $title = '';
+        $description = '<h4>'.get_string('emailbrandinginstruction', 'theme_boost_union', null, true).'</h4>';
+        $description .= '<p>'.get_string('emailbrandinginstruction0', 'theme_boost_union', null, true).'</p>';
+        $emailbrandinginstructionli1url = new moodle_url('/admin/tool/customlang/index.php', array('lng' => $CFG->lang));
+        $description .= '<ul><li>'.get_string('emailbrandinginstructionli1', 'theme_boost_union',
+                array('url' => $emailbrandinginstructionli1url->out(), 'lang' => $CFG->lang), true).'</li>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli2', 'theme_boost_union', null, true).'</li>';
+        $description .= '<ul><li>'.get_string('emailbrandinginstructionli2li1', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli2li2', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli2li3', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli2li4', 'theme_boost_union', null, true).'</li></ul>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli3', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandinginstructionli4', 'theme_boost_union', null, true).'</li></ul>';
+        $description .= '<h4>'.get_string('emailbrandingpitfalls', 'theme_boost_union', null, true).'</h4>';
+        $description .= '<p>'.get_string('emailbrandingpitfalls0', 'theme_boost_union', null, true).'</p>';
+        $description .= '<ul><li>'.get_string('emailbrandingpitfallsli1', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandingpitfallsli2', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandingpitfallsli3', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandingpitfallsli4', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandingpitfallsli5', 'theme_boost_union', null, true).'</li>';
+        $description .= '<li>'.get_string('emailbrandingpitfallsli6', 'theme_boost_union', null, true).'</li></ul>';
+        $setting = new admin_setting_description($name, $title, $description);
+        $tab->add($setting);
+
+        // Create HTML E-Mails heading.
+        $name = 'theme_boost_union/emailbrandinghtmlheading';
+        $title = get_string('emailbrandinghtmlheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Get HTML E-Mail preview.
+        $htmlpreview = theme_boost_union_get_emailbrandinghtmlpreview();
+
+        // If the HTML E-Mails are customized.
+        if ($htmlpreview != null) {
+            // Create HTML E-Mail intro.
+            $name = 'theme_boost_union/emailbrandinghtmlintro';
+            $title = '';
+            $description = '<div class="alert alert-info" role="alert">'.
+                    get_string('emailbrandinghtmlintro', 'theme_boost_union', null, true).'</div>';
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+
+            // Create HTML E-Mail preview.
+            $name = 'theme_boost_union/emailbrandinghtmlpreview';
+            $title = '';
+            $description = $htmlpreview;
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+
+            // Otherwise.
+        } else {
+            // Create HTML E-Mail intro.
+            $name = 'theme_boost_union/emailbrandinghtmlnopreview';
+            $title = '';
+            $description = '<div class="alert alert-info" role="alert">'.
+                    get_string('emailbrandinghtmlnopreview', 'theme_boost_union', null, true).'</div>';
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+        }
+
+        // Create Plaintext E-Mails heading.
+        $name = 'theme_boost_union/emailbrandingtextheading';
+        $title = get_string('emailbrandingtextheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Get Plaintext E-Mail preview.
+        $textpreview = theme_boost_union_get_emailbrandingtextpreview();
+
+        // If the Plaintext E-Mails are customized.
+        if ($textpreview != null) {
+            // Create Plaintext E-Mail intro.
+            $name = 'theme_boost_union/emailbrandingtextintro';
+            $title = '';
+            $description = '<div class="alert alert-info" role="alert">'.
+                    get_string('emailbrandingtextintro', 'theme_boost_union', null, true).'</div>';
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+
+            // Create Plaintext E-Mail preview.
+            $name = 'theme_boost_union/emailbrandingtextpreview';
+            $title = '';
+            $description = $textpreview;
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+
+            // Otherwise.
+        } else {
+            // Create Plaintext E-Mail intro.
+            $name = 'theme_boost_union/emailbrandingtextnopreview';
+            $title = '';
+            $description = '<div class="alert alert-info" role="alert">'.
+                    get_string('emailbrandingtextnopreview', 'theme_boost_union', null, true).'</div>';
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+        }
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
         // Create resources tab.
         $tab = new admin_settingpage('theme_boost_union_look_resources',
                 get_string('resourcestab', 'theme_boost_union', null, true));
@@ -405,15 +529,22 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $setting = new admin_setting_heading($name, $title, null);
         $tab->add($setting);
 
-        // Register the webfonts file types for filtering the uploads in the subsequent admin setting.
-        theme_boost_union_register_webfonts_filetypes();
+        // Register the webfonts file types for filtering the uploads in the subsequent admin settings.
+        // This function call may return false. In this case, the filetypes were not registered and we
+        // can't restrict the filetypes in the subsequent admin settings unfortunately.
+        $registerfontsresult = theme_boost_union_register_webfonts_filetypes();
 
         // Setting: Custom fonts.
         $name = 'theme_boost_union/customfonts';
         $title = get_string('customfontssetting', 'theme_boost_union', null, true);
         $description = get_string('customfontssetting_desc', 'theme_boost_union', null, true);
-        $setting = new admin_setting_configstoredfile($name, $title, $description, 'customfonts', 0,
-                array('maxfiles' => -1, 'accepted_types' => array('.eot', '.otf', '.svg', '.ttf', '.woff', '.woff2')));
+        if ($registerfontsresult == true) {
+            $setting = new admin_setting_configstoredfile($name, $title, $description, 'customfonts', 0,
+                    array('maxfiles' => -1, 'accepted_types' => theme_boost_union_get_webfonts_extensions()));
+        } else {
+            $setting = new admin_setting_configstoredfile($name, $title, $description, 'customfonts', 0,
+                    array('maxfiles' => -1));
+        }
         $tab->add($setting);
 
         // Information: Custom fonts list.
@@ -432,6 +563,89 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             $setting = new admin_setting_description($name, $title, $description);
             $tab->add($setting);
 
+        }
+
+        // Create FontAwesome heading.
+        $name = 'theme_boost_union/fontawesomeheading';
+        $title = get_string('fontawesomeheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: FontAwesome version.
+        $faversionoption =
+                // Don't use string lazy loading (= false) because the string will be directly used and would produce a
+                // PHP warning otherwise.
+                array(THEME_BOOST_UNION_SETTING_FAVERSION_NONE =>
+                        get_string('fontawesomeversionnone', 'theme_boost_union', null, false),
+                        THEME_BOOST_UNION_SETTING_FAVERSION_FA6FREE =>
+                                get_string('fontawesomeversionfa6free', 'theme_boost_union', null, false));
+        $name = 'theme_boost_union/fontawesomeversion';
+        $title = get_string('fontawesomeversionsetting', 'theme_boost_union', null, true);
+        $description = get_string('fontawesomeversionsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_FAVERSION_NONE,
+                $faversionoption);
+        $setting->set_updatedcallback('theme_boost_union_fontawesome_checkin');
+        $tab->add($setting);
+
+        // Setting: FontAwesome files.
+        $name = 'theme_boost_union/fontawesomefiles';
+        $title = get_string('fontawesomefilessetting', 'theme_boost_union', null, true);
+        $description = get_string('fontawesomefilessetting_desc', 'theme_boost_union', null, true).'<br /><br />'.
+                get_string('fontawesomefilesstructurenote', 'theme_boost_union', null, true);
+        if ($registerfontsresult == true) {
+            // Use our enhanced implementation of admin_setting_configstoredfile to circumvent MDL-59082.
+            // This can be changed back to admin_setting_configstoredfile as soon as MDL-59082 is fixed.
+            $setting = new admin_setting_configstoredfilealwayscallback($name, $title, $description, 'fontawesome', 0,
+                    array('maxfiles' => -1, 'subdirs' => 1, 'accepted_types' => theme_boost_union_get_fontawesome_extensions()));
+        } else {
+            // Use our enhanced implementation of admin_setting_configstoredfile to circumvent MDL-59082.
+            // This can be changed back to admin_setting_configstoredfile as soon as MDL-59082 is fixed.
+            $setting = new admin_setting_configstoredfilealwayscallback($name, $title, $description, 'fontawesome', 0,
+                    array('maxfiles' => -1));
+        }
+        $setting->set_updatedcallback('theme_boost_union_fontawesome_checkin');
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/fontawesomefiles', 'theme_boost_union/fontawesomeversion', 'eq',
+                THEME_BOOST_UNION_SETTING_FAVERSION_NONE);
+
+        // Information: FontAwesome list.
+        $faconfig = get_config('theme_boost_union', 'fontawesomeversion');
+        // If there is at least one file uploaded and if a FontAwesome version is enabled (unfortunately, hide_if does not
+        // work for admin_setting_description up to now, that's why we have to use this workaround).
+        if ($faconfig != THEME_BOOST_UNION_SETTING_FAVERSION_NONE && $faconfig != null &&
+                !empty(get_config('theme_boost_union', 'fontawesomefiles'))) {
+            // Prepare the widget.
+            $name = 'theme_boost_union/fontawesomelist';
+            $title = get_string('fontawesomelistsetting', 'theme_boost_union', null, true);
+            $description = get_string('fontawesomelistsetting_desc', 'theme_boost_union', null, true).'<br /><br />'.
+                    get_string('fontawesomelistnote', 'theme_boost_union', null, true);
+
+            // Append the file list to the description.
+            $templatecontext = array('files' => theme_boost_union_get_fontawesome_templatecontext());
+            $description .= $OUTPUT->render_from_template('theme_boost_union/settings-fontawesome-filelist', $templatecontext);
+
+            // Finish the widget.
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
+        }
+
+        // Information: FontAwesome checks.
+        // If there is at least one file uploaded and if a FontAwesome version is enabled (unfortunately, hide_if does not
+        // work for admin_setting_description up to now, that's why we have to use this workaround).
+        if ($faconfig != THEME_BOOST_UNION_SETTING_FAVERSION_NONE && $faconfig != null &&
+                !empty(get_config('theme_boost_union', 'fontawesomefiles'))) {
+            // Prepare the widget.
+            $name = 'theme_boost_union/fontawesomechecks';
+            $title = get_string('fontawesomecheckssetting', 'theme_boost_union', null, true);
+            $description = get_string('fontawesomecheckssetting_desc', 'theme_boost_union', null, true);
+
+            // Append the checks to the description.
+            $templatecontext = array('checks' => theme_boost_union_get_fontawesome_checks_templatecontext());
+            $description .= $OUTPUT->render_from_template('theme_boost_union/settings-fontawesome-checks', $templatecontext);
+
+            // Finish the widget.
+            $setting = new admin_setting_description($name, $title, $description);
+            $tab->add($setting);
         }
 
         // Add tab to settings page.

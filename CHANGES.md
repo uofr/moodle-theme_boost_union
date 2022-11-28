@@ -4,8 +4,19 @@ moodle-theme_boost_union
 Changes
 -------
 
-### Unreleased
+### v4.0-r8
 
+* 2022-11-21 - Improvement: Restrict accepted file types for background images, solves #147.
+* 2022-11-15 - Feature: Possibility to upload FontAwesome 6 Free to the theme, solves #59.
+* 2022-11-08 - Feature: Allow admins to override the email templates within the theme, solves #60.
+
+### v4.0-r7
+
+* 2022-11-09 - Bugfix: Site administration was broken if customfiletypes were set in config.php, solves #133.
+
+### v4.0-r6
+
+* 2022-11-03 - Bugfix: Let favicon() always return a moodle_url object, solves #130.
 * 2022-10-26 - Improvement: Restrict uploadable file types in custom fonts filearea, solves #120.
 
 ### v4.0-r5

@@ -681,11 +681,26 @@ function theme_boost_union_get_customfonts_templatecontext() {
         // Get all files from filearea.
         $files = $fs->get_area_files($systemcontext->id, 'theme_boost_union', 'customfonts', false, 'itemid', false);
 
-        // Iterate over the files and fill the templatecontext of the file list.
+        // Get the webfonts extensions list.
+        $webfonts = theme_boost_union_get_webfonts_extensions();
+
+        // Iterate over the files.
         $filesforcontext = array();
         foreach ($files as $af) {
-            $urlpersistent = new moodle_url('/pluginfile.php/1/theme_boost_union/customfonts/0/'.$af->get_filename());
-            $filesforcontext[] = array('filename' => $af->get_filename(),
+            // Get the filename.
+            $filename = $af->get_filename();
+
+            // Check if the file is really a font file (as we can't really rely on the upload restriction in settings.php)
+            // according to its file suffix (as the filetype might not have a known mimetype).
+            // If it isn't a font file, skip it.
+            $filenamesuffix = pathinfo($filename, PATHINFO_EXTENSION);
+            if (!in_array('.'.$filenamesuffix, $webfonts)) {
+                continue;
+            }
+
+            // Otherwise, fill the templatecontext of the file list.
+            $urlpersistent = new moodle_url('/pluginfile.php/1/theme_boost_union/customfonts/0/'.$filename);
+            $filesforcontext[] = array('filename' => $filename,
                     'fileurlpersistent' => $urlpersistent->out());
         }
     }
@@ -694,14 +709,34 @@ function theme_boost_union_get_customfonts_templatecontext() {
 }
 
 /**
+ * Helper function which returns an array of accepted webfonts extensions (including the dots).
+ *
+ * @return array
+ */
+function theme_boost_union_get_webfonts_extensions() {
+    return array('.eot', '.otf', '.svg', '.ttf', '.woff', '.woff2');
+}
+
+/**
  * Helper function which makes sure that all webfont file types are registered in the system.
  * The webfont file types need to be registered in the system, otherwise the admin settings filepicker wouldn't allow restricting
  * the uploadable file types to webfonts only.
  *
- * @return void
+ * Please note: If custom filetypes are defined in config.php, registering additional filetypes is not possible
+ * due to a restriction in the set_custom_types() function in Moodle core. In this case, this function does not
+ * register anything and will return false.
+ *
+ * @return boolean true if the filetypes were registered, false if not.
  * @throws coding_exception
  */
 function theme_boost_union_register_webfonts_filetypes() {
+    global $CFG;
+
+    // If customfiletypes are set in config.php, we can't do anything.
+    if (array_key_exists('customfiletypes', $CFG->config_php_settings)) {
+        return false;
+    }
+
     // Our array of webfont file types to register.
     // As we want to keep things simple, we do not set a particular icon for these file types.
     // Likewise, we do not set any type groups or use descriptions from the language pack.
@@ -750,6 +785,341 @@ function theme_boost_union_register_webfonts_filetypes() {
 
         // Otherwise, register the file type.
         core_filetypes::add_type($f['extension'], $f['mimetype'], $f['coreicon']);
+    }
+
+    return true;
+}
+
+/**
+ * Helper function to render a preview of a HTML email to be shown on the theme settings page.
+ *
+ * If E-Mails have been branded, an E-Mail preview will be returned as string.
+ * Otherwise, null will be returned.
+ *
+ * @return string|null
+ */
+function theme_boost_union_get_emailbrandinghtmlpreview() {
+    global $OUTPUT;
+
+    // Get branding snippets.
+    $htmlprefix = get_string('templateemailhtmlprefix', 'theme_boost_union');
+    $htmlsuffix = get_string('templateemailhtmlsuffix', 'theme_boost_union');
+
+    // If no snippet was customized, return null.
+    if (trim($htmlprefix) == '' && trim($htmlsuffix) == '') {
+        return null;
+    }
+
+    // Otherwise, compose mail text.
+    $mailtemplatecontext = array('body' => get_string('emailbrandinghtmldemobody', 'theme_boost_union'));
+    $mail = $OUTPUT->render_from_template('core/email_html', $mailtemplatecontext);
+
+    // And compose mail preview.
+    $previewtemplatecontext = array('mail' => $mail);
+    $preview = $OUTPUT->render_from_template('theme_boost_union/emailpreview', $previewtemplatecontext);
+
+    return $preview;
+}
+
+/**
+ * Helper function to render a preview of a plaintext email to be shown on the theme settings page.
+ *
+ * If E-Mails have been branded, an E-Mail preview will be returned as string.
+ * Otherwise, null will be returned.
+ *
+ * @return string|null
+ */
+function theme_boost_union_get_emailbrandingtextpreview() {
+    global $OUTPUT;
+
+    // Get branding snippets.
+    $textprefix = get_string('templateemailtextprefix', 'theme_boost_union');
+    $textsuffix = get_string('templateemailtextsuffix', 'theme_boost_union');
+
+    // If no snippet was customized, return null.
+    if (trim($textprefix) == '' && trim($textsuffix) == '') {
+        return null;
+    }
+
+    // Otherwise, compose mail text.
+    $mailtemplatecontext = array('body' => get_string('emailbrandingtextdemobody', 'theme_boost_union'));
+    $mail = nl2br($OUTPUT->render_from_template('core/email_text', $mailtemplatecontext));
+    $mail = '<div class="text-monospace">'.$mail.'</div>';
+
+    // And compose mail preview.
+    $previewtemplatecontext = array('mail' => $mail);
+    $preview = $OUTPUT->render_from_template('theme_boost_union/emailpreview', $previewtemplatecontext);
+
+    return $preview;
+}
+
+/**
+ * Callback function which is called from settings.php if the FontAwesome files setting has changed.
+ *
+ * It gets all files from the files setting, picks all the expected files (and ignores all others)
+ * and stores them into an application cache for quicker access.
+ *
+ * @return void
+ */
+function theme_boost_union_fontawesome_checkin() {
+    // Create cache for FontAwesome files.
+    $cache = cache::make('theme_boost_union', 'fontawesome');
+
+    // Purge the existing cache values as we will refill the cache now.
+    $cache->purge();
+
+    // Get FontAwesome version config.
+    $faconfig = get_config('theme_boost_union', 'fontawesomeversion');
+
+    // If a FontAwesome version is enabled.
+    if ($faconfig != THEME_BOOST_UNION_SETTING_FAVERSION_NONE && $faconfig != null) {
+
+        // Get the system context.
+        $systemcontext = \context_system::instance();
+
+        // Get filearea.
+        $fs = get_file_storage();
+
+        // Get FontAwesome file structure.
+        $filestructure = theme_boost_union_get_fontawesome_filestructure($faconfig);
+
+        // If a valid file structure could be retrieved.
+        if ($filestructure != null) {
+
+            // Iterate over the folder structure.
+            foreach ($filestructure as $folder => $files) {
+
+                // Initialize a folder list.
+                $folderlist = array();
+
+                // Iterate over the files in the folder.
+                foreach ($files as $file => $expected) {
+
+                    // Try to get the file from the filearea.
+                    $fsfile = $fs->get_file($systemcontext->id, 'theme_boost_union', 'fontawesome', 0, '/'.$folder.'/', $file);
+
+                    // If the file exists.
+                    if ($fsfile != false) {
+                        // Add the file to the folder list.
+                        $folderlist[] = $file;
+                    }
+                }
+
+                // Add the folder to the cache.
+                $cache->set($folder, $folderlist);
+            }
+        }
+    }
+
+    // Add a marker value to the cache which indicates that the files have been checked into the cache completely.
+    // This will help to decide later if the cache is really empty (and should be refilled) or if there aren't just any
+    // files uploaded.
+    $cache->set('checkedin', true);
+}
+
+/**
+ * Helper function which returns an array of accepted fontawesome file extensions (including the dots).
+ *
+ * @return array
+ */
+function theme_boost_union_get_fontawesome_extensions() {
+    return array('.css', '.eot', '.svg', '.ttf', '.woff', '.woff2');
+}
+
+/**
+ * Helper function which returns the files which are expected to be provided for a given FontAwesome version.
+ *
+ * @param string $version The FontAwesome version, given as THEME_BOOST_UNION_SETTING_FAVERSION_* constant.
+ *
+ * @return array|null The array of files or null if an invalid FontAwesome version was provided.
+ */
+function theme_boost_union_get_fontawesome_filestructure($version) {
+    // Pick the files for the selected FA version.
+    switch ($version) {
+        case THEME_BOOST_UNION_SETTING_FAVERSION_FA6FREE:
+            $files = array('css' => array('fontawesome.min.css' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY,
+                            'solid.min.css' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY,
+                            'regular.min.css' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'brands.min.css' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'v4-font-face.min.css' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY),
+                    'webfonts' => array('fa-solid-900.woff2' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY,
+                            'fa-solid-900.ttf' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY,
+                            'fa-regular-400.woff2' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'fa-regular-400.ttf' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'fa-brands-400.woff2' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'fa-brands-400.ttf' => THEME_BOOST_UNION_SETTING_FAFILES_OPTIONAL,
+                            'fa-v4compatibility.woff2' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY,
+                            'fa-v4compatibility.ttf' => THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY));
+            break;
+        default:
+            // This only happens if an invalid version was provided.
+            $files = null;
+    }
+
+    // Return the file structure.
+    return $files;
+}
+
+/**
+ * Helper function which return the files from the fontawesome file area as templatecontext structure.
+ * It was designed to compose the files for the settings-fontawesome-filelist.mustache template.
+ * This function uses the fontawesome cache definition, i.e. it does not load the files from the filearea directly.
+ * This means it uses the same data source as the theme_boost_union_add_fontawesome_to_page() function which adds
+ * the fontawesome files to the page.
+ *
+ * @return array|null
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function theme_boost_union_get_fontawesome_templatecontext() {
+    // Create cache for FontAwesome files.
+    $cache = cache::make('theme_boost_union', 'fontawesome');
+
+    // If the cache is completely empty, check the files in on-the-fly.
+    if ($cache->get('checkedin') != true) {
+        theme_boost_union_fontawesome_checkin();
+    }
+
+    // Get FontAwesome version config.
+    $faconfig = get_config('theme_boost_union', 'fontawesomeversion');
+
+    // If a FontAwesome version is enabled.
+    if ($faconfig != THEME_BOOST_UNION_SETTING_FAVERSION_NONE && $faconfig != null) {
+
+        // Initialize context variable.
+        $filesforcontext = array();
+
+        // Get FontAwesome file structure.
+        $filestructure = theme_boost_union_get_fontawesome_filestructure($faconfig);
+
+        // If a valid file structure could be retrieved.
+        if ($filestructure != null) {
+
+            // Iterate over the folder structure.
+            foreach ($filestructure as $folder => $files) {
+
+                // Get the cached data for this folder.
+                $cachedfolder = $cache->get($folder);
+
+                // Iterate over the files in the folder structure.
+                foreach ($files as $file => $expected) {
+
+                    // Deduce the mandatory value.
+                    if ($expected == THEME_BOOST_UNION_SETTING_FAFILES_MANDATORY) {
+                        $mandatory = true;
+                    } else {
+                        $mandatory = false;
+                    }
+
+                    // Compose the file path.
+                    $filepath = $folder . '/' . $file;
+
+                    // Get the description of the file.
+                    $fileidentifier = str_replace('/', '-', $filepath);
+                    $description = get_string('fontawesomelistfileinfo-' . $faconfig . '-' . $fileidentifier, 'theme_boost_union');
+
+                    // If the folder was not uploaded at all or if the folder is empty, we do not need to check if the file exists.
+                    // We can add the file as non-existent right away.
+                    if ($cachedfolder == null || ($cachedfolder == array()) && count($cachedfolder) < 1) {
+                        $exists = false;
+
+                        // Otherwise, we have to check the file it was uploaded.
+                    } else {
+                        $exists = in_array($file, $cachedfolder);
+                    }
+
+                    // Add the file to the template structure.
+                    $filesforcontext[] = array('filepath' => $filepath, 'exists' => $exists, 'mandatory' => $mandatory,
+                            'description' => $description);
+                }
+            }
+        }
+    }
+
+    return $filesforcontext;
+}
+
+/**
+ * Helper function which returns the visual checks for the configured FontAwesome version.
+ *
+ * @return array|null The array of checks or null if an invalid FontAwesome version is configured.
+ */
+function theme_boost_union_get_fontawesome_checks_templatecontext() {
+    global $CFG;
+
+    // Get FontAwesome version config.
+    $version = get_config('theme_boost_union', 'fontawesomeversion');
+
+    // Pick the checks for the selected FA version.
+    switch ($version) {
+        case THEME_BOOST_UNION_SETTING_FAVERSION_FA6FREE:
+            $checks = array(
+                    array('icon' => '<i class="fa fa-check-circle-o fa-3x fa-fw"></i>',
+                            'title' => get_string('fontawesomecheck-fa6free-general-title', 'theme_boost_union'),
+                            'description' => get_string('fontawesomecheck-fa6free-general-description', 'theme_boost_union')),
+                    array('icon' => '<i class="fa fa-map-o fa-3x fa-fw"></i>',
+                            'title' => get_string('fontawesomecheck-fa6free-fallback-title', 'theme_boost_union'),
+                            'description' => get_string('fontawesomecheck-fa6free-fallback-description', 'theme_boost_union')),
+                    array('icon' => '<i class="fa-solid fa-virus-covid fa-3x fa-fw"></i>',
+                            'title' => get_string('fontawesomecheck-fa6free-newstuff-title', 'theme_boost_union'),
+                            'description' => get_string('fontawesomecheck-fa6free-newstuff-description', 'theme_boost_union')),
+            );
+            break;
+        default:
+            // This only happens if an invalid version was provided.
+            $checks = null;
+    }
+
+    // If the filter_fontawesome plugin is installed, add a check for filtering the icons.
+    if (file_exists($CFG->dirroot.'/filter/fontawesome/version.php')) {
+        $checks[] = array('icon' => format_text('[fa-solid fa-users-line fa-3x fa-fw]'),
+                'title' => get_string('fontawesomecheck-fa6free-filter-title', 'theme_boost_union'),
+                'description' => get_string('fontawesomecheck-fa6free-filter-description', 'theme_boost_union'));
+    }
+
+    // Return the checks structure.
+    return $checks;
+}
+
+/**
+ * Helper function which adds the CSS files from the fontawesome file area to the Moodle page.
+ * This function uses the fontawesome cache definition, i.e. it does not load the files from the filearea directly.
+ * It's meant to be called by theme_boost_union_before_standard_html_head() only.
+ * *
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
+ */
+function theme_boost_union_add_fontawesome_to_page() {
+    global $PAGE;
+
+    // Create cache for FontAwesome files.
+    $cache = cache::make('theme_boost_union', 'fontawesome');
+
+    // If the cache is completely empty, check the files in on-the-fly.
+    if ($cache->get('checkedin') != true) {
+        theme_boost_union_fontawesome_checkin();
+    }
+
+    // Get FontAwesome version config.
+    $faconfig = get_config('theme_boost_union', 'fontawesomeversion');
+
+    // If a FontAwesome version is enabled.
+    if ($faconfig != THEME_BOOST_UNION_SETTING_FAVERSION_NONE && $faconfig != null) {
+
+        // Get the cached data for the CSS folder (we do not need to add files from any other folders in the cache).
+        $cachedfolder = $cache->get('css');
+
+        // Iterate over the files in the cached folder structure.
+        foreach ($cachedfolder as $cachedfile) {
+
+            // Build the FontAwesome CSS file URL.
+            $facssurl = new moodle_url('/pluginfile.php/1/theme_boost_union/fontawesome/' .
+                    theme_get_revision().'/css/'.$cachedfile);
+
+            // Add the CSS file to the page.
+            $PAGE->requires->css($facssurl);
+        }
     }
 }
 
