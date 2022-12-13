@@ -137,6 +137,9 @@ if($darkmodecheck){
    $PAGE->requires->css('/theme/boost_union/style/darkmode.css');
 }
 
+
+$PAGE->requires->css('/theme/boost_union/style/callout.css');
+
 $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
 
