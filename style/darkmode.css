@@ -54,11 +54,6 @@ body {
   background-color: #18191A; }
 
 a {
-<<<<<<< Updated upstream
-  color: #0f6cbf; }
-  a:hover {
-    color: #094478;}
-=======
   color: #3a7a57; }
   a:hover {
     color: #3a7a57;
@@ -67,7 +62,6 @@ a {
 .mycourseheader a{
   color: #e4e6eb;
 }
->>>>>>> Stashed changes
 
 a:not([href]):not([class]) {
   color: inherit;
@@ -432,23 +426,6 @@ select.form-control:focus::-ms-value {
 
 .btn-primary {
   color: #fff;
-<<<<<<< Updated upstream
-  background-color: #0f6cbf;
-  border-color: #0f6cbf; }
-  .btn-primary:hover {
-    color: #fff;
-    background-color: #0c589c;
-    border-color: #0b5190; }
-  .btn-primary:focus, .btn-primary.focus {
-    color: #fff;
-    background-color: #0c589c;
-    border-color: #0b5190;
-    box-shadow: 0 0 0 0.2rem rgba(51, 130, 201, 0.5); }
-  .btn-primary.disabled, .btn-primary:disabled {
-    color: #fff;
-    background-color: #0f6cbf;
-    border-color: #0f6cbf; }
-=======
   background-color: #3a7a57;
   border-color: #3a7a57; }
   .btn-primary:hover {
@@ -464,7 +441,6 @@ select.form-control:focus::-ms-value {
     color: #fff;
     background-color: #3a7a57;
     border-color: #3a7a57; }
->>>>>>> Stashed changes
   .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
   .show > .btn-primary.dropdown-toggle {
     color: #fff;
@@ -657,23 +633,6 @@ select.form-control:focus::-ms-value {
       box-shadow: 0 0 0 0.2rem rgba(82, 88, 93, 0.5); }
 
 .btn-outline-primary {
-<<<<<<< Updated upstream
-  color: #0f6cbf;
-  border-color: #0f6cbf; }
-  .btn-outline-primary:hover {
-    color: #fff;
-    background-color: #0f6cbf;
-    border-color: #0f6cbf; }
-  .btn-outline-primary:focus, .btn-outline-primary.focus {
-    box-shadow: 0 0 0 0.2rem rgba(15, 108, 191, 0.5); }
-  .btn-outline-primary.disabled, .btn-outline-primary:disabled {
-    color: #0f6cbf;}
-  .btn-outline-primary:not(:disabled):not(.disabled):active, .btn-outline-primary:not(:disabled):not(.disabled).active,
-  .show > .btn-outline-primary.dropdown-toggle {
-    color: #fff;
-    background-color: #0f6cbf;
-    border-color: #0f6cbf; }
-=======
   color: #3a7a57;
   border-color: #3a7a57; }
   .btn-outline-primary:hover {
@@ -689,7 +648,6 @@ select.form-control:focus::-ms-value {
     color: #fff;
     background-color: #3a7a57;
     border-color: #3a7a57; }
->>>>>>> Stashed changes
     .btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus,
     .show > .btn-outline-primary.dropdown-toggle:focus {
       box-shadow: 0 0 0 0.2rem rgba(15, 108, 191, 0.5); }
@@ -835,17 +793,10 @@ select.form-control:focus::-ms-value {
       box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5); }
 
 .btn-link {
-<<<<<<< Updated upstream
-  color: #0f6cbf;
-  text-decoration: none; }
-  .btn-link:hover {
-    color: #094478; }
-=======
   color: #3a7a57;
   text-decoration: none; }
   .btn-link:hover {
     color: #3a7a57; }
->>>>>>> Stashed changes
   .btn-link:disabled, .btn-link.disabled {
     color: #6a737b; }
 
@@ -861,17 +812,10 @@ select.form-control:focus::-ms-value {
   color: #e4e6eb; }
   .dropdown-item:hover, .dropdown-item:focus {
     color: #fff;
-<<<<<<< Updated upstream
-    background-color: #0f6cbf; }
-  .dropdown-item.active, .dropdown-item:active {
-    color: #fff;
-    background-color: #0f6cbf; }
-=======
     background-color: #3a7a57; }
   .dropdown-item.active, .dropdown-item:active {
     color: #fff;
     background-color: #3a7a57; }
->>>>>>> Stashed changes
   .dropdown-item.disabled, .dropdown-item:disabled {
     color: #8f959e; }
 
@@ -888,13 +832,8 @@ select.form-control:focus::-ms-value {
 
   .custom-control-input:checked ~ .custom-control-label::before {
     color: #fff;
-<<<<<<< Updated upstream
-    border-color: #0f6cbf;
-    background-color: #0f6cbf; }
-=======
     border-color: #3a7a57;
     background-color: #3a7a57; }
->>>>>>> Stashed changes
   .custom-control-input:focus ~ .custom-control-label::before {
     box-shadow: 0 0 0 0.2rem rgba(15, 108, 191, 0.75); }
   .custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
@@ -913,13 +852,8 @@ select.form-control:focus::-ms-value {
     border: #8f959e solid 1px; }
 
 .custom-checkbox .custom-control-input:indeterminate ~ .custom-control-label::before {
-<<<<<<< Updated upstream
-  border-color: #0f6cbf;
-  background-color: #0f6cbf; }
-=======
   border-color: #3a7a57;
   background-color: #3a7a57; }
->>>>>>> Stashed changes
 
 .custom-checkbox .custom-control-input:disabled:checked ~ .custom-control-label::before {
   background-color: rgba(15, 108, 191, 0.5); }
@@ -976,31 +910,19 @@ select.form-control:focus::-ms-value {
     .custom-range:focus::-ms-thumb {
       box-shadow: 0 0 0 1px #fff, 0 0 0 0.2rem rgba(15, 108, 191, 0.75); }
   .custom-range::-webkit-slider-thumb {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf;}
-=======
     background-color: #3a7a57;}
->>>>>>> Stashed changes
     .custom-range::-webkit-slider-thumb:active {
       background-color: #8bc3f6; }
   .custom-range::-webkit-slider-runnable-track {
     background-color: #dee2e6; }
   .custom-range::-moz-range-thumb {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf;}
-=======
     background-color: #3a7a57;}
->>>>>>> Stashed changes
     .custom-range::-moz-range-thumb:active {
       background-color: #8bc3f6; }
   .custom-range::-moz-range-track {
     background-color: #dee2e6; }
   .custom-range::-ms-thumb {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf; }
-=======
     background-color: #3a7a57; }
->>>>>>> Stashed changes
     .custom-range::-ms-thumb:active {
       background-color: #8bc3f6; }
   .custom-range::-ms-fill-lower {
@@ -1018,11 +940,7 @@ select.form-control:focus::-ms-value {
     color: #6a737b; }
 
 .moremenu .nav-link{
-<<<<<<< Updated upstream
-  color: #e4e6eb;
-=======
   color: #3a7a57;
->>>>>>> Stashed changes
 }
 .nav-tabs {
   color: #e4e6eb;
@@ -1035,20 +953,12 @@ select.form-control:focus::-ms-value {
   .nav-tabs .nav-item.show .nav-link {
     color: #e4e6eb;
     background-color: #3a3b3c;
-<<<<<<< Updated upstream
-    border-color: #dee2e6 #dee2e6 #fff; }
-=======
     border-color: #3a7a57 #3a7a57 #fff; }
->>>>>>> Stashed changes
 
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
   color: #e4e6eb;
-<<<<<<< Updated upstream
-  background-color: #0f6cbf; }
-=======
   background-color: #3a7a57; }
->>>>>>> Stashed changes
 
 .navbar-light .navbar-brand {
   color: #e4e6eb; }
@@ -1127,11 +1037,7 @@ select.form-control:focus::-ms-value {
   color: #6a737b; }
 
 .page-link {
-<<<<<<< Updated upstream
-  color: #0f6cbf;
-=======
   color: #3a7a57;
->>>>>>> Stashed changes
   background-color: #b0b3b8;
   border: 1px solid #949598; }
   .page-link:hover {
@@ -1141,13 +1047,8 @@ select.form-control:focus::-ms-value {
 
 .page-item.active .page-link {
   color: #fff;
-<<<<<<< Updated upstream
-  background-color: #0f6cbf;
-  border-color: #0f6cbf; }
-=======
   background-color: #3a7a57;
   border-color: #3a7a57; }
->>>>>>> Stashed changes
 
 .page-item.disabled .page-link {
   color: #6a737b;
@@ -1156,11 +1057,7 @@ select.form-control:focus::-ms-value {
 
 .badge-primary {
   color: #fff;
-<<<<<<< Updated upstream
-  background-color: #0f6cbf; }
-=======
   background-color: #3a7a57; }
->>>>>>> Stashed changes
   a.badge-primary:hover, a.badge-primary:focus {
     color: #fff;
     background-color: #0b5190; }
@@ -1291,11 +1188,7 @@ select.form-control:focus::-ms-value {
 
 .progress-bar {
   color: #fff;
-<<<<<<< Updated upstream
-  background-color: #0f6cbf; }
-=======
   background-color: #3a7a57; }
->>>>>>> Stashed changes
 
 .list-group-item-action {
   color: #e4e6eb; }
@@ -1313,13 +1206,8 @@ select.form-control:focus::-ms-value {
     background-color: #fff; }
   .list-group-item.active {
     color: #fff;
-<<<<<<< Updated upstream
-    background-color: #0f6cbf;
-    border-color: #0f6cbf; }
-=======
     background-color: #3a7a57;
     border-color: #3a7a57; }
->>>>>>> Stashed changes
 
 .list-group-item-primary {
   color: #083863;
@@ -1464,11 +1352,7 @@ select.form-control:focus::-ms-value {
   color: #fff; }
 
 .bg-primary {
-<<<<<<< Updated upstream
-  background-color: #0f6cbf !important; }
-=======
   background-color: #3a7a57 !important; }
->>>>>>> Stashed changes
 
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover,
@@ -1550,11 +1434,7 @@ button.bg-dark:focus {
   border-left: 1px solid #dee2e6 !important; }
 
 .border-primary {
-<<<<<<< Updated upstream
-  border-color: #0f6cbf !important; }
-=======
   border-color: #3a7a57 !important; }
->>>>>>> Stashed changes
 
 .border-secondary {
   border-color: #ced4da !important; }
@@ -1580,16 +1460,11 @@ button.bg-dark:focus {
 .border-white {
   border-color: #fff !important; }
 
-<<<<<<< Updated upstream
-a.text-primary:hover, a.text-primary:focus {
-  color: #094478 !important; }
-=======
 .text-primary{
   color: #3a7a57 !important;
 }
 a.text-primary:hover, a.text-primary:focus {
   color: #3a7a57 !important; }
->>>>>>> Stashed changes
 
 .text-secondary {
   color: #ced4da !important; }
@@ -1890,11 +1765,7 @@ a.disabled {
   color: #1d2125; }
 
 .dropdown-item:active, .dropdown-item:hover, .dropdown-item:focus, .dropdown-item:focus-within {
-<<<<<<< Updated upstream
-  background-color: #0f6cbf;
-=======
   background-color: #3a7a57;
->>>>>>> Stashed changes
   color: #fff; }
   .dropdown-item:active a, .dropdown-item:hover a, .dropdown-item:focus a, .dropdown-item:focus-within a {
     color: #fff; }
@@ -1914,11 +1785,7 @@ a.disabled {
   background-color: #a2cff8;
   color: #1d2125; }
     .emoji-picker .category-button.selected {
-<<<<<<< Updated upstream
-      border-bottom: 2px solid #0f6cbf; }
-=======
       border-bottom: 2px solid #3a7a57; }
->>>>>>> Stashed changes
 
 #user-notifications{
   background-color: #242526;}
@@ -2179,15 +2046,9 @@ body.dragging .drop-down {
             border: 2px solid #687889; }
     .maincalendar .calendarmonth td.today .day-number-circle {
       color: #fff;
-<<<<<<< Updated upstream
-      background-color: #0f6cbf; }
-    .maincalendar .calendarmonth .clickable:hover {
-      background-color: #3a3b3c; }
-=======
       background-color: #3a7a57; }
     .maincalendar .calendarmonth .clickable:hover {
       background-color: #004f2e; }
->>>>>>> Stashed changes
 
   .maincalendar .calendar_event_category:hover a,
   .maincalendar .calendar_event_course:hover a,
@@ -2317,11 +2178,7 @@ span.editinstructions {
     color: #00171b; }
 
 .dndupload-preview {
-<<<<<<< Updated upstream
-  background-color: #0f6cbf;
-=======
   background-color:#3a7a57;
->>>>>>> Stashed changes
   color: #fff; }
 
 /**
@@ -2372,13 +2229,8 @@ span.editinstructions {
         border-color: #004a56; }
       #course-category-listings .listing-pagination .yui3-button.active-page {
         color: #fff;
-<<<<<<< Updated upstream
-        background-color: #0f6cbf;
-        border-color: #0f6cbf; }
-=======
         background-color: #3a7a57;
         border-color: #3a7a57; }
->>>>>>> Stashed changes
         #course-category-listings .listing-pagination .yui3-button.active-page:hover {
           color: #fff;
           background-color: #0c589c;
@@ -2389,13 +2241,8 @@ span.editinstructions {
           border-color: #0b5190;}
         #course-category-listings .listing-pagination .yui3-button.active-page.disabled, #course-category-listings .listing-pagination .yui3-button.active-page:disabled {
           color: #fff;
-<<<<<<< Updated upstream
-          background-color: #0f6cbf;
-          border-color: #0f6cbf; }
-=======
           background-color: #3a7a57;
           border-color: #3a7a57; }
->>>>>>> Stashed changes
         #course-category-listings .listing-pagination .yui3-button.active-page:not(:disabled):not(.disabled):active, #course-category-listings .listing-pagination .yui3-button.active-page:not(:disabled):not(.disabled).active,
         .show > #course-category-listings .listing-pagination .yui3-button.active-page.dropdown-toggle {
           color: #fff;
@@ -2405,11 +2252,7 @@ span.editinstructions {
       color: #6a737b; }
 
 .course-being-dragged-proxy {
-<<<<<<< Updated upstream
-  color: #0f6cbf; }
-=======
   color: #3a7a57; }
->>>>>>> Stashed changes
 
 /**
  * Display sizes:
@@ -2430,26 +2273,6 @@ span.editinstructions {
 
 .activity-add,
 .block-add {
-<<<<<<< Updated upstream
-  color: #0f6cbf;
-  background-color: #3a3b3c;
-  border-color: #3584c9; }
-  .activity-add hr,
-  .block-add hr {
-    border-top-color: #3077b5; }
-  .activity-add .alert-link,
-  .block-add .alert-link {
-    color: #0b5190; }
-  .activity-add .pluscontainer,
-  .block-add .pluscontainer {
-    border: 1px solid #3584c9; }
-  .activity-add:hover,
-  .block-add:hover {
-    background-color: #b0b3b8; }
-
-.changenumsections {
-  border-top: 1px solid #3584c9; }
-=======
   color: #3a7a57;
   background-color: #3a3b3c;
   border-color: #3a7a57; }
@@ -2468,18 +2291,13 @@ span.editinstructions {
 
 .changenumsections {
   border-top: 1px solid #3a7a57; }
->>>>>>> Stashed changes
 
 .course-section {
   border-bottom: 1px solid #dee2e6; }
   .course-section .section-summary-activities .activity-count {
     color: #6a737b; }
   .course-section.dndupload-dropzone {
-<<<<<<< Updated upstream
-    border: 2px dashed #0f6cbf; }
-=======
     border: 2px dashed #3a7a57; }
->>>>>>> Stashed changes
     .course-section.dndupload-dropzone .dndupload-preview-overlay {
       background-color: #fff; }
 
@@ -2501,11 +2319,7 @@ span.editinstructions {
     background-color: #464646;
     border-color: #666666; }
     .editing .activity-item:hover hr {
-<<<<<<< Updated upstream
-      border-top-color: #3077b5; }
-=======
       border-top-color: #3a7a57; }
->>>>>>> Stashed changes
     .editing .activity-item:hover .alert-link {
       color: #070808; }
 
@@ -2623,17 +2437,10 @@ span.editinstructions {
   background-color: #eff1f3; }
       .message-app .list-group .list-group-item:hover {
         color: #fff;
-<<<<<<< Updated upstream
-        background-color: #0f6cbf; }
-        .message-app .list-group .list-group-item:hover .badge-primary {
-          background-color: #fff;
-          color: #0f6cbf; }  
-=======
         background-color: #3a7a57; }
         .message-app .list-group .list-group-item:hover .badge-primary {
           background-color: #fff;
           color: #3a7a57; }  
->>>>>>> Stashed changes
   .message-app .message.send {
     background-color: #dee2e6;
     color: #1d2125; }
@@ -2753,11 +2560,7 @@ span.editinstructions {
 
 #page-mod-quiz-edit .questionbankwindow div.header a:link,
 #page-mod-quiz-edit .questionbankwindow div.header a:visited {
-<<<<<<< Updated upstream
-  color: #0f6cbf; }
-=======
   color: #3a7a57; }
->>>>>>> Stashed changes
 
 #page-mod-quiz-edit .questionbankwindow div.header a:hover {
   color: #094478; }
@@ -2782,11 +2585,7 @@ span.editinstructions {
   border: 1px solid #ddd; }
 
 a#hidebankcmd {
-<<<<<<< Updated upstream
-  color: #0f6cbf; }
-=======
   color: #3a7a57; }
->>>>>>> Stashed changes
 
 .simplesearchform .btn-submit {
   border-color: #8f959e;
@@ -2840,11 +2639,7 @@ a#hidebankcmd {
 .form-autocomplete-suggestions li {
   color: #1d2125; }
   .form-autocomplete-suggestions li:hover, .form-autocomplete-suggestions li:focus, .form-autocomplete-suggestions li[aria-selected="true"] {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf;
-=======
     background-color: #3a7a57;
->>>>>>> Stashed changes
     color: #fff; }
 
 .form-autocomplete-downarrow {
@@ -2901,11 +2696,7 @@ a#hidebankcmd {
           color: #495057;
           background-color: #fff; }
   .path-mod-forum .unified-grader .drawer-button.active::after {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf; }
-=======
     background-color: #3a7a57; }
->>>>>>> Stashed changes
 
   .path-mod-forum .unified-grader .nested-v2-display-mode .parent-container .author-image-container:after {
     background-color: #e9ecef; }
@@ -3233,22 +3024,14 @@ a#hidebankcmd {
   border-bottom: 1px solid #ddd;}
   .content-item-container:hover {
     color: #fff;
-<<<<<<< Updated upstream
-    background-color: #0f6cbf; }
-=======
     background-color: #3a7a57; }
->>>>>>> Stashed changes
     .content-item-container:hover .content-item-footer .timestamp {
       color: #fff; }
   .content-item-container.unread {
     background-color: #f4f4f4; }
     .content-item-container.unread:hover {
       color: #fff;
-<<<<<<< Updated upstream
-      background-color: #0f6cbf; }
-=======
       background-color: #3a7a57; }
->>>>>>> Stashed changes
   .content-item-container.selected {
     background-color: #4f94cd;
     color: #fff;
@@ -3482,11 +3265,7 @@ div.editor_atto_toolbar button .icon {
       .courseindex .courseindex-item.dimmed.pageitem a {
         color: #fff; }
   .courseindex .courseindex-item.pageitem {
-<<<<<<< Updated upstream
-    background-color: #0f6cbf;
-=======
     background-color: #3a7a57;
->>>>>>> Stashed changes
     color: #fff; }
     .courseindex .courseindex-item.pageitem a {
       color: #fff; }
@@ -3508,27 +3287,16 @@ div.editor_atto_toolbar button .icon {
     border: 1px solid #b8dce2;
     background-color: #e0f0f2; }
   .courseindex .courseindex-section.current {
-<<<<<<< Updated upstream
-    border-left: solid 3px #0f6cbf; }
-=======
     border-left: solid 3px #3a7a57; }
->>>>>>> Stashed changes
 
     .moremenu .nav-link:hover, .moremenu .nav-link:focus {
       background-color: #3a3b3c; }
     .moremenu .nav-link.active {
       background-color: #3a3b3c;
-<<<<<<< Updated upstream
-      border-bottom-color: #0f6cbf; }
-      .moremenu .nav-link.active:focus, .moremenu .nav-link.active:hover {
-        background-color: #3a3b3c;
-        border-bottom-color: #0f6cbf; }
-=======
       border-bottom-color: #3a7a57; }
       .moremenu .nav-link.active:focus, .moremenu .nav-link.active:hover {
         background-color: #3a3b3c;
         border-bottom-color: #3a7a57; }
->>>>>>> Stashed changes
   .moremenu .nav-tabs {
     background-color: #242526; }
 
@@ -3536,11 +3304,7 @@ div.editor_atto_toolbar button .icon {
       background-color: #f8f9fa; }
       .moremenu .dropdownmoremenu > .dropdown-menu .dropdown-menu .dropdown-item:hover, .moremenu .dropdownmoremenu > .dropdown-menu .dropdown-menu .dropdown-item:focus {
         color: #fff;
-<<<<<<< Updated upstream
-        background-color: #0f6cbf; }
-=======
         background-color: #3a7a57; }
->>>>>>> Stashed changes
   
   .moremenu .dropdown-item[aria-current="true"],
   .moremenu .dropdown-item.active {
@@ -3548,11 +3312,7 @@ div.editor_atto_toolbar button .icon {
     .moremenu .dropdown-item[aria-current="true"]:focus-within, .moremenu .dropdown-item[aria-current="true"]:hover,
     .moremenu .dropdown-item.active:focus-within,
     .moremenu .dropdown-item.active:hover {
-<<<<<<< Updated upstream
-      background-color: #0f6cbf;
-=======
       background-color: #3a7a57;
->>>>>>> Stashed changes
       color: #fff; }
       .moremenu .dropdown-item[aria-current="true"]:focus-within a, .moremenu .dropdown-item[aria-current="true"]:hover a,
       .moremenu .dropdown-item.active:focus-within a,
@@ -3823,8 +3583,6 @@ ul.oublog-accordion li {
   background-color: transparent;
   color: #e4e6eb;
   border-color:  rgba(10, 10, 10, 0.25);
-<<<<<<< Updated upstream
-=======
 }
 
 .custom-control-input:checked~.custom-control-label::before {
@@ -3835,5 +3593,4 @@ ul.oublog-accordion li {
 
 .format-tiles #page .course-content ul li.section.main{
   background-color: #242526;
->>>>>>> Stashed changes
 }
