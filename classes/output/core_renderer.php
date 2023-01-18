@@ -417,7 +417,36 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	    $mynode->url = new moodle_url($this->page->url,array("darkmode"=>$usedarkmodeurl));
 	    $mynode->title = "Darkmode is " . $darkstate;
 	    $mynode->titleidentifier = "darkmode, theme_urcourses_default";
-	    $mynode->pix = $mynodelabel;
+		$mynode->pix = $mynodelabel;
+		
+
+		//For Test student user account
+		//check if not student user
+		$troleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+		$mroleid = $DB->get_field('role', 'id', ['shortname' => 'manager']);
+		$iroleid = $DB->get_field('role', 'id', ['shortname' => 'instdesigner']);
+		$isteacher = $DB->record_exists('role_assignments', ['userid' => $USER->id, 'roleid' => $troleid]);
+		$ismanager = $DB->record_exists('role_assignments', ['userid' => $USER->id, 'roleid' => $mroleid]);
+		$isdesigner = $DB->record_exists('role_assignments', ['userid' => $USER->id, 'roleid' => $iroleid]);
+
+
+		if($isteacher|| $ismanager || $isdesigner || is_siteadmin() ){
+			$saccountnode = new stdClass();
+			$saccountnode->itemtype = "link";
+			$saccountnode->url = new moodle_url($this->page->url);
+			$saccountnode->pix =     "i/user";
+			$saccountnode->titleidentifier = "studentaccount,theme_urcourses_default";
+			$saccountnode->useridentifier = $USER->username;
+			
+			$isaccount= theme_boost_union_check_test_account($USER->username);
+			$saccountnode->account = $isaccount;
+			
+			if($isaccount){
+				$saccountnode->title = "Modify test student";
+			}else{
+				$saccountnode->title = "Create test student";
+			}	
+		}
 
 
 	    //$lnode = $opts->navitems[count($opts->navitems)]; //get logout node
@@ -447,8 +476,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
 			}
 		}
 		$opts->navitems[$menukey] = $mynode;
-		for ($i=$menukey+1; $i<count($allnodes)+1; $i++) {
-			$opts->navitems[$i] = $allnodes[$i-1];
+		$opts->navitems[$menukey+1] = $saccountnode;
+		for ($i=$menukey+2; $i<count($allnodes)+2; $i++) {
+			$opts->navitems[$i] = $allnodes[$i-2];
 		}
 		
 	    //$opts->navitems[] = $lnode; //placing log out back in at the end
@@ -564,7 +594,12 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	                    );
 	                    if (!empty($value->titleidentifier)) {
 	                        $al->attributes['data-title'] = $value->titleidentifier;
-	                    }
+						}
+						//UR HACK
+						if (!empty($value->useridentifier)) {
+	                        $al->attributes['data-info'] = $value->useridentifier.",".$value->account;
+						}
+						
 	                    $am->add($al);
 	                    break;
 	            }
