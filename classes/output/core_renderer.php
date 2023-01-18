@@ -189,17 +189,17 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		
 		
 		if ($activityheader === true) {
-	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'">'.$headertext.'</a>';
+	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/mod/'.$this->page->activityname.'/view.php?id='.$this->page->context->instanceid.'" class="activity-header-link">'.$headertext.'</a>';
         	
 		} else {
 			
 			$headertext = $COURSE->fullname;
-	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'">'.$headertext.'</a>';
+	        $header->contextheader = '<a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'" class="course-header-link">'.$headertext.'</a>';
         
 		}
 		
         
-        $header->mycourseheader = '<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'" title="'.$PAGE->url.'">'.$COURSE->fullname.'</a></h2>';
+        $header->mycourseheader = '<h2><a href="'.$CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'" title="'.$PAGE->url.'" class="mycourse-header-link">'.$COURSE->fullname.'</a></h2>';
         
         $header->iscoursepage = false;
         
