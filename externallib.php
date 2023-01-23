@@ -375,8 +375,15 @@ class theme_boost_union_external extends external_api {
         $context = context_user::instance($USER->id);
         self::validate_context($context);
 
+        //check if has a student account
+        //get username to create email
+        $email = $USER->username."+urstudent@uregina.ca";
+        //check if test user account has already been created
+        $sql = "SELECT * FROM mdl_user as u WHERE u.email ='{$email}'";
+        $user = $DB->get_record_sql($sql);
+
         //check if user is enrolled already
-        $isenrolled =is_enrolled($context, $USER, 'mod/assignment:submit');
+        $isenrolled =is_enrolled($context, $user, 'mod/assignment:submit');
 
         if($isenrolled){
             $return=array("userid"=>$user->id,"username"=>$user->username,"enrolled"=>false,"created"=>false );

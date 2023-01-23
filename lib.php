@@ -303,3 +303,63 @@ function theme_boost_union_extend_navigation_user_settings($navigation, $user, $
         }
 		//}
 }
+
+//UR HACK to add Unenrol Test Student Account to Course More Menu
+/**
+ * Adds a Unenrol Test Student Account link to the course admin menu.
+ *
+ * @param navigation_node $navigation The navigation node to extend
+ * @param stdClass $course The course to object for the tool
+ * @param context $context The context of the course
+ * @return void|null return null if we don't want to display the node.
+ */
+function theme_boost_union_extend_navigation_course($navigation, $course, $context) {
+    global $PAGE, $USER, $DB;
+
+    if ( (!isloggedin())) {
+        return null;
+    }
+
+    if (!has_capability('moodle/course:update', $context, $USER->id)) {
+        return null;
+    }
+
+    //check if has a student account
+    //get username to create email
+    $email = $USER->username."+urstudent@uregina.ca";
+    //check if test user account has already been created
+    $sql = "SELECT * FROM mdl_user as u WHERE u.email ='{$email}'";
+    $user = $DB->get_record_sql($sql);
+
+    if($user){
+
+        //check if user is enrolled already
+        $enrolled =is_enrolled($context, $user->id, '', true);
+
+        if($enrolled){
+            $pluginname = "Unenrol test student account";
+        }else{
+            $pluginname = "Enrol test student account";
+        }
+
+        $url = null;
+        $settingnode = null;
+    
+        $url = new moodle_url('/theme/boost_union/unenroltestaccount.php',array(
+            'id' => $course->id));
+
+        $node = navigation_node::create(
+            $pluginname,
+            $url,
+            navigation_node::NODETYPE_LEAF,
+            'theme_boost_union',
+            'theme_boost_union'
+        );
+    
+        if ($PAGE->url->compare($url, URL_MATCH_BASE)) {
+            $node->make_active();
+        }
+    
+        $navigation->add_node($node);
+    }
+ }

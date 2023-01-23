@@ -45,14 +45,8 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str',
      */
     var _createStudentAction =  function() {
 
-        console.log("Made it to createstudent action");
         //look if created or not
-
-
         var info = $(BTN_STUDENT_ACCOUNT).data("info");
-
-        console.log(info);
-
         var infoarray = info.split(',');
 
         var value =infoarray[1];
@@ -356,7 +350,6 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str',
      */
     var init = function() {
 
-        console.log("MADE IT IN");
         var salink = $(BTN_STUDENT_ACCOUNT);
 
         salink.click(function (event) {
