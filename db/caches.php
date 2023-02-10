@@ -14,23 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * A login page layout for the boost theme.
+ * Theme Boost Union - Cache definitions.
  *
- * @package   theme_boost
- * @copyright 2016 Damyon Wiese
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    theme_boost_union
+ * @copyright  2022 Moodle an Hochschulen e.V. <kontakt@moodle-an-hochschulen.de>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$bodyattributes = $OUTPUT->body_attributes();
+defined('MOODLE_INTERNAL') || die();
 
-$templatecontext = [
-    'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
-    'output' => $OUTPUT,
-    'bodyattributes' => $bodyattributes
-];
-
-echo $OUTPUT->render_from_template('theme_boost/login', $templatecontext);
-
+$definitions = array(
+        'fontawesome' => array(
+                'mode' => cache_store::MODE_APPLICATION,
+                'simplekeys' => true,
+                'simpledata' => true,
+                'staticacceleration' => true,
+        )
+);

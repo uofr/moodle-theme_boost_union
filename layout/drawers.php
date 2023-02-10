@@ -34,6 +34,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG,$PAGE,$DB,$COURSE;
+
 require_once($CFG->libdir . '/behat/lib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
@@ -100,6 +102,8 @@ $primarymenu = $primary->export_for_template($renderer);
 $buildregionmainsettings = !$PAGE->include_region_main_settings_in_header_actions() && !$PAGE->has_secondary_navigation();
 // If the settings menu will be included in the header then don't add it here.
 $regionmainsettingsmenu = $buildregionmainsettings ? $OUTPUT->region_main_settings_menu() : false;
+
+$PAGE->requires->css('/theme/boost_union/style/callout.css');
 
 $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);

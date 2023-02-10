@@ -72,6 +72,10 @@ $buildregionmainsettings = !$PAGE->include_region_main_settings_in_header_action
 // If the settings menu will be included in the header then don't add it here.
 $regionmainsettingsmenu = $buildregionmainsettings ? $OUTPUT->region_main_settings_menu() : false;
 
+
+
+$PAGE->requires->css('/theme/boost_union/style/callout.css');
+
 $header = $PAGE->activityheader;
 $headercontent = $header->export_for_template($renderer);
 

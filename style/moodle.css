@@ -4160,30 +4160,28 @@ fieldset:disabled a.btn {
   pointer-events: none; }
 
 .btn-primary {
-  color: #fff;
-  background-color: #0f6cbf;
-  border-color: #0f6cbf; }
+  color: #000;
+  background-color: #FFC831;
+  font-weight: bold;
+}
   .btn-primary:hover {
-    color: #fff;
-    background-color: #0c589c;
-    border-color: #0b5190; }
+    color: #000;
+    background-color: #EAA92B; }
   .btn-primary:focus, .btn-primary.focus {
-    color: #fff;
-    background-color: #0c589c;
-    border-color: #0b5190;
-    box-shadow: 0 0 0 0.2rem rgba(51, 130, 201, 0.5); }
+    color: #000;
+    background-color: #EAA92B;
+    box-shadow: 0 0 0 0.2rem rgba(234, 169, 43, 0.5); }
   .btn-primary.disabled, .btn-primary:disabled {
-    color: #fff;
-    background-color: #0f6cbf;
-    border-color: #0f6cbf; }
+    color: #000;
+    background-color: #cf9525; }
+
   .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
   .show > .btn-primary.dropdown-toggle {
-    color: #fff;
-    background-color: #0b5190;
-    border-color: #0a4b84; }
+    color: #000;
+    background-color: #FFC831 }
     .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
     .show > .btn-primary.dropdown-toggle:focus {
-      box-shadow: 0 0 0 0.2rem rgba(51, 130, 201, 0.5); }
+      box-shadow: 0 0 0 0.2rem rgba(234, 169, 43 0.5); }
 
 .btn-secondary {
   color: #1d2125;
@@ -17739,6 +17737,12 @@ textarea[data-auto-rows] {
   .login-container {
     max-width: 600px;
     border-radius: 0.5rem; } }
+
+  /*UR HACK for opacity login form*/
+  #page-login-index #region-main-box div.card{
+    background-color: rgba(255,255,255,.8);
+    border-radius: 3px;
+  }
 
 /* modules.less */
 select {

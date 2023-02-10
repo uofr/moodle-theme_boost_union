@@ -104,6 +104,52 @@ $string['activityiconcolorcontentsetting_desc'] = 'The activity icon color for "
 // ... ... Setting: Activity icon color for 'Interface'.
 $string['activityiconcolorinterfacesetting'] = 'Activity icon color for "Interface"';
 $string['activityiconcolorinterfacesetting_desc'] = 'The activity icon color for "Interface"';
+// Settings: E-Mail branding.
+$string['emailbrandingtab'] = 'E-Mail branding';
+$string['templateemailhtmlprefix'] = '';
+$string['templateemailhtmlsuffix'] = '';
+$string['templateemailtextprefix'] = '';
+$string['templateemailtextsuffix'] = '';
+// ... Section: E-Mails introduction.
+$string['emailbrandingintroheading'] = 'Introduction';
+$string['emailbrandingintronote'] = 'Please note: This is an advanced functionality which uses some workarounds to provide E-Mail branding options. Please follow the instructions closely.';
+$string['emailbrandinginstruction'] = 'How-to';
+$string['emailbrandinginstruction0'] = 'With this Boost Union feature, you can apply branding to all E-Mails which Moodle is sending out.';
+$string['emailbrandinginstructionli1'] = 'Go to the <a href="{$a->url}" target="_blank">language customization settings page</a> to open the <em>{$a->lang}</em> language pack for editing.';
+$string['emailbrandinginstructionli2'] = 'Search for and modify these strings in the <code>theme_boost_union language</code> pack:';
+$string['emailbrandinginstructionli2li1'] = '<code>templateemailhtmlprefix</code>: This snippet will be added <em>at the beginning / before the body</em> of all <em>HTML E-Mails</em> which Moodle is sending out.';
+$string['emailbrandinginstructionli2li2'] = '<code>templateemailhtmlsuffix</code>: This snippet will be added <em>at the end / after the body</em> of all <em>HTML E-Mails</em> which Moodle is sending out.';
+$string['emailbrandinginstructionli2li3'] = '<code>templateemailtextprefix</code>: This snippet will be added <em>at the beginning / before the body</em> of all <em>plaintext E-Mails</em> which Moodle is sending out.';
+$string['emailbrandinginstructionli2li4'] = '<code>templateemailtextsuffix</code>: This snippet will be added <em>at the end / after the body</em> of all <em>plaintext E-Mails</em> which Moodle is sending out.';
+$string['emailbrandinginstructionli3'] = 'Save the changes to the language pack.';
+$string['emailbrandinginstructionli4'] = 'Come back to this page and have a look at the E-Mail previews below.';
+$string['emailbrandingpitfalls'] = 'Pitfalls';
+$string['emailbrandingpitfalls0'] = 'Using this feature, there are some pitfalls which you should be aware of:';
+$string['emailbrandingpitfallsli1'] = 'It is mandatory that you modify the language pack strings of the <em>current default language</em> of this site. Even if you have multiple language packs installed, only changes to the default language will have an effect.';
+$string['emailbrandingpitfallsli2'] = 'Respecting the receipient\'s language is not possible. Thus, you should use language-agnostic terms within your E-Mail branding snippets.';
+$string['emailbrandingpitfallsli3'] = 'If you ever change the site\'s default language in the future, you will have to migrate the modified language pack strings to the new default language pack.';
+$string['emailbrandingpitfallsli4'] = 'In plaintext E-Mails, there is a line break and an empty line added automatically after the prefix and an empty line added automatically before the suffix snippet. This is to make sure that the suffix and prefix do not stick directly to the E-Mail body.';
+$string['emailbrandingpitfallsli5'] = 'In HTML E-Mails, the prefix and the suffix are directly added before and above the E-Mail body. This is to make sure that you can work with HTML tags easily, however you will have to handle all spacing around the body yourself.';
+$string['emailbrandingpitfallsli6'] = 'In HTML E-Mails, you can open a HTML tag in the prefix snippet and close the tag in the suffix snippet without problems. Just remember to create valid HTML in the resulting mail.';
+
+// ... Section: HTML E-Mails.
+$string['emailbrandinghtmlheading'] = 'HTML E-Mail preview';
+$string['emailbrandinghtmlintro'] = 'This is a preview of a HTML E-Mail based on the branding prefixes and suffixes which are currently set in the language pack.';
+$string['emailbrandinghtmlnopreview'] = 'Up to now, the HTML E-Mails haven\'t been customized within this feature. E-Mails will be composed and sent out normally.';
+$string['emailbrandinghtmldemobody'] = '<p>E-Mail body starts here.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p><p>Id donec ultrices tincidunt arcu non sodales. Id volutpat lacus laoreet non curabitur gravida arcu.</p><p>Cursus turpis massa tincidunt dui. Pellentesque nec nam aliquam sem et tortor consequat id. In ornare quam viverra orci sagittis eu volutpat. Sem nulla pharetra diam sit amet nisl suscipit. Justo donec enim diam vulputate ut pharetra.</p><p>E-Mail body ends here.</p>';
+// ... Section: Plaintext E-Mails.
+$string['emailbrandingtextheading'] = 'Plaintext E-Mail preview';
+$string['emailbrandingtextintro'] = 'This is a preview of a plaintext E-Mail based on the branding prefixes and suffixes which are currently set in the language pack.';
+$string['emailbrandingtextnopreview'] = 'Up to now, the plaintext E-Mails haven\'t been customized within this feature. E-Mails will be composed and sent out normally.';
+$string['emailbrandingtextdemobody'] = 'E-Mail body starts here.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+Id donec ultrices tincidunt arcu non sodales. Id volutpat lacus laoreet non curabitur gravida arcu.
+
+Cursus turpis massa tincidunt dui. Pellentesque nec nam aliquam sem et tortor consequat id. In ornare quam viverra orci sagittis eu volutpat. Sem nulla pharetra diam sit amet nisl suscipit. Justo donec enim diam vulputate ut pharetra.
+
+E-Mail body ends here.';
 // Settings: Resources.
 $string['resourcestab'] = 'Resources';
 $string['resourcescachecontrolnote'] = 'Please note that the files are shipped to the browser with the \'Cache-Control\' header set which tells the browser to cache the file. If you are sure that you won\'t change the file in the near future, you can use the persistent URL to link to the file. However, if you plan to modify a file but keep the same filename every now and then, you should rather use the revisioned URL and re-link the file where you have used it everytime you update the file to avoid that the browsers will show cached outdated versions of the file.';
@@ -127,6 +173,49 @@ $string['customfontslistsetting'] = 'Custom fonts list';
 $string['customfontslistsetting_desc'] = 'This is the list of fonts which you have uploaded to the custom fonts filearea. The given CSS snippets can be used to add these fonts to your custom SCSS. Please note that you will have to take care of the font format value as well as the font-family, font-style and font-weight CSS properties yourself for now as Boost Union is not able yet to parse the font files.';
 $string['customfontsfileurlpersistent'] = 'URL (persistent)';
 $string['customfontsfileurlrevisioned'] = 'URL (revisioned)';
+// ... Section: FontAwesome.
+$string['fontawesomeheading'] = 'FontAwesome';
+// ... ... Setting: FontAwesome version.
+$string['fontawesomeversionsetting'] = 'FontAwesome version';
+$string['fontawesomeversionsetting_desc'] = 'Moodle core ships with FontAwesome 4 icons which are fine, but FontAwesome has evolved since then. If you want to use more recent FontAwesome icons, you can do this with this setting. As soon as you choose another version than FontAwesome 4, additional settings will appear where you can upload more recent FontAwesome versions.';
+$string['fontawesomeversionnone'] = 'Keep FontAwesome 4 (as shipped with Moodle core)';
+$string['fontawesomeversionfa6free'] = 'Update to FontAwesome 6 Free';
+// ... ... Setting: FontAwesome files.
+$string['fontawesomefilessetting'] = 'FontAwesome files';
+$string['fontawesomefilessetting_desc'] = 'With this setting you can upload more recent FontAwesome files to Moodle. You have to upload the FontAwesome files to Moodle yourself due to licensing constraints. Just head over to <a href="https://fontawesome.com">fontawesome.com</a>, download the FontAwesome package and upload the files here.';
+$string['fontawesomefilesstructurenote'] = 'Please note that the files must be uploaded with the correct folder structure and with the correct file names. Please start by creating a <em>css</em> and a <em>webfonts</em> folder in the filepicker, upload the <em>fa-solid-900.woff2</em> file into the <em>webfonts</em> folder and save the settings page. As soon as you have done this, a file list will appear below which helps you to identify and upload the right files into these folders.';
+// ... ... Information: FontAwesome files list.
+$string['fontawesomelistsetting'] = 'FontAwesome files list';
+$string['fontawesomelistsetting_desc'] = 'This is the list of FontAwesome files which you have uploaded to the FontAwesome files filearea above. All FontAwesome files which are valid for the configured FontAwesome version are listed here, other files which you may have uploaded as well but which are not valid or needed FontAwesome files are ignored. The FontAwesome files are automatically added to the Moodle pages and have a direct effect as soon as you save this setting.';
+$string['fontawesomelistnote'] = 'Please note that, if you upload only a fraction of the mandatory files, the FontAwesome icons can appear as broken on the Moodle page. This cannot be fixed until you upload all mandatory files or remove all files again.';
+$string['fontawesomelistfileinfo-fa6free-css-fontawesome.min.css'] = 'This is the main CSS file which adds all available FontAwesome glyphs to the Moodle page.';
+$string['fontawesomelistfileinfo-fa6free-css-brands.min.css'] = 'This is an additional CSS file which adds the font for FontAwesome brand icons to the Moodle page.';
+$string['fontawesomelistfileinfo-fa6free-css-regular.min.css'] = 'This is an additional CSS file which adds the font for FontAwesome regular icons to the Moodle page.';
+$string['fontawesomelistfileinfo-fa6free-css-solid.min.css'] = 'This is an additional CSS file which adds the font for FontAwesome solid icons to the Moodle page.';
+$string['fontawesomelistfileinfo-fa6free-css-v4-font-face.min.css'] = 'This is the CSS file which makes sure that the FontAwesome 4 icons in Moodle are still displayed correctly.';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-brands-400.woff2'] = 'This is the font file for FontAwesome brand icons (in the WOFF2 format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-brands-400.ttf'] = 'This is the font file for FontAwesome brand icons (in the TTF format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-regular-400.woff2'] = 'This is the font file for FontAwesome regular icons (in the WOFF2 format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-regular-400.ttf'] = 'This is the font file for FontAwesome regular icons (in the TTF format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-solid-900.woff2'] = 'This is the font file for FontAwesome solid icons (in the WOFF2 format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-solid-900.ttf'] = 'This is the font file for FontAwesome solid icons (in the TTF format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-v4compatibility.woff2'] = 'This is the font file for the FontAwesome v4 compatibility (in the WOFF2 format).';
+$string['fontawesomelistfileinfo-fa6free-webfonts-fa-v4compatibility.ttf'] = 'This is the font file for the FontAwesome v4 compatibility (in the TTF format).';
+$string['fontawesomelistmandatoryuploaded'] = 'It is a mandatory file for FontAwesome to work and it was uploaded properly.';
+$string['fontawesomelistoptionaluploaded'] = 'It is an optional file to enhance the FontAwesome iconset and it was uploaded properly.';
+$string['fontawesomelistmandatorymissing'] = 'It is a mandatory file for FontAwesome to work, but it was not uploaded properly. Please try to upload it properly.';
+$string['fontawesomelistoptionalmissing'] = 'It is an optional file to enhance the FontAwesome iconset, but it was not uploaded. This fine as long as you don\'t need it.';
+// ... ... Information: FontAwesome checks.
+$string['fontawesomecheckssetting'] = 'FontAwesome checks';
+$string['fontawesomecheckssetting_desc'] = 'Here, you can verify visually if the FontAwesome files have been uploaded and added to the Moodle page properly. If one of the checks fail, please double-check if you have uploaded all mandatory files correctly.';
+$string['fontawesomecheck-fa6free-general-title'] = 'General functionality';
+$string['fontawesomecheck-fa6free-general-description'] = 'If you see a checkmark icon on the left hand side, FontAwesome is generally working in your site.';
+$string['fontawesomecheck-fa6free-fallback-title'] = 'FontAwesome 4 fallback';
+$string['fontawesomecheck-fa6free-fallback-description'] = 'Newer FontAwesome versions use to remap older icon identifiers to newer ones or even get rid of some icons. If you see a solid map icon on the left hand side, your FontAwesome 6 version is properly showing remapped icons from FontAwesome 4.';
+$string['fontawesomecheck-fa6free-newstuff-title'] = 'FontAwesome 6 icons';
+$string['fontawesomecheck-fa6free-newstuff-description'] = 'Newer FontAwesome versions ship with additional icons compared to the FontAwesome 4 iconset. If you see a virus icon on the left hand side, your FontAwesome 6 version is properly showing new icons which are new in FontAwesome 6.';
+$string['fontawesomecheck-fa6free-filter-title'] = 'FontAwesome filter';
+$string['fontawesomecheck-fa6free-filter-description'] = 'As you have the FontAwesome filter plugin installed, you should be sure that the filter handles the new FontAwesome 6 icons correctly as well. If you see a users icon on the left hand side, the filter is working properly with the FontAwesome 6 version icons.';
 
 // Settings: Feel page.
 $string['configtitlefeel'] = 'Feel';
@@ -278,3 +367,8 @@ $string['privacy:metadata'] = 'The Boost Union theme does not store any personal
 $string['boost_union:configure'] = 'To be able to configure the theme as non-admin';
 $string['boost_union:viewhintcourseselfenrol'] = 'To be able to see a hint for unrestricted self enrolment in a visible course.';
 $string['boost_union:viewhintinhiddencourse'] = 'To be able to see a hint in a hidden course.';
+
+// Caches.
+$string['cachedef_fontawesome'] = 'FontAwesome files (which are uploaded in the Boost Union settings)';
+    
+

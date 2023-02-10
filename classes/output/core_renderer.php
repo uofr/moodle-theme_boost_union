@@ -23,6 +23,45 @@
  */
 
 namespace theme_boost_union\output;
+/*
+use stdClass;
+use context_course;
+use html_writer;
+use moodle_url;
+*/
+
+use coding_exception;
+use core\plugininfo\enrol;
+use html_writer;
+use tabobject;
+use tabtree;
+use context_system;
+use custom_menu_item;
+use custom_menu;
+use block_contents;
+use navigation_node;
+use action_link;
+use stdClass;
+use moodle_url;
+use preferences_groups;
+use action_menu;
+use help_icon;
+use single_button;
+use single_select;
+use paging_bar;
+use url_select;
+use context_course;
+use pix_icon;
+use user_picture;
+use action_menu_filler;
+use action_menu_link_secondary;
+use core_text;
+
+
+
+use \core_course\external\course_summary_exporter;
+
+
 
 /**
  * Extending the core_renderer interface.
@@ -37,16 +76,25 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * Returns the moodle_url for the favicon.
      *
      * This renderer function is copied and modified from /lib/outputrenderers.php
+     * It uses the same logic as Moodle 4.1dev already which introduced a Moodle core favicon setting,
+     * but picks the favicon from the theme_boost_union settings for the time being.
      *
      * @since Moodle 2.5.1 2.6
      * @return moodle_url The moodle_url for the favicon
+     * @throws \moodle_exception
      */
     public function favicon() {
-        if (!empty($this->page->theme->settings->favicon)) {
-            return $this->page->theme->setting_file_url('favicon', 'favicon');
-        } else {
+        $logo = null;
+        if (!during_initial_install()) {
+            $logo = get_config('theme_boost_union', 'favicon');
+        }
+        if (empty($logo)) {
             return $this->image_url('favicon', 'theme');
         }
+
+        // Use $CFG->themerev to prevent browser caching when the file changes.
+        return moodle_url::make_pluginfile_url(context_system::instance()->id, 'theme_boost_union', 'favicon', '',
+                theme_get_revision(), $logo);
     }
 
     /**
@@ -77,8 +125,8 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         // If this is the login page and the page has a login background image, add a class to the body attributes.
         if ($this->page->pagelayout == 'login') {
-            // Generate the background image class for displaying a random image for the login page.
-            $loginimageclass = theme_boost_union_get_random_loginbackgroundimage_class();
+			// Generate the background image class for displaying a random image for the login page.
+			$loginimageclass = theme_boost_union_get_random_loginbackgroundimage_class();
 
             // If the background image class was returned, we can expect that a background image was set.
             // In this case, add both the general loginbackgroundimage class as well as the generated
@@ -86,9 +134,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
             if ($loginimageclass != '') {
                 $additionalclasses[] = 'loginbackgroundimage';
                 $additionalclasses[] = $loginimageclass;
-            }
+			}
         }
 
         return ' id="'. $this->body_id().'" class="'.$this->body_css_classes($additionalclasses).'"';
-    }
+	}
 }
