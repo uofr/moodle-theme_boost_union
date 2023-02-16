@@ -153,7 +153,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
         
         //Little hack to add back missing header for dashboard
         //The context header the comes through is not formated properly
-        if($this->page->pagelayout=="mydashboard"){
+        if($this->page->pagelayout=="mydashboard"&&strpos($PAGE->url,'my/indexsys.php')===false){
             $headertext = $sitecontextheader;
         }
         /*
@@ -182,7 +182,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		} else if (strpos($PAGE->url,'admin/')==true&&strpos($PAGE->url,'permissions.php')==true&&$PAGE->url->get_param('contextid')!==null) {
 			// permissions within activity
 			$activityheader = true;
-		} else if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&strpos($PAGE->url,'report/')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'my/courses.php')===false&&strpos($PAGE->url,'admin/')===false) {
+		} else if (strpos($PAGE->url,'grade/')===false&&strpos($PAGE->url,'backup/')===false&&strpos($PAGE->url,'reset.php')===false&&strpos($PAGE->url,'coursecompetencies.php')===false&&strpos($PAGE->url,'unenrolself.php')===false&&strpos($PAGE->url,'newbadge.php')===false&&strpos($PAGE->url,'report/')===false&&$PAGE->url->get_param('bui_editid')===null&&strpos($PAGE->url,'my/courses.php')===false&&strpos($PAGE->url,'admin/')===false&&strpos($PAGE->url,'my/indexsys.php')===false) {
 			$activityheader = true;
 		}
 		
