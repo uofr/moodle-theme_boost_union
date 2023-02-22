@@ -1145,27 +1145,3 @@ function theme_boost_union_get_course_image($course) {
     }
     return false;
 }
-
-/**
-* UR HACK
-* Return true or false if current user has a test account
-* for course
-* @return bool
-*/
-function theme_boost_union_check_test_account($username){
-    global $DB;
-
-    //get username to create email
-    $email = $username."+urstudent@uregina.ca";
-    //check if test user account has already been created
-    $select = 'SELECT * FROM mdl_user WHERE email ='.$email.';';
-    $sql = "SELECT * FROM mdl_user as u WHERE u.email ='{$email}'";  
-    $user = $DB->get_record_sql($sql);
-    
-    //if created
-    if($user){
-        return true;
-    }
-
-    return false;
-}
