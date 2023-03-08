@@ -20,11 +20,16 @@
  * This layoutfile is based on theme/boost/layout/drawers.php
  *
  * Modifications compared to this layout file:
- * * Include footnote
  * * Render theme_boost_union/drawers instead of theme_boost/drawers template
+ * * Include activity navigation
  * * Include course related hints
  * * Include back to top button
- * * Include activity navigation
+ * * Include scroll spy
+ * * Include footnote
+ * * Include static pages
+ * * Include Jvascript disabled hint
+ * * Include advertisement tiles
+ * * Include info banners
  *
  * @package   theme_boost_union
  * @copyright 2022 Luca Bösch, BFH Bern University of Applied Sciences luca.boesch@bfh.ch
@@ -130,12 +135,6 @@ $templatecontext = [
     'addblockbutton' => $addblockbutton
 ];
 
-// Get and use the course related hints HTML code, if any hints are configured.
-$courserelatedhintshtml = theme_boost_union_get_course_related_hints();
-if ($courserelatedhintshtml) {
-    $templatecontext['courserelatedhints'] = $courserelatedhintshtml;
-}
-
 // Include the template content for the course related hints.
 require_once(__DIR__ . '/includes/courserelatedhints.php');
 
@@ -156,6 +155,14 @@ require_once(__DIR__ . '/includes/javascriptdisabledhint.php');
 
 // Include the template content for the info banners.
 require_once(__DIR__ . '/includes/infobanners.php');
+
+// Include the template content for the navbar styling.
+require_once(__DIR__ . '/includes/navbar.php');
+
+// Include the template content for the advertisement tiles, but only if we are on the frontpage.
+if ($PAGE->pagelayout == 'frontpage') {
+    require_once(__DIR__ . '/includes/advertisementtiles.php');
+}
 
 // Render drawers.mustache from boost_union.
 echo $OUTPUT->render_from_template('theme_boost_union/drawers', $templatecontext);

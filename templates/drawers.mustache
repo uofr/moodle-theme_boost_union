@@ -55,8 +55,10 @@
     Modifications compared to this template:
     * Include theme_boost_union/footnote template
     * Include theme_boost_union/footer template instead of theme_boost/footer
+    * Include theme_boost_union/navbar template instead of theme_boost/navbar
     * Added the possibility to show course related hints.
     * Added the possibility to show info banners.
+    * Include theme_boost_union/advertisementtiles template
 }}
 {{> theme_boost/head }}
 
@@ -66,7 +68,7 @@
 
     {{{ output.standard_top_of_body_html }}}
 
-    {{> theme_boost/navbar }}
+    {{> theme_boost_union/navbar }}
     {{#courseindex}}
         {{< theme_boost/drawer }}
             {{$id}}theme_boost-drawers-courseindex{{/id}}
@@ -145,6 +147,9 @@
             {{/secondarymoremenu}}
             <div id="page-content" class="pb-3 d-print-block">
                 <div id="region-main-box">
+                    {{#advtilespositionbefore}}
+                        {{> theme_boost_union/advertisementtiles }}
+                    {{/advtilespositionbefore}}
                     {{#hasregionmainsettingsmenu}}
                     <div id="region-main-settings-menu" class="d-print-none">
                         <div> {{{ regionmainsettingsmenu }}} </div>
@@ -172,6 +177,9 @@
                         {{{ output.course_content_footer }}}
 
                     </section>
+                    {{#advtilespositionafter}}
+                        {{> theme_boost_union/advertisementtiles }}
+                    {{/advtilespositionafter}}
                 </div>
             </div>
         </div>

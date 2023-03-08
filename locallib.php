@@ -18,7 +18,7 @@
  * Theme Boost Union - Local library
  *
  * @package    theme_boost_union
- * @copyright  2022 Moodle an Hochschulen e.V. <kontakt@moodle-an-hochschulen.de>
+ * @copyright  2022 Alexander Bias, lern.link GmbH <alexander.bias@lernlink.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,7 +26,7 @@
  * Build the course related hints HTML code.
  * This function evaluates and composes all course related hints which may appear on a course page below the course header.
  *
- * @copyright  2022 Moodle an Hochschulen e.V. <kontakt@moodle-an-hochschulen.de>
+ * @copyright  2022 Alexander Bias, lern.link GmbH <alexander.bias@lernlink.de>
  * @copyright  based on code from theme_boost_campus by Kathrin Osswald.
  *
  * @return string.
@@ -279,36 +279,39 @@ function theme_boost_union_get_course_related_hints() {
 }
 
 /**
- * Build the link to the imprint page.
+ * Build the link to a static page.
  *
+ * @param string $page The static page's identifier.
  * @return string.
  */
-function theme_boost_union_get_imprint_link() {
+function theme_boost_union_get_staticpage_link($page) {
     // Compose the URL object.
-    $url = new moodle_url('/theme/boost_union/pages/imprint.php');
+    $url = new moodle_url('/theme/boost_union/pages/'.$page.'.php');
 
     // Return the string representation of the URL.
     return $url->out();
 }
 
 /**
- * Build the page title of the imprint page.
+ * Build the page title of a static page.
  *
+ * @param string $page The static page's identifier.
  * @return string.
  */
-function theme_boost_union_get_imprint_pagetitle() {
+function theme_boost_union_get_staticpage_pagetitle($page) {
     // Get the configured page title.
-    $imprintpagetitleconfig = get_config('theme_boost_union', 'imprintpagetitle');
+    $pagetitleconfig = format_string(get_config('theme_boost_union', $page.'pagetitle'), true,
+    ['context' => \context_system::instance()]);
 
     // If there is a string configured.
-    if ($imprintpagetitleconfig) {
+    if ($pagetitleconfig) {
         // Return this setting.
-        return $imprintpagetitleconfig;
+        return $pagetitleconfig;
 
         // Otherwise.
     } else {
         // Return the default string.
-        return get_string('imprintpagetitledefault', 'theme_boost_union');
+        return get_string($page.'pagetitledefault', 'theme_boost_union');
     }
 }
 
@@ -320,7 +323,7 @@ function theme_boost_union_get_imprint_pagetitle() {
  * b) if the banner is configured to be shown on the given page
  * c) if the banner is configured to be shown now (in case it is a time-based banner)
  *
- * @copyright  2022 Moodle an Hochschulen e.V. <kontakt@moodle-an-hochschulen.de>
+ * @copyright  2022 Alexander Bias, lern.link GmbH <alexander.bias@lernlink.de>
  * @copyright  based on code from theme_boost_campus by Kathrin Osswald.
  *
  * @param int $bannerno The counting number of the info banner.
@@ -400,22 +403,23 @@ function theme_boost_union_infobanner_is_shown_on_page($bannerno) {
 }
 
 /**
- * Helper function to compare two infobanner orders.
+ * Helper function to compare either infobanner or tiles orders.
  *
  * @param int $a The first value
  * @param int $b The second value
  *
  * @return boolean.
  */
-function theme_boost_union_infobanner_compare_order($a, $b) {
+function theme_boost_union_compare_order($a, $b) {
+    // If the same 'order' attribute is given to both items.
     if ($a->order == $b->order) {
-        // Basically, we should return 0 in this case.
-        // But due to the way how usort works internally, info banners with the same order would end up in the result array
-        // in reversed order (compared to the numbering order on the theme settings page).
-        // Thus, we do a little trick and tell the sorting algorithm that the first item is greater than the second one
-        // by returning a positive number.
-        return 1;
+        // We have to compare the 'no' attribute.
+        // This way, we make sure that the item which is presented first in the admin settings is still placed first in the
+        // ordered list even if the same order is configured.
+        return ($a->no < $b->no) ? -1 : 1;
     }
+
+    // Otherwise, compare both items based on their 'order' attribute.
     return ($a->order < $b->order) ? -1 : 1;
 }
 
@@ -537,6 +541,53 @@ function theme_boost_union_get_loginbackgroundimage_files() {
 }
 
 /**
+ *
+ * Get the advertisement tile's background image URL from the filearea 'tilebackgroundimage'.tileno.
+ *
+ * Note:
+ * Calling this function for each tile separately is maybe not performant. Originally it was planed to put
+ * all files in one filearea. However, at the time of development
+ * https://github.com/moodle/moodle/blob/master/lib/outputlib.php#L2062
+ * did not support itemids in setting-files of themes.
+ *
+ * @param int $tileno The tile number.
+ * @return string|null
+ */
+function theme_boost_union_get_urloftilebackgroundimage($tileno) {
+    // If the tile number is apparently not valid, return.
+    // Note: We just check the tile's number, we do not check if the tile is enabled or not.
+    if ($tileno < 0 || $tileno > THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COUNT) {
+        return null;
+    }
+
+    // Get the background image config for this tile.
+    $bgconfig = get_config('theme_boost_union', 'tile'.$tileno.'backgroundimage');
+
+    // If a background image is configured.
+    if (!empty($bgconfig)) {
+        // Get the system context.
+        $systemcontext = context_system::instance();
+
+        // Get filearea.
+        $fs = get_file_storage();
+
+        // Get all files from filearea.
+        $files = $fs->get_area_files($systemcontext->id, 'theme_boost_union', 'tilebackgroundimage'.$tileno,
+                false, 'itemid', false);
+
+        // Just pick the first file - we are sure that there is just one file.
+        $file = reset($files);
+
+        // Build and return the image URL.
+        return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+                $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+    }
+
+    // As no image was found, return null.
+    return null;
+}
+
+/**
  * Add background images from setting 'loginbackgroundimage' to SCSS.
  *
  * @return string
@@ -596,14 +647,17 @@ function theme_boost_union_get_loginbackgroundimage_text() {
                 continue;
             }
             // Compare the filenames for a match.
-            if (strcmp($filename, $settings[0]) == 0) {
+            if (strcmp($filename, trim($settings[0])) == 0) {
+                // Trim the second parameter as we need it more than once.
+                $settings[2] = trim($settings[2]);
+
                 // If the color value is not acceptable, replace it with dark.
                 if ($settings[2] != 'dark' && $settings[2] != 'light') {
                     $settings[2] = 'dark';
                 }
 
                 // Return the text + text color that belongs to the randomly selected image.
-                return array(format_string($settings[1]), $settings[2]);
+                return array(format_string(trim($settings[1])), $settings[2]);
             }
         }
     }
@@ -1082,6 +1136,41 @@ function theme_boost_union_get_fontawesome_checks_templatecontext() {
 }
 
 /**
+ * Helper function to compose the title of an external admin page.
+ * This is adopted from /admin/settings.php and done to make sure that the external admin pages look as similar as possible
+ * to the standard admin pages.
+ *
+ * @param string $pagename The page's name.
+ *
+ * @return string
+ */
+function theme_boost_union_get_externaladminpage_title($pagename) {
+    global $SITE;
+
+    $title = $SITE->shortname.': ';
+    $title .= get_string('administration', 'core').': ';
+    $title .= get_string('appearance', 'core').': ';
+    $title .= get_string('themes', 'core').': ';
+    $title .= get_string('pluginname', 'theme_boost_union').': ';
+    $title .= $pagename;
+
+    return $title;
+}
+
+/**
+ * Helper function to compose the heading of an external admin page.
+ * This is adopted from /admin/settings.php and done to make sure that the external admin pages look as similar as possible
+ * to the standard admin pages.
+ *
+ * @return string
+ */
+function theme_boost_union_get_externaladminpage_heading() {
+    global $SITE;
+
+    return $SITE->fullname;
+}
+
+/**
  * Helper function which adds the CSS files from the fontawesome file area to the Moodle page.
  * This function uses the fontawesome cache definition, i.e. it does not load the files from the filearea directly.
  * It's meant to be called by theme_boost_union_before_standard_html_head() only.
@@ -1120,6 +1209,108 @@ function theme_boost_union_add_fontawesome_to_page() {
             // Add the CSS file to the page.
             $PAGE->requires->css($facssurl);
         }
+    }
+}
+
+/**
+ * Helper function which adds the CSS file from the flavour to the Moodle page.
+ * It's meant to be called by theme_boost_union_before_standard_html_head() only.
+ * *
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
+ */
+function theme_boost_union_add_flavourcss_to_page() {
+    global $CFG, $PAGE;
+
+    // Require flavours library.
+    require_once($CFG->dirroot . '/theme/boost_union/flavours/flavourslib.php');
+
+    // If any flavour applies to this page.
+    $flavour = theme_boost_union_get_flavour_which_applies();
+    if ($flavour != null) {
+        // Build the flavour CSS file URL.
+        $flavourcssurl = new moodle_url('/theme/boost_union/flavours/styles.php',
+                array('id' => $flavour->id, 'rev' => theme_get_revision()));
+
+        // Add the CSS file to the page.
+        $PAGE->requires->css($flavourcssurl);
+    }
+}
+
+/**
+ * Helper function which returns the course header image url, picking the current course from the course settings
+ * or the fallback image from the theme.
+ * If no course header image can should be shown for the current course, the function returns null.
+ *
+ * @return null | string
+ */
+function theme_boost_union_get_course_header_image_url() {
+    global $PAGE;
+
+    // If the current course is the frontpage course (which means that we are not within any real course),
+    // directly return null.
+    if (isset($PAGE->course->id) && $PAGE->course->id == SITEID) {
+        return null;
+    }
+
+    // Get the course image.
+    $courseimage = \core_course\external\course_summary_exporter::get_course_image($PAGE->course);
+
+    // If the course has a course image.
+    if ($courseimage) {
+        // Then return it directly.
+        return $courseimage;
+
+        // Otherwise, if a fallback image is configured.
+    } else if (get_config('theme_boost_union', 'courseheaderimagefallback')) {
+        // Get the system context.
+        $systemcontext = \context_system::instance();
+
+        // Get filearea.
+        $fs = get_file_storage();
+
+        // Get all files from filearea.
+        $files = $fs->get_area_files($systemcontext->id, 'theme_boost_union', 'courseheaderimagefallback',
+            false, 'itemid', false);
+
+        // Just pick the first file - we are sure that there is just one file.
+        $file = reset($files);
+
+        // Build and return the image URL.
+        return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+            $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+    }
+
+    // As no picture was found, return null.
+    return null;
+}
+
+/**
+ * Helper function which sets the URL to the CSS file as soon as the theme's mobilescss setting has any CSS code.
+ * It's meant to be called as callback when changing the admin setting only.
+ * *
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
+ */
+function theme_boost_union_set_mobilecss_url() {
+    // Check if the admin has set any CSS code for the Mobile app.
+    $csscode = get_config('theme_boost_union', 'mobilescss');
+    if (!empty($csscode)) {
+        // Build the Mobile app CSS file URL and especially add the current time as rev parameter.
+        // This parameter isn't the theme revision as the theme cache is not cleared when this setting is stored.
+        // It is just the time when the setting is saved.
+        // This is the best we can do to make the Mobile app load the new styles when needed.
+        $mobilescssurl = new moodle_url('/theme/boost_union/mobile/styles.php', array('rev' => time()));
+
+        // Set the $CFG->mobilecssurl setting.
+        set_config('mobilecssurl', $mobilescssurl->out());
+
+        // Otherwise.
+    } else {
+        // Clear the $CFG->mobilecssurl setting.
+        set_config('mobilecssurl', '');
     }
 }
 

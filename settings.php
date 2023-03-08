@@ -18,7 +18,7 @@
  * Theme Boost Union - Settings file
  *
  * @package    theme_boost_union
- * @copyright  2022 Moodle an Hochschulen e.V. <kontakt@moodle-an-hochschulen.de>
+ * @copyright  2022 Alexander Bias, lern.link GmbH <alexander.bias@lernlink.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -77,6 +77,14 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
                 get_string('configtitlefunctionality', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
         $ADMIN->add('theme_boost_union', $tab);
+
+        // Create Flavours settings page as external page
+        // (and allow users with the theme/boost_union:configure capability to access it).
+        $flavourspage = new admin_externalpage('theme_boost_union_flavours',
+                get_string('configtitleflavours', 'theme_boost_union', null, true),
+                new moodle_url('/theme/boost_union/flavours/overview.php'),
+                'theme/boost_union:configure');
+        $ADMIN->add('theme_boost_union', $flavourspage);
     }
 
     // Create full settings page structure.
@@ -91,6 +99,10 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Due to MDL-58376, we will use binary select settings instead of checkbox settings throughout this theme.
         $yesnooption = array(THEME_BOOST_UNION_SETTING_SELECT_YES => get_string('yes'),
                 THEME_BOOST_UNION_SETTING_SELECT_NO => get_string('no'));
+
+        // Prepare regular expression for checking if the value is a percent number (from 0% to 100%) or a pixel number
+        // (with 3 or 4 digits) or a viewport width number (from 0 to 100).
+        $widthregex = '/^((\d{1,2}|100)%)|((\d{1,2}|100)vw)|(\d{3,4}px)$/';
 
 
         // Create Look settings page with tabs
@@ -142,8 +154,8 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->add($tab);
 
 
-        // Create advanced settings tab.
-        $tab = new admin_settingpage('theme_boost_union_look_advanced', get_string('advancedsettings', 'theme_boost', null, true));
+        // Create SCSS tab.
+        $tab = new admin_settingpage('theme_boost_union_look_scss', get_string('scsstab', 'theme_boost_union', null, true));
 
         // Create Raw SCSS heading.
         $name = 'theme_boost_union/scssheading';
@@ -176,9 +188,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Create page tab.
         $tab = new admin_settingpage('theme_boost_union_look_page', get_string('pagetab', 'theme_boost_union', null, true));
 
-        // Create layout heading.
-        $name = 'theme_boost_union/layoutheading';
-        $title = get_string('layoutheading', 'theme_boost_union', null, true);
+        // Create page width heading.
+        $name = 'theme_boost_union/pagewidthheading';
+        $title = get_string('pagewidthheading', 'theme_boost_union', null, true);
         $setting = new admin_setting_heading($name, $title, null);
         $tab->add($setting);
 
@@ -187,10 +199,16 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $title = get_string('coursecontentmaxwidthsetting', 'theme_boost_union', null, true);
         $description = get_string('coursecontentmaxwidthsetting_desc', 'theme_boost_union', null, true);
         $default = '830px';
-        // Regular expression for checking if the value is a percent number (from 0% to 100%) or a pixel number (with 3 or 4 digits)
-        // or a viewport width number (from 0 to 100).
-        $regex = '/^((\d{1,2}|100)%)|((\d{1,2}|100)vw)|(\d{3,4}px)$/';
-        $setting = new admin_setting_configtext($name, $title, $description, $default, $regex, 6);
+        $setting = new admin_setting_configtext($name, $title, $description, $default, $widthregex, 6);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Setting: Medium content max width.
+        $name = 'theme_boost_union/mediumcontentmaxwidth';
+        $title = get_string('mediumcontentmaxwidthsetting', 'theme_boost_union', null, true);
+        $description = get_string('mediumcontentmaxwidthsetting_desc', 'theme_boost_union', null, true);
+        $default = '1120px';
+        $setting = new admin_setting_configtext($name, $title, $description, $default, $widthregex, 6);
         $setting->set_updatedcallback('theme_reset_all_caches');
         $tab->add($setting);
 
@@ -201,18 +219,52 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Create branding tab.
         $tab = new admin_settingpage('theme_boost_union_look_branding', get_string('brandingtab', 'theme_boost_union', null, true));
 
+        // Create logos heading.
+        $name = 'theme_boost_union/logosheading';
+        $title = get_string('logosheading', 'theme_boost_union', null, true);
+        $notificationurl = new moodle_url('/admin/settings.php', array('section' => 'logos'));
+        $notification = new \core\output\notification(get_string('logosheading_desc', 'theme_boost_union', $notificationurl->out()),
+                \core\output\notification::NOTIFY_INFO);
+        $notification->set_show_closebutton(false);
+        $description = $OUTPUT->render($notification);
+        $setting = new admin_setting_heading($name, $title, $description);
+        $tab->add($setting);
+
+        // Replicate the logo setting from core_admin.
+        $name = 'theme_boost_union/logo';
+        $title = get_string('logosetting', 'theme_boost_union', null, true);
+        $description = get_string('logosetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'logo', 0,
+                array('maxfiles' => 1, 'accepted_types' => 'web_image'));
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Replicate the compact logo setting from core_admin.
+        $name = 'theme_boost_union/logocompact';
+        $title = get_string('logocompactsetting', 'theme_boost_union', null, true);
+        $description = get_string('logocompactsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'logocompact', 0,
+                array('maxfiles' => 1, 'accepted_types' => 'web_image'));
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
         // Create favicon heading.
         $name = 'theme_boost_union/faviconheading';
         $title = get_string('faviconheading', 'theme_boost_union', null, true);
-        $setting = new admin_setting_heading($name, $title, null);
+        $notificationurl = new moodle_url('/admin/settings.php', array('section' => 'logos'));
+        $notification = new \core\output\notification(get_string('faviconheading_desc', 'theme_boost_union',
+                $notificationurl->out()), \core\output\notification::NOTIFY_INFO);
+        $notification->set_show_closebutton(false);
+        $description = $OUTPUT->render($notification);
+        $setting = new admin_setting_heading($name, $title, $description);
         $tab->add($setting);
 
-        // Setting: Favicon.
+        // Replicate the favicon setting from core_admin.
         $name = 'theme_boost_union/favicon';
         $title = get_string('faviconsetting', 'theme_boost_union', null, true);
         $description = get_string('faviconsetting_desc', 'theme_boost_union', null, true);
         $setting = new admin_setting_configstoredfile($name, $title, $description, 'favicon', 0,
-                array('maxfiles' => 1, 'accepted_types' => array('.ico', '.png')));
+                array('maxfiles' => 1, 'accepted_types' => 'image'));
         $setting->set_updatedcallback('theme_reset_all_caches');
         $tab->add($setting);
 
@@ -224,33 +276,11 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
 
         // Replicate the Background image setting from theme_boost.
         $name = 'theme_boost_union/backgroundimage';
-        $title = get_string('backgroundimage', 'theme_boost', null, true);
-        $description = get_string('backgroundimage_desc', 'theme_boost', null, true);
+        $title = get_string('backgroundimagesetting', 'theme_boost_union', null, true);
+        $description = get_string('backgroundimagesetting_desc', 'theme_boost_union', null, true);
         $setting = new admin_setting_configstoredfile($name, $title, $description, 'backgroundimage', 0,
                 array('maxfiles' => 1, 'accepted_types' => 'web_image'));
         $setting->set_updatedcallback('theme_reset_all_caches');
-        $tab->add($setting);
-
-        // Create login page background images heading.
-        $name = 'theme_boost_union/loginbackgroundimagesheading';
-        $title = get_string('loginbackgroundimagesheading', 'theme_boost_union', null, true);
-        $setting = new admin_setting_heading($name, $title, null);
-        $tab->add($setting);
-
-        // Create Login background image setting.
-        $name = 'theme_boost_union/loginbackgroundimage';
-        $title = get_string('loginbackgroundimage', 'theme_boost_union', null, true);
-        $description = get_string('loginbackgroundimage_desc', 'theme_boost_union', null, true);
-        $setting = new admin_setting_configstoredfile($name, $title, $description, 'loginbackgroundimage', 0,
-                array('maxfiles' => 25, 'accepted_types' => 'web_image'));
-        $setting->set_updatedcallback('theme_reset_all_caches');
-        $tab->add($setting);
-
-        // Create Login background image text setting.
-        $name = 'theme_boost_union/loginbackgroundimagetext';
-        $title = get_string('loginbackgroundimagetextsetting', 'theme_boost_union', null, true);
-        $description = get_string('loginbackgroundimagetextsetting_desc', 'theme_boost_union', null, true);
-        $setting = new admin_setting_configtextarea($name, $title, $description, null, PARAM_TEXT);
         $tab->add($setting);
 
         // Create brand colors heading.
@@ -358,6 +388,176 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $setting = new admin_setting_configcolourpicker($name, $title, $description, '');
         $setting->set_updatedcallback('theme_reset_all_caches');
         $tab->add($setting);
+
+        // Create navbar heading.
+        $name = 'theme_boost_union/navbarheading';
+        $title = get_string('navbarheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Navbar color.
+        $name = 'theme_boost_union/navbarcolor';
+        $title = get_string('navbarcolorsetting', 'theme_boost_union', null, true);
+        $description = get_string('navbarcolorsetting_desc', 'theme_boost_union', null, true);
+        $navbarcoloroptions = array(
+                THEME_BOOST_UNION_SETTING_NAVBARCOLOR_LIGHT =>
+                        get_string('navbarcolorsetting_light', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_NAVBARCOLOR_DARK =>
+                        get_string('navbarcolorsetting_dark', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_NAVBARCOLOR_PRIMARYLIGHT =>
+                        get_string('navbarcolorsetting_primarylight', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_NAVBARCOLOR_PRIMARYDARK =>
+                        get_string('navbarcolorsetting_primarydark', 'theme_boost_union'));
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_NAVBARCOLOR_LIGHT,
+                $navbarcoloroptions);
+        $tab->add($setting);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
+        // Create login page tab.
+        $tab = new admin_settingpage('theme_boost_union_look_loginpage',
+                get_string('loginpagetab', 'theme_boost_union', null, true));
+
+        // Create login page background images heading.
+        $name = 'theme_boost_union/loginbackgroundimagesheading';
+        $title = get_string('loginbackgroundimagesheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Create login page background image setting.
+        $name = 'theme_boost_union/loginbackgroundimage';
+        $title = get_string('loginbackgroundimage', 'theme_boost_union', null, true);
+        $description = get_string('loginbackgroundimage_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'loginbackgroundimage', 0,
+                array('maxfiles' => 25, 'accepted_types' => 'web_image'));
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Create login page background image text setting.
+        $name = 'theme_boost_union/loginbackgroundimagetext';
+        $title = get_string('loginbackgroundimagetextsetting', 'theme_boost_union', null, true);
+        $description = get_string('loginbackgroundimagetextsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configtextarea($name, $title, $description, null, PARAM_TEXT);
+        $tab->add($setting);
+
+        // Create login form heading.
+        $name = 'theme_boost_union/loginformheading';
+        $title = get_string('loginformheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Create login form position setting.
+        $name = 'theme_boost_union/loginformposition';
+        $title = get_string('loginformpositionsetting', 'theme_boost_union', null, true);
+        $description = get_string('loginformpositionsetting_desc', 'theme_boost_union', null, true);
+        $loginformoptions = array(
+                THEME_BOOST_UNION_SETTING_LOGINFORMPOS_CENTER => get_string('loginformpositionsetting_center', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_LOGINFORMPOS_LEFT => get_string('loginformpositionsetting_left', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_LOGINFORMPOS_RIGHT => get_string('loginformpositionsetting_right', 'theme_boost_union'));
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_LOGINFORMPOS_CENTER,
+                $loginformoptions);
+        $tab->add($setting);
+
+        // Create login form transparency setting.
+        $name = 'theme_boost_union/loginformtransparency';
+        $title = get_string('loginformtransparencysetting', 'theme_boost_union', null, true);
+        $description = get_string('loginformtransparencysetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
+        // Create course tab.
+        $tab = new admin_settingpage('theme_boost_union_look_course',
+                get_string('coursetab', 'theme_boost_union', null, true));
+
+        // Create course header heading.
+        $name = 'theme_boost_union/courseheaderheading';
+        $title = get_string('courseheaderheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Display the course image in the course header.
+        $name = 'theme_boost_union/courseheaderimageenabled';
+        $title = get_string('courseheaderimageenabled', 'theme_boost_union', null, true);
+        $description = get_string('courseheaderimageenabled_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+
+        // Setting: Fallback course header image.
+        $name = 'theme_boost_union/courseheaderimagefallback';
+        $title = get_string('courseheaderimagefallback', 'theme_boost_union', null, true);
+        $description = get_string('courseheaderimagefallback_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'courseheaderimagefallback', 0,
+                array('maxfiles' => 1, 'accepted_types' => 'web_image'));
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/courseheaderimagefallback', 'theme_boost_union/courseheaderimageenabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+        // Setting: Course header image layout.
+        $name = 'theme_boost_union/courseheaderimagelayout';
+        $title = get_string('courseheaderimagelayout', 'theme_boost_union', null, true);
+        $description = get_string('courseheaderimagelayout_desc', 'theme_boost_union', null, true);
+        $courseheaderimagelayoutoptions = array(
+                THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_STACKEDDARK =>
+                        get_string('courseheaderimagelayoutstackeddark', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_STACKEDLIGHT =>
+                        get_string('courseheaderimagelayoutstackedlight', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_HEADINGABOVE =>
+                        get_string('courseheaderimagelayoutheadingabove', 'theme_boost_union'));
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_HEADINGABOVE, $courseheaderimagelayoutoptions);
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/courseheaderimagelayout', 'theme_boost_union/courseheaderimageenabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+        // Setting: Course header image height.
+        $name = 'theme_boost_union/courseheaderimageheight';
+        $title = get_string('courseheaderimageheight', 'theme_boost_union', null, true);
+        $description = get_string('courseheaderimageheight_desc', 'theme_boost_union', null, true);
+        $courseheaderimageheightoptions = array(
+                THEME_BOOST_UNION_SETTING_HEIGHT_100PX => THEME_BOOST_UNION_SETTING_HEIGHT_100PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_150PX => THEME_BOOST_UNION_SETTING_HEIGHT_150PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_200PX => THEME_BOOST_UNION_SETTING_HEIGHT_200PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_250PX => THEME_BOOST_UNION_SETTING_HEIGHT_250PX);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_HEIGHT_150PX,
+                $courseheaderimageheightoptions);
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/courseheaderimageheight', 'theme_boost_union/courseheaderimageenabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+        // Setting: Course header image position.
+        $name = 'theme_boost_union/courseheaderimageposition';
+        $title = get_string('courseheaderimageposition', 'theme_boost_union', null, true);
+        $description = get_string('courseheaderimageposition_desc', 'theme_boost_union', null, true);
+        $courseheaderimagepositionoptions = array(
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_TOP =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_TOP,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_BOTTOM =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_BOTTOM,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_TOP =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_TOP,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_CENTER =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_CENTER,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_BOTTOM =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_BOTTOM,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_TOP =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_TOP,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_CENTER =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_CENTER,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_BOTTOM =>
+                        THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_BOTTOM);
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER, $courseheaderimagepositionoptions);
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/courseheaderimageposition', 'theme_boost_union/courseheaderimageenabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
 
         // Add tab to settings page.
         $page->add($tab);
@@ -652,6 +852,90 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->add($tab);
 
 
+        // Create H5P tab.
+        $tab = new admin_settingpage('theme_boost_union_look_h5p',
+                get_string('h5ptab', 'theme_boost_union', null, true));
+
+        // Create Raw CSS for H5P heading.
+        $name = 'theme_boost_union/cssh5pheading';
+        $title = get_string('cssh5pheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Raw CSS for H5P.
+        $name = 'theme_boost_union/cssh5p';
+        $title = get_string('cssh5psetting', 'theme_boost_union', null, true);
+        $description = get_string('cssh5psetting_desc', 'theme_boost_union', null, true);
+        $default = '';
+        $setting = new admin_setting_scsscode($name, $title, $description, $default, PARAM_RAW);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Create content bank width heading.
+        $name = 'theme_boost_union/contentwidthheading';
+        $title = get_string('contentwidthheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: H5P content bank max width.
+        $name = 'theme_boost_union/h5pcontentmaxwidth';
+        $title = get_string('h5pcontentmaxwidthsetting', 'theme_boost_union', null, true);
+        $description = get_string('h5pcontentmaxwidthsetting_desc', 'theme_boost_union', null, true);
+        $default = '960px';
+        $setting = new admin_setting_configtext($name, $title, $description, $default, $widthregex, 6);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
+        // Create mobile app tab.
+        $tab = new admin_settingpage('theme_boost_union_look_mobile',
+                get_string('mobiletab', 'theme_boost_union', null, true));
+
+        // Create Mobile appearance heading.
+        $name = 'theme_boost_union/mobileappearanceheading';
+        $title = get_string('mobileappearanceheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Additional CSS for Mobile app.
+        $name = 'theme_boost_union/mobilescss';
+        $title = get_string('mobilecss', 'theme_boost_union', null, true);
+        $description = get_string('mobilecss_desc', 'theme_boost_union', null, true);
+        $mobilecssurl = new moodle_url('/admin/settings.php', array('section' => 'mobileappearance'));
+        // If another Mobile App CSS URL is set already (in the $CFG->mobilecssurl setting), we add a warning to the description.
+        if (isset($CFG->mobilecssurl) && !empty($CFG->mobilecssurl) &&
+                strpos($CFG->mobilecssurl, '/boost_union/mobile/styles.php') == false) {
+            $mobilescssnotification = new \core\output\notification(
+                    get_string('mobilecss_overwrite', 'theme_boost_union',
+                            array('url' => $mobilecssurl->out(), 'value' => $CFG->mobilecssurl)).' '.
+                    get_string('mobilecss_donotchange', 'theme_boost_union'),
+                    \core\output\notification::NOTIFY_WARNING);
+            $mobilescssnotification->set_show_closebutton(false);
+            $description .= $OUTPUT->render($mobilescssnotification);
+
+            // Otherwise, we just add a note to the description.
+        } else {
+            $mobilescssnotification = new \core\output\notification(
+                    get_string('mobilecss_set', 'theme_boost_union',
+                            array('url' => $mobilecssurl->out())).' '.
+                    get_string('mobilecss_donotchange', 'theme_boost_union'),
+                    \core\output\notification::NOTIFY_INFO);
+            $mobilescssnotification->set_show_closebutton(false);
+            $description .= $OUTPUT->render($mobilescssnotification);
+        }
+        // Using admin_setting_scsscode is not 100% right here as this setting does not support SCSS.
+        // However, is shouldn't harm if the CSS code is parsed by the setting.
+        $setting = new admin_setting_scsscode($name, $title, $description, '', PARAM_RAW);
+        $setting->set_updatedcallback('theme_boost_union_set_mobilecss_url');
+        $tab->add($setting);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
         // Add settings page to the admin settings category.
         $ADMIN->add('theme_boost_union', $page);
 
@@ -665,6 +949,28 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Create navigation tab.
         $tab = new admin_settingpage('theme_boost_union_feel_navigation',
                 get_string('navigationtab', 'theme_boost_union', null, true));
+
+        // Create primary navigation heading.
+        $name = 'theme_boost_union/primarynavigationheading';
+        $title = get_string('primarynavigationheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Prepare hide nodes options.
+        $hidenodesoptions = array(
+                THEME_BOOST_UNION_SETTING_HIDENODESPRIMARYNAVIGATION_HOME => get_string('home'),
+                THEME_BOOST_UNION_SETTING_HIDENODESPRIMARYNAVIGATION_MYHOME => get_string('myhome'),
+                THEME_BOOST_UNION_SETTING_HIDENODESPRIMARYNAVIGATION_MYCOURSES => get_string('mycourses'),
+                THEME_BOOST_UNION_SETTING_HIDENODESPRIMARYNAVIGATION_SITEADMIN => get_string('administrationsite')
+        );
+
+        // Setting: Hide nodes in primary navigation.
+        $name = 'theme_boost_union/hidenodesprimarynavigation';
+        $title = get_string('hidenodesprimarynavigationsetting', 'theme_boost_union', null, true);
+        $description = get_string('hidenodesprimarynavigationsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configmulticheckbox($name, $title, $description, array(), $hidenodesoptions);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
 
         // Create navigation heading.
         $name = 'theme_boost_union/navigationheading';
@@ -774,59 +1080,68 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab = new admin_settingpage('theme_boost_union_content_staticpages',
                 get_string('staticpagestab', 'theme_boost_union', null, true));
 
-        // Create imprint heading.
-        $name = 'theme_boost_union/imprintheading';
-        $title = get_string('imprintheading', 'theme_boost_union', null, true);
-        $setting = new admin_setting_heading($name, $title, null);
-        $tab->add($setting);
+        // The static pages to be supported.
+        $staticpages = array('imprint', 'contact', 'help', 'maintenance');
 
-        // Setting: Enable imprint.
-        $name = 'theme_boost_union/enableimprint';
-        $title = get_string('enableimprintsetting', 'theme_boost_union', null, true);
-        $description = '';
-        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
-        $tab->add($setting);
+        // Iterate over the pages.
+        foreach ($staticpages as $staticpage) {
 
-        // Setting: Imprint content.
-        $name = 'theme_boost_union/imprintcontent';
-        $title = get_string('imprintcontentsetting', 'theme_boost_union', null, true);
-        $description = get_string('imprintcontentsetting_desc', 'theme_boost_union', null, true);
-        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
-        $tab->add($setting);
-        $page->hide_if('theme_boost_union/imprintcontent', 'theme_boost_union/enableimprint', 'neq',
-                THEME_BOOST_UNION_SETTING_SELECT_YES);
+            // Create page heading.
+            $name = 'theme_boost_union/'.$staticpage.'heading';
+            $title = get_string($staticpage.'heading', 'theme_boost_union', null, true);
+            $setting = new admin_setting_heading($name, $title, null);
+            $tab->add($setting);
 
-        // Setting: Imprint page title.
-        $name = 'theme_boost_union/imprintpagetitle';
-        $title = get_string('imprintpagetitlesetting', 'theme_boost_union', null, true);
-        $description = get_string('imprintpagetitlesetting_desc', 'theme_boost_union', null, true);
-        $default = get_string('imprintpagetitledefault', 'theme_boost_union', null, true);
-        $setting = new admin_setting_configtext($name, $title, $description, $default);
-        $tab->add($setting);
-        $page->hide_if('theme_boost_union/imprintpagetitle', 'theme_boost_union/enableimprint', 'neq',
-                THEME_BOOST_UNION_SETTING_SELECT_YES);
+            // Setting: Enable page.
+            $name = 'theme_boost_union/enable'.$staticpage;
+            $title = get_string('enable'.$staticpage.'setting', 'theme_boost_union', null, true);
+            $description = '';
+            $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO,
+                    $yesnooption);
+            $tab->add($setting);
 
-        // Setting: Imprint link position.
-        $name = 'theme_boost_union/imprintlinkposition';
-        $title = get_string('imprintlinkpositionsetting', 'theme_boost_union', null, true);
-        $imprinturl = theme_boost_union_get_imprint_link();
-        $description = get_string('imprintlinkpositionsetting_desc', 'theme_boost_union', array('url' => $imprinturl), true);
-        $imprintlinkpositionoption =
-                // Don't use string lazy loading (= false) because the string will be directly used and would produce a
-                // PHP warning otherwise.
-                array(THEME_BOOST_UNION_SETTING_IMPRINTLINKPOSITION_NONE =>
-                        get_string('imprintlinkpositionnone', 'theme_boost_union', null, false),
-                        THEME_BOOST_UNION_SETTING_IMPRINTLINKPOSITION_FOOTNOTE =>
-                                get_string('imprintlinkpositionfootnote', 'theme_boost_union', null, false),
-                        THEME_BOOST_UNION_SETTING_IMPRINTLINKPOSITION_FOOTER =>
-                                get_string('imprintlinkpositionfooter', 'theme_boost_union', null, false),
-                        THEME_BOOST_UNION_SETTING_IMPRINTLINKPOSITION_BOTH =>
-                                get_string('imprintlinkpositionboth', 'theme_boost_union', null, false));
-        $default = 'none';
-        $setting = new admin_setting_configselect($name, $title, $description, $default, $imprintlinkpositionoption);
-        $tab->add($setting);
-        $page->hide_if('theme_boost_union/imprintlinkposition', 'theme_boost_union/enableimprint', 'neq',
-                THEME_BOOST_UNION_SETTING_SELECT_YES);
+            // Setting: Page content.
+            $name = 'theme_boost_union/'.$staticpage.'content';
+            $title = get_string($staticpage.'contentsetting', 'theme_boost_union', null, true);
+            $description = get_string($staticpage.'contentsetting_desc', 'theme_boost_union', null, true);
+            $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/'.$staticpage.'content', 'theme_boost_union/enable'.$staticpage, 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Page title.
+            $name = 'theme_boost_union/'.$staticpage.'pagetitle';
+            $title = get_string($staticpage.'pagetitlesetting', 'theme_boost_union', null, true);
+            $description = get_string($staticpage.'pagetitlesetting_desc', 'theme_boost_union', null, true);
+            $default = get_string($staticpage.'pagetitledefault', 'theme_boost_union', null, true);
+            $setting = new admin_setting_configtext($name, $title, $description, $default);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/'.$staticpage.'pagetitle', 'theme_boost_union/enable'.$staticpage, 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Page link position.
+            $name = 'theme_boost_union/'.$staticpage.'linkposition';
+            $title = get_string($staticpage.'linkpositionsetting', 'theme_boost_union', null, true);
+            $staticpageurl = theme_boost_union_get_staticpage_link($staticpage);
+            $description = get_string($staticpage.'linkpositionsetting_desc', 'theme_boost_union', array('url' => $staticpageurl),
+                    true);
+            $linkpositionoption =
+                    // Don't use string lazy loading (= false) because the string will be directly used and would produce a
+                    // PHP warning otherwise.
+                    array(THEME_BOOST_UNION_SETTING_STATICPAGELINKPOSITION_NONE =>
+                            get_string($staticpage.'linkpositionnone', 'theme_boost_union', null, false),
+                            THEME_BOOST_UNION_SETTING_STATICPAGELINKPOSITION_FOOTNOTE =>
+                                    get_string($staticpage.'linkpositionfootnote', 'theme_boost_union', null, false),
+                            THEME_BOOST_UNION_SETTING_STATICPAGELINKPOSITION_FOOTER =>
+                                    get_string($staticpage.'linkpositionfooter', 'theme_boost_union', null, false),
+                            THEME_BOOST_UNION_SETTING_STATICPAGELINKPOSITION_BOTH =>
+                                    get_string($staticpage.'linkpositionboth', 'theme_boost_union', null, false));
+            $default = 'none';
+            $setting = new admin_setting_configselect($name, $title, $description, $default, $linkpositionoption);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/'.$staticpage.'linkposition', 'theme_boost_union/enable'.$staticpage, 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+        }
 
         // Add tab to settings page.
         $page->add($tab);
@@ -996,6 +1311,182 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->add($tab);
 
 
+        // Create advertisement tiles tab.
+        $tab = new admin_settingpage('theme_boost_union_tiles',
+            get_string('tilestab', 'theme_boost_union', null, true));
+
+        // Create advertisement tiles general heading.
+        $name = 'theme_boost_union/tilesgeneralheading';
+        $title = get_string('tilesgeneralheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Position of the advertisement tiles on the frontpage.
+        $tilefrontpagepositionoptions = array(
+                THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_FRONTPAGEPOSITION_BEFORE =>
+                        get_string('tilefrontpagepositionsetting_before', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_FRONTPAGEPOSITION_AFTER =>
+                        get_string('tilefrontpagepositionsetting_after', 'theme_boost_union'));
+        $name = 'theme_boost_union/tilefrontpageposition';
+        $title = get_string('tilefrontpagepositionsetting', 'theme_boost_union', null, true);
+        $url = new moodle_url('/admin/settings.php', array('section' => 'frontpagesettings'));
+        $description = get_string('tilefrontpagepositionsetting_desc', 'theme_boost_union', array('url' => $url), true);
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_FRONTPAGEPOSITION_BEFORE, $tilefrontpagepositionoptions);
+        $tab->add($setting);
+
+        // Setting: Number of advertisement tile columns per row.
+        $tilecolumnsoptions = array();
+        for ($i = 1; $i <= THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COLUMN_COUNT; $i++) {
+            $tilecolumnsoptions[$i] = $i;
+        }
+        $name = 'theme_boost_union/tilecolumns';
+        $title = get_string('tilecolumnssetting', 'theme_boost_union', null, true);
+        $description = get_string('tilecolumnssetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, 2, $tilecolumnsoptions);
+        $tab->add($setting);
+
+        // Setting: Advertisement tiles height.
+        $name = 'theme_boost_union/tileheight';
+        $title = get_string('tileheightsetting', 'theme_boost_union', null, true);
+        $description = get_string('tileheightsetting_desc', 'theme_boost_union', null, true);
+        $tileheightoptions = array(
+                THEME_BOOST_UNION_SETTING_HEIGHT_100PX => THEME_BOOST_UNION_SETTING_HEIGHT_100PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_150PX => THEME_BOOST_UNION_SETTING_HEIGHT_150PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_200PX => THEME_BOOST_UNION_SETTING_HEIGHT_200PX,
+                THEME_BOOST_UNION_SETTING_HEIGHT_250PX => THEME_BOOST_UNION_SETTING_HEIGHT_250PX);
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_HEIGHT_150PX, $tileheightoptions);
+        $tab->add($setting);
+
+        // Prepare options for the order settings.
+        $tilesorders = array();
+        for ($i = 1; $i <= THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COUNT; $i++) {
+            $tilesorders[$i] = $i;
+        }
+
+        // Create the hardcoded amount of advertisement tiles without code duplication.
+        for ($i = 1; $i <= THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COUNT; $i++) {
+
+            // Create advertisement tile heading.
+            $name = 'theme_boost_union/tile'.$i.'heading';
+            $title = get_string('tileheading', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_heading($name, $title, null);
+            $tab->add($setting);
+
+            // Setting: Advertisement tile enabled.
+            $name = 'theme_boost_union/tile'.$i.'enabled';
+            $title = get_string('tileenabledsetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tileenabledsetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO,
+                    $yesnooption);
+            $tab->add($setting);
+
+            // Setting: Advertisement tile title.
+            $name = 'theme_boost_union/tile'.$i.'title';
+            $title = get_string('tiletitlesetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tiletitlesetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configtext($name, $title, $description, '');
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'title', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile content.
+            $name = 'theme_boost_union/tile'.$i.'content';
+            $title = get_string('tilecontentsetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilecontentsetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'content', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile background image.
+            $name = 'theme_boost_union/tile'.$i.'backgroundimage';
+            $title = get_string('tilebackgroundimagesetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilebackgroundimagesetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configstoredfile($name, $title, $description, 'tilebackgroundimage'.$i, 0,
+                array('maxfiles' => 1, 'accepted_types' => 'web_image'));
+            $setting->set_updatedcallback('theme_reset_all_caches');
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'backgroundimage', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Course header image position.
+            $name = 'theme_boost_union/tile'.$i.'backgroundimageposition';
+            $title = get_string('tilebackgroundimagepositionsetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilebackgroundimagepositionsetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $tilebackgroundimagepositionoptions = array(
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_TOP =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_TOP,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_BOTTOM =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_BOTTOM,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_TOP =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_TOP,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_CENTER =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_CENTER,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_BOTTOM =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_LEFT_BOTTOM,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_TOP =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_TOP,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_CENTER =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_CENTER,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_BOTTOM =>
+                            THEME_BOOST_UNION_SETTING_IMAGEPOSITION_RIGHT_BOTTOM);
+            $setting = new admin_setting_configselect($name, $title, $description,
+                    THEME_BOOST_UNION_SETTING_IMAGEPOSITION_CENTER_CENTER, $tilebackgroundimagepositionoptions);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'backgroundimageposition', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile link URL.
+            $name = 'theme_boost_union/tile'.$i.'link';
+            $title = get_string('tilelinksetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilelinksetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configtext($name, $title, $description, '', PARAM_URL);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'link', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile link title.
+            $name = 'theme_boost_union/tile'.$i.'linktitle';
+            $title = get_string('tilelinktitlesetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilelinktitlesetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configtext($name, $title, $description, '');
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'linktitle', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile link target.
+            $name = 'theme_boost_union/tile'.$i.'linktarget';
+            $title = get_string('tilelinktargetsetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tilelinktargetsetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $tilelinktargetnoptions = array(
+                    THEME_BOOST_UNION_SETTING_LINKTARGET_SAMEWINDOW =>
+                            get_string('tilelinktargetsetting_samewindow', 'theme_boost_union'),
+                    THEME_BOOST_UNION_SETTING_LINKTARGET_NEWTAB =>
+                            get_string('tilelinktargetsetting_newtab', 'theme_boost_union'));
+            $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_LINKTARGET_SAMEWINDOW,
+                    $tilelinktargetnoptions);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'linktarget', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Setting: Advertisement tile order position.
+            $name = 'theme_boost_union/tile'.$i.'order';
+            $title = get_string('tileordersetting', 'theme_boost_union', array('no' => $i), true);
+            $description = get_string('tileordersetting_desc', 'theme_boost_union', array('no' => $i), true);
+            $setting = new admin_setting_configselect($name, $title, $description, $i, $tilesorders);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/tile'.$i.'order', 'theme_boost_union/tile'.$i.'enabled', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+        }
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
         // Add settings page to the admin settings category.
         $ADMIN->add('theme_boost_union', $page);
 
@@ -1050,5 +1541,14 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
 
         // Add settings page to the admin settings category.
         $ADMIN->add('theme_boost_union', $page);
+
+
+        // Create Flavours settings page as external page
+        // (and allow users with the theme/boost_union:configure capability to access it).
+        $flavourspage = new admin_externalpage('theme_boost_union_flavours',
+                get_string('configtitleflavours', 'theme_boost_union', null, true),
+                new moodle_url('/theme/boost_union/flavours/overview.php'),
+                'theme/boost_union:configure');
+        $ADMIN->add('theme_boost_union', $flavourspage);
     }
 }

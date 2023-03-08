@@ -1,7 +1,7 @@
 moodle-theme_boost_union
 ========================
 
-[![Moodle Plugin CI](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/workflows/Moodle%20Plugin%20CI/badge.svg?branch=master)](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amaster)
+[![Moodle Plugin CI](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/workflows/Moodle%20Plugin%20CI/badge.svg?branch=MOODLE_401_STABLE)](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3AMOODLE_401_STABLE)
 
 Theme Boost Union is an enhanced child theme of Boost which is intended, on the one hand, to make Boost simply more configurable and, on the other hand, to provide helpful additional features for the daily Moodle operation of admins, teachers and students.
 
@@ -20,6 +20,8 @@ The Boost theme in Moodle core is not really configurable, many things are hardc
 On the other hand, many Moodle installations share the same basic functional needs like the possibility to add an imprint page or a footnote. This theme intends to provide these basic features without needing to fiddle with other plugins.
 
 One highlight is the main design principle of Boost Union: As soon as it is activated on a Moodle site, it does not change anything yet and simply behaves as Boost from Moodle core does. The admin can enable and configure only the theme features he needs and does not need to care about side effects from other, disabled theme features.
+
+As a side note, it is quite easy to create a grandchild theme of Boost Union. That way, you can benefit from all the / only the Boost Union features you need, but you can also add additional local features or settings (that are not interesting as a pull request or feature request for the whole Boost Union community) to your local grandchild theme at the same time.
 
 
 Installation
@@ -62,7 +64,7 @@ This setting is already available in the Moodle core theme Boost. For more infor
 This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
 Please note: This will not override the setting "theme_boost_campus | loginbackgroundimage" which means that the pictures uploaded to the login page background will be displayed anyway.
 
-#### Tab "Advanced settings"
+#### Tab "SCSS"
 
 In this tab there are the following settings:
 
@@ -80,21 +82,35 @@ This setting is already available in the Moodle core theme Boost. For more infor
 
 In this tab there are the following settings:
 
-##### Layout
+##### Page width
 
 ###### Course content max width
 
-With this setting, you can override Moodle's default content width without manual SCSS modifications.
+With this setting, you can override Moodle's course content width without manual SCSS modifications.
+
+###### Medium content max width
+
+With this setting, you can override Moodle's default medium width without manual SCSS modifications.
 
 #### Tab "Branding"
 
 In this tab there are the following settings:
 
+##### Logos
+
+###### Logo
+
+Here, you can upload a full logo to be used as decoration. This image is especially used on the login page. This image can be quite high resolution because it will be scaled down for use.
+
+###### Compact logo
+
+Here, you can upload a compact version of the same logo as above, such as an emblem, shield or icon. This image is especially used in the navigation bar at the top of each Moodle page. The image should be clear even at small sizes.
+
 ##### Favicon
 
 ###### Favicon
 
-Here, you can upload a custom image (.ico or .png format) that the browser will show as the favicon of your Moodle website. If no custom favicon is uploaded, a standard Moodle favicon will be used.
+Here, you can upload a custom image that the browser will show as the favicon of your Moodle website. If no custom favicon is uploaded, a standard Moodle favicon will be used.
 
 ##### Background images
 
@@ -102,6 +118,22 @@ Here, you can upload a custom image (.ico or .png format) that the browser will 
 
 This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
 Please note: This will not interfere with the setting "theme_boost_union | loginbackgroundimage" which means that the pictures uploaded here will be shown on all pages except the login page.
+
+##### Brand colors
+
+###### Brand color
+
+This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
+
+##### Bootstrap colors
+
+With these settings, you can overwrite the Bootstrap colors which are used within the Moodle GUI.
+
+##### Activity icon colors
+
+With these settings, you can overwrite the activity icon colors which are used within courses.
+
+#### Tab "Login page"
 
 ##### Login page background images
 
@@ -120,21 +152,45 @@ For example:
 
 As text color, you can use the values "dark" or "light".
 
-You can declare texts for a arbitrary amount of your uploaded login background images. The texts will be added only to those images that match their filename with the identifier declared in this setting.
+You can declare texts for an arbitrary amount of your uploaded login background images. The texts will be added only to those images that match their filename with the identifier declared in this setting.
 
-##### Brand colors
+##### Login form position
 
-###### Brand color
+With this setting, you can optimize the login form to fit to a greater variety of background images. By default, the login form is displayed centered on the login page. Alternatively, you can move it to the left or to the right of the login page to let other parts of the background image shine through. Of course, you can also change this setting if no background images are uploaded at all.
 
-This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
+##### Login form transparency
 
-##### Bootstrap colors
+With this setting, you can make the login form slightly transparent to let the background image shine through even more.
 
-With these settings, you can overwrite the Bootstrap colors which are used within the Moodle GUI.
+#### Tab "Course"
 
-##### Activity icon colors
+##### Course Header
 
-With these settings, you can overwrite the activity icon colors which are used within courses.
+###### Display the course image in the course header
+
+When enabled, the course image (which can be uploaded in a course's course settings) is displayed in the header of a course. The course images are shown there in addition to the 'My courses' page where they are always shown.
+
+###### Fallback course header image
+
+If you upload an image in this setting, it is used as fallback image and is displayed in the course header if no course image is uploaded in a particular course's course settings. If you do not upload an image here, a course header image is only shown in a particular course if a course image is uploaded in this particular course's course settings.
+
+###### Course header image height
+
+With this setting, you control the height of the presented course header image.
+
+###### Course header image layout
+
+With this setting, you control the layout of the course header image and the course title.
+
+###### Course header image position
+
+With this setting, you control the positioning of the course header image within the course header container. The first value is the horizontal position, the second value is the vertical position.
+
+#### Tab "E-Mail branding"
+
+In this tab, you find a feature which you can use to apply branding to all E-Mails which Moodle is sending out.
+
+Please note: This is an advanced functionality which uses some workarounds to provide E-Mail branding options. Please follow the instructions closely.
 
 #### Tab "Resources"
 
@@ -146,11 +202,43 @@ With this setting you can upload additional resources to the theme. The advantag
 
 With this setting you can upload custom fonts to the theme. The advantage of uploading fonts to this file area is that those fonts can be delivered without a check if the user is logged in and can be used as locally installed fonts everywhere on the site. As soon as you have uploaded at least one font to this filearea and have stored the settings, a list will appear underneath which will give you CSS code snippets which you can use as a boilerplate to reference particular fonts in your custom SCSS.
 
+##### FontAwesome
+
+Moodle core ships with FontAwesome 4 icons which are fine, but FontAwesome has evolved since then. If you want to use more recent FontAwesome icons, you can do this with this setting. As soon as you choose another version than FontAwesome 4, additional settings will appear where you can upload more recent FontAwesome versions.
+
+#### Tab "H5P"
+
+##### Raw CSS for H5P
+
+###### Raw CSS for H5P
+
+Use this field to provide CSS code which will be applied to the presentation of H5P content by mod_h5p and mod_hvp. Please inspect the H5P content types to find the necessary CSS selectors.
+
+##### Content width
+
+###### H5P content bank max width
+
+With this setting, you can override Moodle's H5P content bank width without manual SCSS modifications.
+
+#### Tab "Mobile app"
+
+##### Mobile appearance 
+
+###### Additional CSS for Mobile app
+
+With this setting, you can write custom CSS code to customise your mobile app interface. The CSS code will be only added to the Mobile app depiction of this Moodle instance and will not be shown in the webbrowser version.
+
 ### Settings page "Feel"
 
 #### Tab "Navigation"
 
 In this tab there are the following settings:
+
+##### Primary navigation
+
+###### Hide nodes in primary navigation
+
+With this setting, you can hide one or multiple nodes from the primary navigation.
 
 ##### Navigation
 
@@ -206,9 +294,25 @@ In this tab there are the following settings:
 
 With these settings, you can add rich text content which will be shown on the imprint page.
 
+##### Contact
+
+With these settings, you can add rich text content which will be shown on a contact page (which is not the same as the built-in Moodle 'Contact site support' page).
+
+##### Help
+
+With these settings, you can add rich text content which will be shown on a help page.
+
+##### Maintenance
+
+With these settings, you can add rich text content which will be shown on a maintenance information page (which is not the same as the built-in Moodle maintenance page).
+
 #### Tab "Information banners"
 
 In this tab, you can enable and configure multiple information banners to be shown on selected pages.
+
+#### Tab "Advertisement tiles"
+
+In this tab, you can enable and configure multiple advertisement tiles to be shown on site home.
 
 ### Settings page "Functionality"
 
@@ -233,6 +337,10 @@ With this setting a hint will appear in the course header when a user is accessi
 ###### Show hint for self enrolment without enrolment key
 
 With this setting a hint will appear in the course header if the course is visible and an enrolment without enrolment key is currently possible.
+
+### Settings page "Flavours"
+
+Boost Union's flavours offer a possibility to override particular Moodle look & feel settings in particular contexts. On this page, you can create and manage flavours.
 
 
 Capabilities
@@ -327,6 +435,12 @@ Maintainers
 The plugin is maintained by\
 Moodle an Hochschulen e.V.
 
+in cooperation with\
+lern.link GmbH
+
+together with\
+bdecent GmbH
+
 
 Copyright
 ---------
@@ -348,12 +462,19 @@ Contributors
 
 This theme is a collaboration result of multiple organisations.
 
-Moodle an Hochschulen e.V. would like to thank these main contributors (in alphabetical order) for their work:
+Moodle an Hochschulen e.V. would like to thank these main contributors (in alphabetical order of the institutions) for their work:
 
 * Bern University of Applied Sciences (BFH), Luca Bösch: Code, Peer Review, Ideating
+* Käferfreie Software, Nina Herrmann: Code
 * lern.link GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
+* lern.link GmbH, Beata Waloszczyk: Code
+* Lower Saxony (Federal state of Germany): Funding
+* moodleSCHULE e.V., Ralf Krause: German translation and curation
+* Ruhr University Bochum, Melanie Treitinger: Code
+* RWTH Aachen, Amrita Deb Dutta: Code
 * RWTH Aachen, Josha Bartsch: Code
+* University of Graz, André Menrath: Code
 * University of Lübeck, Christian Wolters: Peer Review, Ideating
 * Zurich University of Applied Sciences (ZHAW): Funding
 
-Additionally, we thank all other contributors who contributed ideas, feedback and code snippets within the Github issues and pull requests.
+Additionally, we thank all other contributors who contributed ideas, feedback and code snippets within the Github issues and pull requests as well as all contributors who contributed additional translations in AMOS, the Moodle translation tool.

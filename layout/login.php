@@ -20,8 +20,10 @@
  * This layoutfile is based on theme/boost/layout/login.php
  *
  * Modifications compared to this layout file:
- * * Include footnote
  * * Render theme_boost_union/login instead of theme_boost/login template
+ * * Include footnote
+ * * Include static pages
+ * * Include info banners
  *
  * @package   theme_boost_union
  * @copyright 2022 Luca Bösch, BFH Bern University of Applied Sciences luca.boesch@bfh.ch
@@ -39,7 +41,11 @@ $templatecontext = [
     'output' => $OUTPUT,
     'bodyattributes' => $bodyattributes,
     'loginbackgroundimagetext' => $loginbackgroundimagetext,
-    'loginbackgroundimagetextcolor' => $loginbackgroundimagetextcolor
+    'loginbackgroundimagetextcolor' => $loginbackgroundimagetextcolor,
+    'loginwrapperclass' => 'login-wrapper-'.$this->page->theme->settings->loginformposition,
+    'logincontainerclass' =>
+            ($this->page->theme->settings->loginformtransparency == THEME_BOOST_UNION_SETTING_SELECT_YES) ?
+                    'login-container-80t' : ''
 ];
 
 // Include the template content for the footnote.
