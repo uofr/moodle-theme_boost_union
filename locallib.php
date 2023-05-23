@@ -423,6 +423,27 @@ function theme_boost_union_compare_order($a, $b) {
     return ($a->order < $b->order) ? -1 : 1;
 }
 
+
+/**
+ * Helper function to compare two infobanner orders.
+ *
+ * @param int $a The first value
+ * @param int $b The second value
+ *
+ * @return boolean.
+ */
+function theme_boost_union_infobanner_compare_order($a, $b) {
+    if ($a->order == $b->order) {
+        // Basically, we should return 0 in this case.
+        // But due to the way how usort works internally, info banners with the same order would end up in the result array
+        // in reversed order (compared to the numbering order on the theme settings page).
+        // Thus, we do a little trick and tell the sorting algorithm that the first item is greater than the second one
+        // by returning a positive number.
+        return 1;
+    }
+    return ($a->order < $b->order) ? -1 : 1;
+}
+
 /**
  * Helper function to reset the visibility of a given info banner.
  *
