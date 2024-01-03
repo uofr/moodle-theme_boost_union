@@ -410,7 +410,64 @@ class core_renderer extends \theme_boost\output\core_renderer {
         $newnav = new \theme_boost_union\boostnavbar($this->page);
         return $this->render_from_template('core/navbar', $newnav);
     }
-
+	
+	
+	public function nav_language() {
+		global $CFG, $PAGE;
+		$lang = \current_language();
+		
+		$currurl = $PAGE->url;
+		
+		if ($lang == 'en') {
+			$currurl->param('lang','fr_ca');
+			$langlink = '<a href="'.$currurl->out().'">Français</a>';
+		} else {
+			$currurl->param('lang','en');
+			$langlink = '<a href="'.$currurl->out().'">English</a>';
+		}
+		
+		//$langlink .= print_r($currurl,1);
+		
+		return $langlink;
+	}
+	
+	
+	public function login_status() {
+		global $CFG;
+		//$lang = \current_language();
+		
+		if (isloggedin()) {
+			$lslink = '<a href="'.$CFG->wwwroot.'/login/logout.php?sesskey='.sesskey().'">'.get_string('logout').'</a>';
+		} else {
+			$lslink = '<a href="'.$CFG->wwwroot.'/login/index.php">'.get_string('login').'</a>';
+		}
+		/*
+		if ($lang == 'en') {
+			
+			
+		} else {
+			if (isloggedin()) {
+				$lslink = '<a href="'.$CFG->wwwroot.'/login/logout.php?sesskey='.sesskey().'">Log out</a>';
+			} else {
+				$lslink = '<a href="'.$CFG->wwwroot.'/login/index.php">Log in</a>';
+			}
+		}
+		*/
+		
+		return $lslink;
+	}
+	
+	public function contact_email() {
+		global $CFG;
+		$lang = \current_language();
+		
+		$contact_str = ($lang == 'fr_ca') ? 'Contactez-nous' : 'Contact Us';
+		
+		$contact_link = '<a href="mailto:'.$CFG->noreplyaddress.'">'.$contact_str.'</a>';
+		
+		return $contact_link;
+	}
+	
     /**
      * Prints a nice side block with an optional header.
      *
