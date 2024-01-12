@@ -431,6 +431,10 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		return $langlink;
 	}
 	
+	public function logo_src() {
+		global $OUTPUT;
+		return $OUTPUT->image_url('University-of-Regina-Hill-Levene-Schools-of-Business-Logo', 'theme');
+	}
 	
 	public function login_status() {
 		global $CFG;

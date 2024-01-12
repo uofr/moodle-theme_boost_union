@@ -62,96 +62,101 @@
     * Added the possibility to change navbar color.
     * Include button for off-canvas region.
 }}
-<div class="lang-social">{{{output.nav_language}}} {{{ output.login_status }}} {{{ output.contact_email }}} 
-	
-	<a href="https://www.facebook.com/HillandLeveneSchools" class="soc-icon" target="_blank"><i class="fa fa-facebook-official" aria-hidden="true"></i></a> <a href="https://www.instagram.com/hillandleveneschools/" class="soc-icon" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/school/hill-levene-schools-of-business-at-university-of-regina/" class="soc-icon" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+<div class="hdr-top d-flex flex-row flex-wrap align-items-center">
+		<div class="order-1 col-sm-1 col-md-6 uofr-hill-logo px-0"><img src="{{{output.logo_src}}}" width="310" height="44"></div>
+		<div class="order-3 col-sm-1 col-md-4 text-center lang-status px-0">{{{output.nav_language}}} {{{ output.login_status }}} {{{ output.contact_email }}}</div>
+		<div class="order-2 col-sm-1 col-md-2 lang-social px-0 align-middle">
+			<a href="https://www.facebook.com/HillandLeveneSchools" class="soc-icon" target="_blank"><i class="fa fa-facebook-official" aria-hidden="true"></i></a> <a href="https://www.instagram.com/hillandleveneschools/" class="soc-icon" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a> <a href="https://www.linkedin.com/school/hill-levene-schools-of-business-at-university-of-regina/" class="soc-icon" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+		</div>
 </div>
-<nav class="navbar fixed-top {{navbarcolorclasses}} navbar-expand" aria-label="{{#str}}sitemenubar, admin{{/str}}">
 
-<!--
-    <button class="navbar-toggler aabtn d-block d-md-none px-1 my-1 border-0" data-toggler="drawers" data-action="toggle" data-target="theme_boost-drawers-primary">
-        <span class="navbar-toggler-icon"></span>
-        <span class="sr-only">{{#str}}sidepanel, core{{/str}}</span>
-    </button>
--->
-    <a href="{{{ config.homeurl }}}" class="navbar-brand d-md-flex align-items-center m-0 mr-4 p-0 aabtn">
 
-        {{# output.should_display_navbar_logo }}
-            <img src="{{output.get_compact_logo_url}}" class="logo mr-1" alt="{{sitename}}">
-        {{/ output.should_display_navbar_logo }}
-        {{^ output.should_display_navbar_logo }}
-            {{{ sitename }}}
-        {{/ output.should_display_navbar_logo }}
-    </a>
-    {{#primarymoremenu}}
-        <div class="primary-navigation">
-            {{> core/moremenu}}
-        </div>
-    {{/primarymoremenu}}
-
-    <ul class="navbar-nav d-none d-md-flex my-1 px-1">
-        <!-- page_heading_menu -->
-        {{{ output.page_heading_menu }}}
-    </ul>
-
-    <div id="usernavigation" class="navbar-nav ml-auto">
-        {{# output.search_box }}
-            {{{ output.search_box }}}
-            <div class="divider border-left h-75 align-self-center mx-1"></div>
-        {{/output.search_box}}
-        {{#langmenu}}
-            {{> theme_boost/language_menu }}
-            <div class="divider border-left h-75 align-self-center mx-1"></div>
-        {{/langmenu}}
-        {{{ output.navbar_plugin_output }}}
-        <div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
-            {{#usermenu}}
-                {{> core/user_menu }}
-            {{/usermenu}}
-        </div>
-        {{{ output.edit_switch }}}
-
-        {{^userisediting}}
-            {{#regions.offcanvas.hasblocks}}
-                <div class="divider border-left h-75 align-self-center mx-1"></div>
-                <div class="drawer-offcanvas-toggle d-print-none">
-                    <button
-                        class="btn"
-                        id="theme_boost_union-offcanvas-btn"
-                        data-toggler="drawers"
-                        title="{{#str}}openoffcanvas, theme_boost_union{{/str}}"
-                        data-action="toggle"
-                        data-target="theme_boost_union-drawers-offcanvas"
-                        data-toggle="tooltip"
-                        data-placement="bottom"
-                    >
-                        <span class="sr-only">{{#str}}openoffcanvas, theme_boost_union{{/str}}</span>
-                        <i class="fa fa-th"></i>
-                    </button>
-                </div>
-            {{/regions.offcanvas.hasblocks}}
-        {{/userisediting}}
-        {{#userisediting}}
-            {{#regions.offcanvas.hasblocks}}
-                <div class="divider border-left h-75 align-self-center mx-1"></div>
-                <div class="drawer-offcanvas-toggle d-print-none">
-                    <button
-                        class="btn"
-                        id="theme_boost_union-offcanvas-btn"
-                        data-toggle="collapse"
-                        title="{{#str}}openoffcanvas, theme_boost_union{{/str}}"
-                        data-target="#theme-block-region-offcanvas-editing"
-                        aria-expanded="false"
-                        aria-controls="theme-block-region-offcanvas-editing"
-                    >
-                        <span class="sr-only">{{#str}}openoffcanvas, theme_boost_union{{/str}}</span>
-                        <i class="fa fa-th"></i>
-                    </button>
-                </div>
-            {{/regions.offcanvas.hasblocks}}
-        {{/userisediting}}
-    </div>
-
+<nav class="navbar hdr-navbar {{navbarcolorclasses}} navbar-expand" aria-label="{{#str}}sitemenubar, admin{{/str}}">
+	<div class="navbar-inner d-md-flex">
+	<!--
+	    <button class="navbar-toggler aabtn d-block d-md-none px-1 my-1 border-0" data-toggler="drawers" data-action="toggle" data-target="theme_boost-drawers-primary">
+	        <span class="navbar-toggler-icon"></span>
+	        <span class="sr-only">{{#str}}sidepanel, core{{/str}}</span>
+	    </button>
+	-->
+	    <a href="{{{ config.homeurl }}}" class="navbar-brand d-md-flex align-items-center m-0 mr-4 p-0 aabtn">
+	
+	        {{# output.should_display_navbar_logo }}
+	            <img src="{{output.get_compact_logo_url}}" class="logo mr-1" alt="{{sitename}}">
+	        {{/ output.should_display_navbar_logo }}
+	        {{^ output.should_display_navbar_logo }}
+	            {{{ sitename }}}
+	        {{/ output.should_display_navbar_logo }}
+	    </a>
+	    {{#primarymoremenu}}
+	        <div class="primary-navigation">
+	            {{> core/moremenu}}
+	        </div>
+	    {{/primarymoremenu}}
+	
+	    <ul class="navbar-nav d-none d-md-flex my-1 px-1">
+	        <!-- page_heading_menu -->
+	        {{{ output.page_heading_menu }}}
+	    </ul>
+	
+	    <div id="usernavigation" class="navbar-nav ml-auto">
+	        {{# output.search_box }}
+	            {{{ output.search_box }}}
+	            <div class="divider border-left h-75 align-self-center mx-1"></div>
+	        {{/output.search_box}}
+	        {{#langmenu}}
+	            {{> theme_boost/language_menu }}
+	            <div class="divider border-left h-75 align-self-center mx-1"></div>
+	        {{/langmenu}}
+	        {{{ output.navbar_plugin_output }}}
+	        <div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
+	            {{#usermenu}}
+	                {{> core/user_menu }}
+	            {{/usermenu}}
+	        </div>
+	        {{{ output.edit_switch }}}
+	
+	        {{^userisediting}}
+	            {{#regions.offcanvas.hasblocks}}
+	                <div class="divider border-left h-75 align-self-center mx-1"></div>
+	                <div class="drawer-offcanvas-toggle d-print-none">
+	                    <button
+	                        class="btn"
+	                        id="theme_boost_union-offcanvas-btn"
+	                        data-toggler="drawers"
+	                        title="{{#str}}openoffcanvas, theme_boost_union{{/str}}"
+	                        data-action="toggle"
+	                        data-target="theme_boost_union-drawers-offcanvas"
+	                        data-toggle="tooltip"
+	                        data-placement="bottom"
+	                    >
+	                        <span class="sr-only">{{#str}}openoffcanvas, theme_boost_union{{/str}}</span>
+	                        <i class="fa fa-th"></i>
+	                    </button>
+	                </div>
+	            {{/regions.offcanvas.hasblocks}}
+	        {{/userisediting}}
+	        {{#userisediting}}
+	            {{#regions.offcanvas.hasblocks}}
+	                <div class="divider border-left h-75 align-self-center mx-1"></div>
+	                <div class="drawer-offcanvas-toggle d-print-none">
+	                    <button
+	                        class="btn"
+	                        id="theme_boost_union-offcanvas-btn"
+	                        data-toggle="collapse"
+	                        title="{{#str}}openoffcanvas, theme_boost_union{{/str}}"
+	                        data-target="#theme-block-region-offcanvas-editing"
+	                        aria-expanded="false"
+	                        aria-controls="theme-block-region-offcanvas-editing"
+	                    >
+	                        <span class="sr-only">{{#str}}openoffcanvas, theme_boost_union{{/str}}</span>
+	                        <i class="fa fa-th"></i>
+	                    </button>
+	                </div>
+	            {{/regions.offcanvas.hasblocks}}
+	        {{/userisediting}}
+	    </div>
+	</div>
 </nav>
 
 {{> theme_boost/primary-drawer-mobile }}
