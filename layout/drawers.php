@@ -100,6 +100,11 @@ if ($courseindexopen) {
     $extraclasses[] = 'drawer-open-index';
 }
 
+//add section class to body, if set, and viewing course id = 3
+$id = optional_param('id', 0, PARAM_INT);
+$section = optional_param('section', 0, PARAM_INT);
+if (isset($section)&&$id==3) $extraclasses[] = 'section-'.$section;
+
 $blockshtml = $OUTPUT->blocks('side-pre');
 $hasblocks = (strpos($blockshtml, 'data-block=') !== false || !empty($addblockbutton));
 if (!$hasblocks) {
