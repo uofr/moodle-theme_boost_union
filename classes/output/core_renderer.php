@@ -205,7 +205,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * @return moodle_url|false
      */
     public function get_compact_logo_url($maxwidth = 300, $maxheight = 300) {
-        global $CFG;
+        global $CFG,$OUTPUT;
 
         // Initialize static variable for the flavour logo as this function is called (for whatever reason) multiple times
         // during a page output.
@@ -271,8 +271,15 @@ class core_renderer extends \theme_boost\output\core_renderer {
         }
 
         // Use $CFG->themerev to prevent browser caching when the file changes.
-        return moodle_url::make_pluginfile_url(context_system::instance()->id, 'theme_boost_union', 'logocompact', $filepath,
+		if (current_language()=='en') {
+			$logo_url = moodle_url::make_pluginfile_url(context_system::instance()->id, 'theme_boost_union', 'logocompact', $filepath,
                 theme_get_revision(), $logo);
+			
+		} else {
+			$logo_url = $OUTPUT->image_url('Imagineur-logo-with-tagline-white_fr', 'theme');
+		}
+		
+        return $logo_url;
     }
 
     /**
