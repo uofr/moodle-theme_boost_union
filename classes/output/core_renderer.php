@@ -436,6 +436,17 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		return $OUTPUT->image_url('University-of-Regina-Hill-Levene-Schools-of-Business-Logo', 'theme');
 	}
 	
+	public function funding_statement() {
+		$lang = \current_language();
+		if ($lang == 'en') {
+			$statement = 'Funded by the Government of Canada’s Skills for Success Program';
+		} else {
+			$statement = 'Financé par le programme Compétences pour réussir du gouvernement du Canada';
+		}
+		
+		return $statement;
+	}
+	
 	public function login_status() {
 		global $CFG;
 		//$lang = \current_language();
