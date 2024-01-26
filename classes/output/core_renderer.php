@@ -443,6 +443,11 @@ class core_renderer extends \theme_boost\output\core_renderer {
 		return $OUTPUT->image_url('University-of-Regina-Hill-Levene-Schools-of-Business-Logo', 'theme');
 	}
 	
+	public function funding_logo_src() {
+		global $OUTPUT;
+		return $OUTPUT->image_url('canada-wordmark-colour', 'theme');
+	}
+	
 	public function funding_statement() {
 		$lang = \current_language();
 		if ($lang == 'en') {

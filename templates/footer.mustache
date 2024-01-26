@@ -54,7 +54,7 @@
 }}
 
 <footer id="page-footer" class="footer bg-white">
-    <div class="footer-content container" data-region="footer-content">
+    <div class="footer-content container-fluid" data-region="footer-content">
         {{# output.has_popover_links }}
             <div class="footer-section py-3 border-bottom footer-support">
                 
@@ -73,9 +73,10 @@
             <!--{{{ output.standard_footer_html }}}-->
             {{{ output.standard_end_of_body_html }}}
         </div>
-        <div class="footer-section px-0 py-3 d-flex flex-row flex-wrap">
-            <div class="footer-logo col-sm-1 col-md-5 px-0"><a href="https://www.uregina.ca/business/" target="_blank"><img src="{{{output.logo_src}}}" width="310" height="44"></a></div>
-			<div class="footer-funding col-sm-1 col-md-7 px-0"><p class="small">{{{ output.funding_statement }}}</p></div>
+        <div class="footer-section px-3 py-3 row align-items-center">
+            <div class="footer-logo col-6 col-md-5 px-0"><a href="https://www.uregina.ca/business/" target="_blank"><img class="img-fluid" src="{{{output.logo_src}}}"></a></div>
+			<div class="footer-fund-logo col-6 col-md-2 px-0"><img class="img-fluid" src="{{{output.funding_logo_src}}}"></div>
+			<div class="footer-funding col-sm-12 col-md-5 px-0"><p class="small">{{{ output.funding_statement }}}</p></div>
         </div>
     </div>
 
