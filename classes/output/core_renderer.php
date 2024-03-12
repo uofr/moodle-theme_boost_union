@@ -418,7 +418,6 @@ class core_renderer extends \theme_boost\output\core_renderer {
         return $this->render_from_template('core/navbar', $newnav);
     }
 	
-	
 	public function nav_language() {
 		global $CFG, $PAGE;
 		$lang = \current_language();
@@ -441,6 +440,17 @@ class core_renderer extends \theme_boost\output\core_renderer {
 	public function logo_src() {
 		global $OUTPUT;
 		return $OUTPUT->image_url('University-of-Regina-Hill-Levene-Schools-of-Business-Logo', 'theme');
+	}
+	
+	public function logo_alt() {
+		$lang = \current_language();
+		if ($lang == 'en') {
+			$alt = 'University of Regina - Hill Levene Schools of Business - Visit site';
+		} else {
+			$alt = 'Université de Regina - écoles de commerce Hill Levene - Visiter le site';
+		}
+		
+		return $alt;
 	}
 	
 	public function funding_logo_src() {
