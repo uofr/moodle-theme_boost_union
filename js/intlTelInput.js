@@ -165,6 +165,7 @@
         }
         // these vars persist through all instances of the plugin
         var id = 0;
+		var lastFlagsrc = '';
         var defaults = {
             // whether or not to allow the dropdown
             allowDropdown: true,
@@ -976,7 +977,7 @@
                     this._handleClickCountryList = function(e) {
                         var listItem = e.target.closest(".iti__country");
                         if (listItem) {
-                            _this8._selectListItem(listItem);
+                            _this8._selectListItemClick(listItem);
                         }
                     };
                     this.countryList.addEventListener("click", this._handleClickCountryList);
@@ -1345,6 +1346,27 @@
                 key: "_selectListItem",
                 value: function _selectListItem(listItem) {
                     // update selected flag and active list item
+					
+					var flagChanged = this._setFlag(listItem.getAttribute("data-country-code"));
+                    this._closeDropdown();
+                    this._updateDialCode(listItem.getAttribute("data-dial-code"));
+                    // focus the input
+                    this.telInput.focus();
+                    if (flagChanged) {
+                        this._triggerCountryChange();
+                    }
+					lastFlagsrc = '<div class="iti__flag iti__'+listItem.getAttribute("data-country-code")+'"></div><div class="iti__arrow iti__arrow--dn"></div>';
+					console.log('flagsrc:'+lastFlagsrc);
+					setTimeout(this._restoreclickflag,50);
+                }
+            }, {
+                key: "_selectListItemClick",
+                value: function _selectListItem(listItem) {
+                    // update selected flag and active list item
+					
+					console.log('debug:data-country-code:'+listItem.getAttribute("data-country-code"));
+					console.log('debug:data-country-code:'+listItem.getAttribute("data-dial-code"));
+					console.log('listItem:'+listItem.getAttribute("id"));
                     var flagChanged = this._setFlag(listItem.getAttribute("data-country-code"));
                     this._closeDropdown();
                     this._updateDialCode(listItem.getAttribute("data-dial-code"));
@@ -1353,7 +1375,23 @@
                     if (flagChanged) {
                         this._triggerCountryChange();
                     }
+					
+					lastFlagsrc = '<div class="iti__flag iti__'+listItem.getAttribute("data-country-code")+'"></div><div class="iti__arrow iti__arrow--dn"></div>';
+					console.log('flagsrc:'+lastFlagsrc);
+					setTimeout(this._restoreclickflag,50);
+					
                 }
+            },{
+                key: "_restoreclickflag",
+                value: function _restoreclickflag() {
+					console.log('flagsrc(delay):'+$('.iti__selected-flag').html()); 
+										console.log('lastFlagsrc:'+lastFlagsrc);
+										if ($('.iti__selected-flag').html() !== lastFlagsrc) {
+											$('.iti__selected-flag').html(lastFlagsrc);
+											lastFlagsrc = $('.iti__selected-flag').html();
+											console.log('updated flag');
+										}
+				}
             }, {
                 key: "_closeDropdown",
                 value: function _closeDropdown() {
