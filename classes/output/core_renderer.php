@@ -24,6 +24,7 @@
 
 namespace theme_boost_union\output;
 use context_system;
+use context_course;
 use moodle_url;
 
 /**
@@ -417,6 +418,78 @@ class core_renderer extends \theme_boost\output\core_renderer {
         $newnav = new \theme_boost_union\boostnavbar($this->page);
         return $this->render_from_template('core/navbar', $newnav);
     }
+	
+	
+	public function profile_prompt() {
+		global $CFG, $PAGE, $USER, $COURSE;
+		$lang = \current_language();
+		
+		$currurl = $PAGE->url;
+		
+		if ($USER->id>0) profile_load_custom_fields($USER);
+		
+		$context = context_course::instance($COURSE->id);
+		
+		$profile_prompt = '';//'course:'.$COURSE->id.' hascap:'.has_capability('moodle/course:update', $context).' || '.$currurl;
+		
+		$shouldprompt = false;
+		
+		if (empty($USER->profile['residence'])) $shouldprompt = true;
+		if (empty($USER->profile['gender'])) $shouldprompt = true;
+		if (empty($USER->profile['ethnicity'])) $shouldprompt = true;
+		if (empty($USER->profile['occupation'])) $shouldprompt = true;
+		
+		if ($USER->id>0 && !has_capability('moodle/course:update', $context)) {
+			if ($shouldprompt && !str_contains($currurl, 'user/edit.php')) {
+				$profile_prompt .= '<script>
+		window.addEventListener(\'load\', function() { 
+		
+			var modalmarkup = \'<!-- Modal -->\';
+			modalmarkup += \'<div class="modal fade" id="lightboxmodal" role="dialog">\';
+			modalmarkup += \'<div class="modal-dialog" id="lbdialog">\';
+			modalmarkup += \'  <!-- Modal content-->\';
+			modalmarkup += \'    <div class="modal-content">\';
+			modalmarkup += \'      <div class="modal-header">\';
+			//modalmarkup += \'        <button type="button" class="close" data-dismiss="modal">&times;</button>\';
+			modalmarkup += \'        <h4 class="modal-title">Help improve our data!</h4>\';
+			modalmarkup += \'      </div>\';
+			modalmarkup += \'      <div class="modal-body">\';
+			modalmarkup += \'        <p>Take a moment to update your profile to ensure accurate reporting to our funder.  Your personal information remains anonymous and secure.</p>  <div class="alert alert-info"><p>Please note: the first and last name that appears in your profile is what will appear on your digital badge.</p></div>\';
+			modalmarkup += \'      </div>\';
+			modalmarkup += \'      <div class="modal-footer">\';
+			modalmarkup += \'        <button type="button" class="btn btn-primary" onclick="location.href=\\\''.$CFG->wwwroot.'/user/edit.php?id='.$USER->id.'\\\'">Update Profile</button>\';
+			modalmarkup += \'      </div>\';
+			modalmarkup += \'    </div>\';
+			modalmarkup += \' </div>\';
+			modalmarkup += \'</div>\';
+
+			$("body").append(modalmarkup);
+			//$("#lightboxmodal").modal(\'show\');
+			$("#lightboxmodal").modal({backdrop: \'static\',show: true});
+			//console.log(\'pop modal\');
+			
+		});
+	    </script>';
+			} else if (str_contains($currurl, 'user/edit.php')) {
+				$profile_prompt .= '<code><pre>Profile '.print_r($USER->profile,1).'</pre></code>';
+			}
+		}
+		
+		
+		
+		//ensure on the right pages,a nd shown only to students
+		//has_capability('theme/boost_union:editregion'.$regioncapname, $this->page->context);
+		
+		//profile_load_custom_fields($USER);
+		
+		
+		
+		
+		//$langlink .= print_r($currurl,1);
+		
+		return $profile_prompt;
+	}
+	
 	
 	public function nav_language() {
 		global $CFG, $PAGE;
