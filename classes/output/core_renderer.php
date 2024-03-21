@@ -451,13 +451,13 @@ class core_renderer extends \theme_boost\output\core_renderer {
 			modalmarkup += \'    <div class="modal-content">\';
 			modalmarkup += \'      <div class="modal-header">\';
 			//modalmarkup += \'        <button type="button" class="close" data-dismiss="modal">&times;</button>\';
-			modalmarkup += \'        <h4 class="modal-title">Help improve our data!</h4>\';
+			modalmarkup += \'        <h4 class="modal-title">'.(($lang == 'fr_ca') ? 'Aidez-nous à améliorer nos données!' : 'Help improve our data!').'</h4>\';
 			modalmarkup += \'      </div>\';
 			modalmarkup += \'      <div class="modal-body">\';
-			modalmarkup += \'        <p>Take a moment to update your profile to ensure accurate reporting to our funder.  Your personal information remains anonymous and secure.</p>  <div class="alert alert-info"><p>Please note: the first and last name that appears in your profile is what will appear on your digital badge.</p></div>\';
+			modalmarkup += \'        '.(($lang == 'fr_ca') ? '<p>Prenez le temps de mettre votre profil à jour pour que nous puissions rendre compte précisément à notre bailleur de fonds. Vos renseignements personnels restent anonymes et sécurisés.</p>  <div class="alert alert-info"><p>À noter : le prénom et le nom de famille qui paraissent dans votre profil sont ceux qui paraîtront sur votre insigne numérique.</p></div>' : '<p>Take a moment to update your profile to ensure accurate reporting to our funder.  Your personal information remains anonymous and secure.</p>  <div class="alert alert-info"><p>Please note: the first and last name that appears in your profile is what will appear on your digital badge.</p></div>').'\';
 			modalmarkup += \'      </div>\';
 			modalmarkup += \'      <div class="modal-footer">\';
-			modalmarkup += \'        <button type="button" class="btn btn-primary" onclick="location.href=\\\''.$CFG->wwwroot.'/user/edit.php?id='.$USER->id.'\\\'">Update Profile</button>\';
+			modalmarkup += \'        <button type="button" class="btn btn-primary" onclick="location.href=\\\''.$CFG->wwwroot.'/user/edit.php?id='.$USER->id.'\\\'">'.(($lang == 'fr_ca') ? 'Mise à jour du profil' : 'Update Profile').'</button>\';
 			modalmarkup += \'      </div>\';
 			modalmarkup += \'    </div>\';
 			modalmarkup += \' </div>\';
