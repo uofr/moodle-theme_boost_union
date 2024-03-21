@@ -470,9 +470,9 @@ class core_renderer extends \theme_boost\output\core_renderer {
 			
 		});
 	    </script>';
-			} else if (str_contains($currurl, 'user/edit.php')) {
+			}/* else if (str_contains($currurl, 'user/edit.php')) {
 				$profile_prompt .= '<code><pre>Profile '.print_r($USER->profile,1).'</pre></code>';
-			}
+			}*/
 		}
 		
 		
