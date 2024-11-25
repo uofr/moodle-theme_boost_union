@@ -32,7 +32,6 @@ use moodle_exception;
 use core\navigation\views\primary;
 use cache;
 use cache_helper;
-use smartmenu_helper;
 
 require_once($CFG->dirroot.'/theme/boost_union/smartmenus/menulib.php');
 
@@ -65,7 +64,7 @@ class smartmenu {
     /**
      * The helper object for managing smart menu restrict access rules.
      *
-     * @var \smartmenu_helper
+     * @var smartmenu_helper
      */
     public $helper;
 
@@ -263,6 +262,24 @@ class smartmenu {
     public const MODE_SUBMENU = 1;
 
     /**
+     * Restrict to admins: Show to all users.
+     * @var int
+     */
+    public const BYADMIN_ALL = 0;
+
+    /**
+     * Restrict to admins: Show only to admins.
+     * @var int
+     */
+    public const BYADMIN_ADMINS = 1;
+
+    /**
+     * Restrict to admins: Show only to non-admins.
+     * @var int
+     */
+    public const BYADMIN_NONADMINS = 2;
+
+    /**
      * Cache key for the menus list.
      */
     public const CACHE_MENUSLIST = 'menuslist';
@@ -294,7 +311,7 @@ class smartmenu {
     public function __construct($menu) {
         $this->id = $menu->id;
         $this->menu = self::update_menu_valuesformat($menu);
-        $this->helper = new \smartmenu_helper($this->menu);
+        $this->helper = new smartmenu_helper($this->menu);
         // Cache for menu.
         $this->cache = cache::make('theme_boost_union', 'smartmenus');
     }
@@ -688,6 +705,14 @@ class smartmenu {
             $nodescache->menuitems = $menuitems;
             $this->cache->set($cachekey, $nodescache);
         }
+
+        // If the current menu doesn't contain any nodes, hide the menu from users.
+        // Verify after storing the cache to prevent rebuilding the menu items.
+        // This helps to verify the cached menus, too.
+        if (!isset($builditems) || empty($builditems)) {
+            return false;
+        }
+
         // Remove the menu items list from nodes. it doesn't need to build the smartmenus.
         if (isset($nodes->menuitems)) {
             // Remove the menu items list from nodes, it doesn't need anymore.
@@ -977,7 +1002,7 @@ class smartmenu {
         }
 
         // Menus are purged in the build method when needed, then clear the user preference of purge cache.
-        \smartmenu_helper::clear_user_cachepreferencemenu();
+        smartmenu_helper::clear_user_cachepreferencemenu();
 
         return $nodes;
     }
@@ -995,7 +1020,7 @@ class smartmenu {
             // Confirm the cache is not already purged for this language change. To avoid multiple purge.
             if (!isset($SESSION->prevlang) || $SESSION->prevlang != $lang) {
                 // Set the purge cache preference for this session user. Cache will purged in the build_smartmenu method.
-                \smartmenu_helper::set_user_purgecache($USER->id);
+                smartmenu_helper::set_user_purgecache($USER->id);
                 $SESSION->prevlang = $lang; // Save this lang for verification.
             }
         }

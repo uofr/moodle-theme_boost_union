@@ -44,7 +44,7 @@ if ($footerquestionmark != THEME_BOOST_UNION_SETTING_ENABLEFOOTER_NONE) {
         $templatecontext['footershowchat'] = false;
     }
 
-    // If the "Suppress 'Help and documentation' link" setting is not enabled.
+    // If the "Suppress 'Documentation for this page' link" setting is not enabled.
     $footersuppresshelpsetting = get_config('theme_boost_union', 'footersuppresshelp');
     if (!isset($footersuppresshelpsetting) || $footersuppresshelpsetting != THEME_BOOST_UNION_SETTING_SELECT_YES) {
         // Add marker to show this link.
@@ -80,7 +80,7 @@ if ($footerquestionmark != THEME_BOOST_UNION_SETTING_ENABLEFOOTER_NONE) {
         $templatecontext['footershowcontact'] = false;
     }
 
-    // If any of the 'Help and documentation', 'Services and support' or 'Contact site support' links are enabled.
+    // If any of the 'Documentation for this page', 'Services and support' or 'Contact site support' links are enabled.
     if (isset($templatecontext['footershowhelp']) && $templatecontext['footershowhelp'] == true ||
             isset($templatecontext['footershowservices']) && $templatecontext['footershowservices'] == true ||
             isset($templatecontext['footershowcontact']) && $templatecontext['footershowcontact'] == true) {
@@ -128,4 +128,18 @@ if ($footerquestionmark != THEME_BOOST_UNION_SETTING_ENABLEFOOTER_NONE) {
         // Add marker to hide this link.
         $templatecontext['footershowpowered'] = false;
     }
+
+    // If the "Suppress icons in front of the footer links" setting is not enabled.
+    $footersuppressfooterlinkiconssetting = get_config('theme_boost_union', 'footersuppressicons');
+    if (!isset($footersuppressfooterlinkiconssetting) ||
+        $footersuppressfooterlinkiconssetting != THEME_BOOST_UNION_SETTING_SELECT_YES) {
+        // Add marker to show the icons.
+        $templatecontext['suppressfooterlinkicons'] = false;
+
+        // Otherwise.
+    } else {
+        // Add marker to hide the icons.
+        $templatecontext['suppressfooterlinkicons'] = true;
+    }
+
 }

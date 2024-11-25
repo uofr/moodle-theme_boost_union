@@ -291,5 +291,62 @@ function xmldb_theme_boost_union_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2023102009, 'theme', 'boost_union');
     }
 
+    if ($oldversion < 2023102021) {
+
+        // Remove the preset setting from Boost Union.
+        unset_config('preset', 'theme_boost_union');
+
+        // Remove the presetfiles setting from Boost Union.
+        unset_config('presetfiles', 'theme_boost_union');
+
+        // Remove the files from the preset filearea of Boost Union as this setting was removed.
+        $systemcontext = context_system::instance();
+        $fs = get_file_storage();
+        $fs->delete_area_files($systemcontext->id, 'theme_boost_union', 'preset');
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2023102021, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2023102027) {
+        // Define table theme_boost_union_menuitems to be altered.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+
+        // Define field listsort to be added to theme_boost_union_menuitems.
+        $field = new xmldb_field('category_subcats', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'category');
+
+        // Conditionally launch add field listsort.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2023102027, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2023102046) {
+
+        // Define field byadmin to be added to theme_boost_union_menus.
+        $table = new xmldb_table('theme_boost_union_menus');
+        $field = new xmldb_field('byadmin', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '0', 'visible');
+
+        // Conditionally launch add field byadmin.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field byadmin to be added to theme_boost_union_menuitems.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+        $field = new xmldb_field('byadmin', XMLDB_TYPE_INTEGER, '9', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field byadmin.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2023102046, 'theme', 'boost_union');
+    }
+
     return true;
 }

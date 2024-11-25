@@ -22,12 +22,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace theme_boost_union;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot. '/theme/boost_union/locallib.php');
+use cache;
+use context_system;
 
-use theme_boost_union\smartmenu;
-use theme_boost_union\smartmenu_item;
+require_once($CFG->dirroot. '/theme/boost_union/locallib.php');
 
 /**
  * Smartmenu helper which contains the methods to verify the access rules for menu and its items.
@@ -95,6 +97,11 @@ class smartmenu_helper {
         // Restriction by roles.
         $this->restriction_byroles($query);
 
+        // Restricted by site admin status.
+        if (!$this->restriction_byadmin()) {
+            return false;
+        }
+
         // Restriction by cohorts.
         $this->restriction_bycohorts($query);
 
@@ -135,11 +142,33 @@ class smartmenu_helper {
      * @return void
      */
     public function restriction_byroles(&$query) {
-        global $DB;
+        global $DB, $CFG;
 
         $roles = $this->data->roles;
-        // Roles not mentioned then stop the role check.
+        // If no role restrictions are set.
         if ($roles == '' || empty($roles)) {
+            // Return directly.
+            return true;
+        }
+
+        // If the user is logged in and the default user role is allowed to view the menu.
+        $defaultuserroleid = isset($CFG->defaultuserroleid) ? $CFG->defaultuserroleid : 0;
+        if ($defaultuserroleid && in_array($defaultuserroleid, $roles) && !empty($this->userid) && !isguestuser($this->userid)) {
+            // Return directly.
+            return true;
+        }
+
+        // If the user is a guest and the guest role is allowed to view the menu.
+        $guestroleid = isset($CFG->guestroleid) ? $CFG->guestroleid : 0;
+        if ($guestroleid && in_array($guestroleid, $roles) && isguestuser()) {
+            // Return directly.
+            return true;
+        }
+
+        // If the user is a visitor and the visitor role is allowed to view the menu.
+        $visitorroleid = isset($CFG->notloggedinroleid) ? $CFG->notloggedinroleid : 0;
+        if ($visitorroleid && in_array($visitorroleid, $roles) && !isloggedin() && !isguestuser()) {
+            // Return directly.
             return true;
         }
 
@@ -154,7 +183,25 @@ class smartmenu_helper {
             'systemcontext' => context_system::instance()->id,
         ];
         $query->params += array_merge($params, $inparam);
+    }
 
+    /**
+     * Verify if the menu is restricted to site admins.
+     *
+     * @return bool True if the menu is available for this user, otherwise false.
+     */
+    public function restriction_byadmin() {
+        // If the item is restricted to site admins only.
+        if ($this->data->byadmin == smartmenu::BYADMIN_ADMINS) {
+            return is_siteadmin($this->userid);
+
+            // Otherwise, if the item is restricted to non-site admins only.
+        } else if ($this->data->byadmin == smartmenu::BYADMIN_NONADMINS) {
+            return !is_siteadmin($this->userid);
+        }
+
+        // Allow the item to be viewed by the user.
+        return true;
     }
 
     /**
@@ -382,7 +429,7 @@ class smartmenu_helper {
                     $value = json_decode($menu->$method);
                     if (($key = array_search($id, $value)) !== false) {
                         unset($value[$key]);
-                        $updated = json_encode($value);
+                        $updated = json_encode(array_values($value));
                         $DB->set_field('theme_boost_union_menus', $method, $updated, ['id' => $menu->id]);
 
                         // Purge the cache of this menu.
@@ -414,7 +461,7 @@ class smartmenu_helper {
                     $value = json_decode($item->$method);
                     if (($key = array_search($id, $value)) !== false) {
                         unset($value[$key]);
-                        $updated = json_encode($value);
+                        $updated = json_encode(array_values($value));
                         $DB->set_field('theme_boost_union_menuitems', $method, $updated, ['id' => $item->id]);
                         // Purge the cache of this item and its menu.
                         self::purge_menu_cache($item->menu);

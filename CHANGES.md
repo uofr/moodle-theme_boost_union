@@ -4,6 +4,113 @@ moodle-theme_boost_union
 Changes
 -------
 
+### v4.3-r19
+
+* 2024-11-19 - Upgrade: Support more seamless upgrade to 4.5 by only requiring /cache/classes/loaders.php if it is present, resolves #708.
+* 2024-11-19 - Bugfix: The starred courses popover showed a JavaScript error in the browser JS console, resolves #759.
+* 2024-11-19 - Bugfix: The starred courses popover in the navbar must only be shown if Boost Union or Boost Union child is active, resolves #759.
+* 2024-11-18 - Improvement: Add the possibility to restrict smart menus and smart menu items to site admins and non-site admins only, resolves #421.
+* 2024-11-18 - Bugfix: Footer displacement on pages with minimal content, resolves #655.
+* 2024-11-18 - Upstream change: Adopt changes from MDL-77732 ('Custom menu items do not receive active behaviour'), resolves #436 #620 #384 #715.
+* 2024-11-13 - Upstream change: Adopt changes from MDL-78999 ('Site logo does not appear in mobile view'), resolves #753.
+* 2024-11-11 - Release: Add ssystems GmbH to the list of maintainers in README.md.
+
+### v4.3-r18
+
+* 2024-10-31 - Bugfix: Fix possible site failure when a cohort or role used as restriction of a smart menu item is deleted, resolves #737.
+* 2024-10-24 - Release: Change support thread URL in README to a tiny URL.
+
+### v4.3-r17
+
+* 2024-10-21 - Improvement: Add link to policyoverviewnavigation setting, resolves #732.
+* 2024-10-14 - Test: Change tests/fixtures/*.jpg to tests/fixtures/*.png to prevent resizing issues with JPG images
+
+### v4.3-r16
+
+* 2024-10-09 - Bugfix: Course category breadcrumbs were broken on the course enrolment page due to MDL-80974 and were removed, resolves #727.
+* 2024-10-08 - Upstream change: Adopt change from MDL-82298 into smartmenus-[card|more]menu-children.mustache
+* 2024-08-11 - Updated Moodle Plugin CI to latest upstream recommendations
+* 2024-07-24 - Test: Fix broken Behat scenario 'Suppress 'Chat to course participants' link', resolves #696
+
+### v4.3-r15
+
+* 2024-07-11 - Bugfix: Allow external SCSS to use SCSS variables by disabling the SCSS validation, resolves #683.
+* 2024-06-23 - Upstream change: Adopt change in view-chards.mustache from MDL-70829.
+* 2024-06-18 - Release: Let codechecker ignore some sniffs in the language pack.
+* 2024-06-13 - Cleanup: Change @codingStandardsIgnore tags to phpcs:disable, resolves #676.
+* 2024-06-12 - Cleanup: Fix CSS warnings in external SCSS tests, resolves #674.
+
+### v4.3-r14
+
+* 2024-06-10 - Cleanup: Introduce a dedicated Behat step to deactivate and activate debugging, resolves #670.
+* 2024-05-05 - Cleanup: Fix 'Implicitly marking a parameter as nullable is deprecated since PHP 8.4' codechecker warning, resolves #667.
+* 2024-04-28 - Feature: Allow admins to configure URLs from where Boost Union will fetch additional raw SCSS code, resolves #41.
+* 2024-05-13 - Improvement: Suppress icons in footer, resolves #649
+* 2024-05-13 - Bugfix: Make the "More menu behavior" setting in smart menus more stable, resolves #461.
+
+### v4.3-r13
+
+* 2024-05-11 - Improvement: Enhance smart menu restrictions for authenticated user role, guest roles and visitor role, resolves #571
+* 2024-05-11 - Improvement: Smart menu "locations" must be filled with a value, resolves #404
+* 2024-05-10 - Bugfix: Do not show empty smart menus to users, resolves #405
+* 2024-05-09 - Bugfix: Smart menu menubar overlaid course index, resolves #607
+* 2024-04-27 - Improvement: Add navigation to policy overview page, resolves #633
+
+### v4.3-r12
+
+* 2024-04-20 - Bugfix: Footnote ignored paragraph breaks, resolves #623.
+* 2024-04-20 - Improvement: Add hint that notifications don't work within forums for hidden courses, resolves #98.
+* 2024-04-20 - Bugfix: Correct order for in-course breadcrumb when sections exist in it (First categories then sections), solves #317.
+* 2024-04-20 - Cleanup: Add proper JS promise error handling, resolves #435.
+
+### v4.3-r11
+
+* 2024-04-01 - Bugfix: Site support form success message is now shown above advert tiles / the slider on frontpage, partly resolves #488.
+* 2024-04-01 - Bugfix: In smart menus, the search for cohorts in restrict visibility by cohorts didn't work for more than 25 cohorts, resolves #462.
+* 2024-04-01 - Improvement: Enhance the activitynavigation setting description to cover section navigation as well, resolves #536.
+* 2024-03-30 - Bugfix: Smart menu divider did not work for user menu submenus, resolves #537.
+* 2024-03-25 - Upgrade: Boost Union settings were moved to an admin settings category of its own to support the new theme chooser on Moodle 4.4, resolves #482.
+               Please note: This change is backported to Moodle 4.3 to 4.1 as well.
+               Child theme support: If you are running a Boost Union Child theme, please make sure to adapt your child theme to our latest boilerplate.
+* 2024-03-22 - Upgrade: Migrate the before_standard_html_head() function to the new hook callback on Moodle 4.4, resolves #604.
+
+### v4.3-r10
+
+* 2024-03-18 - Improvement: Add prefixes to the sessionStorage keys in the scrollspy implementation, resolves #598.
+* 2024-03-18 - Improvement: Switch to the active Boost Union admin sub-tab after saving a setting and the following page reload, resolves #468.
+* 2024-03-16 - Feature: Show the logged-in user's full name in the user menu, resolves #439.
+* 2024-03-16 - Bugfix: Leave the last item's link in the breadcrumb only if it's really needed, resolves #595
+
+### v4.3-r9
+
+* 2024-03-13 - Improvement: In smart menus, dynamic courses can now pick up the courses from all subcategories, resolves #395.
+* 2024-03-13 - Bugfix: Custom course fields of type "Textarea" were not conditionally hidden in the smart menu configuration, resolves #576.
+* 2024-03-01 - Feature: Show starred courses popover in the navbar, resolves #289.
+
+### v4.3-r8
+
+* 2024-02-22 - Feature: Allow the admin to change the link behind the logo in the navbar, resolves #565.
+* 2024-02-22 - Feature: Allow administrators to change the order of login items on the login page without using CSS or touching the mustache template, resolves #504.
+
+### v4.3-r7
+
+* 2024-02-21 - Bugfix: Single activity format contained unnecessary second level of navigation items, resolves #415.
+
+### v4.3-r6
+
+* 2024-02-18 - Make codechecker happier
+* 2024-02-17 - Test: Use custom step to check the menus and menu items existence, resolves #365.
+* 2024-02-12 - Feature: Allow the admin to display activity icons in course content navigation, resolves #16.
+* 2024-02-11 - Child theme support: Improve namespace of class smartmenu_helper, resolves #494.
+* 2024-02-11 - Child theme support: Update note about grandchild themes in README.md
+* 2024-02-09 - Improvement: Inherit preset setting and preset files from Boost Core instead of duplicating them into Boost Union, resolves #267.
+               Please note: The preset setting in Boost Union was practically broken up to now. Removing the duplicated setting should not break anything.
+* 2024-02-06 - Child theme support: Adapt favicon behat scenario to support Boost Union Child
+* 2024-01-30 - Child theme support: Don't force child themes to reimplement the settings to mark links and the settings to modify the course overview block, resolves #345.
+* 2024-01-30 - Child theme support: Don't force child theme to reimplement activitypurpose_MODNAME settings, resolves #370.
+* 2024-02-11 - Upstream change: Update 'Documentation for this page' string after upstream change in MDL-80725, resolves #559.
+* 2024-02-11 - Peer review management: Add a github action checking pull requests for use of non get_config() theme settings references, resolves #257.
+
 ### v4.3-r5
 
 * 2024-01-20 - Improvement: Add a side entrance login page for local logins if the local login form is disabled on the standard login page, resolves #539.

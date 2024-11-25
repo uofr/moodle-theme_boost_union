@@ -40,26 +40,45 @@ function theme_boost_union_get_course_related_hints() {
     // Initialize HTML code.
     $html = '';
 
-    // If the setting showhintcoursehidden is set and the visibility of the course is hidden and
+    // If the setting showhintcoursehidden is set and the visibility of the course is hidden
     // a hint for the visibility will be shown.
     if (get_config('theme_boost_union', 'showhintcoursehidden') == THEME_BOOST_UNION_SETTING_SELECT_YES
             && has_capability('theme/boost_union:viewhintinhiddencourse', \context_course::instance($COURSE->id))
             && $PAGE->has_set_url()
-            && $PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)
             && $COURSE->visible == false) {
 
-        // Prepare template context.
-        $templatecontext = ['courseid' => $COURSE->id];
+        // Initialize hint text.
+        $hintcoursehiddentext = '';
 
-        // If the user has the capability to change the course settings, an additional link to the course settings is shown.
-        if (has_capability('moodle/course:update', context_course::instance($COURSE->id))) {
-            $templatecontext['showcoursesettingslink'] = true;
-        } else {
-            $templatecontext['showcoursesettingslink'] = false;
+        // The general hint will only be shown when the course is viewed.
+        if ($PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)) {
+            // Use the default hint text for hidden courses.
+            $hintcoursehiddentext = get_string('showhintcoursehiddengeneral', 'theme_boost_union');
         }
 
-        // Render template and add it to HTML code.
-        $html .= $OUTPUT->render_from_template('theme_boost_union/course-hint-hidden', $templatecontext);
+        // If the setting showhintcoursehiddennotifications is set too and we view a forum (e.g. announcement) within a hidden
+        // course a hint will be shown that no notifications via forums will be sent out to students.
+        if (get_config('theme_boost_union', 'showhintforumnotifications') == THEME_BOOST_UNION_SETTING_SELECT_YES
+                && ($PAGE->url->compare(new moodle_url('/mod/forum/view.php'), URL_MATCH_BASE) ||
+                        $PAGE->url->compare(new moodle_url('/mod/forum/discuss.php'), URL_MATCH_BASE) ||
+                        $PAGE->url->compare(new moodle_url('/mod/forum/post.php'), URL_MATCH_BASE))) {
+            // Use the specialized hint text for hidden courses on forum pages.
+            $hintcoursehiddentext = get_string('showhintforumnotifications', 'theme_boost_union');
+        }
+
+        // If we show any kind of hint for the hidden course, construct the hints HTML item via mustache.
+        if ($hintcoursehiddentext) {
+            // Prepare the templates context.
+            $templatecontext = [
+                'courseid' => $COURSE->id,
+                'hintcoursehiddentext' => $hintcoursehiddentext,
+                // If the user has the capability to change the course settings, an additional link to the course settings is shown.
+                'showcoursesettingslink' => has_capability('moodle/course:update', context_course::instance($COURSE->id)),
+            ];
+
+            // Render template and add it to HTML code.
+            $html .= $OUTPUT->render_from_template('theme_boost_union/course-hint-hidden', $templatecontext);
+        }
     }
 
     // If the setting showhintcourseguestaccess is set and the user is accessing the course with guest access,
@@ -915,7 +934,7 @@ function theme_boost_union_get_emailbrandinghtmlpreview() {
     $mail = $OUTPUT->render_from_template('core/email_html', $mailtemplatecontext);
 
     // And compose mail preview.
-    $previewtemplatecontext = ['mail' => $mail, 'type' => 'html', 'monospace' => false];
+    $previewtemplatecontext = ['mail' => $mail, 'type' => 'Html', 'monospace' => false];
     $preview = $OUTPUT->render_from_template('theme_boost_union/emailpreview', $previewtemplatecontext);
 
     return $preview;
@@ -946,7 +965,7 @@ function theme_boost_union_get_emailbrandingtextpreview() {
     $mail = nl2br($OUTPUT->render_from_template('core/email_text', $mailtemplatecontext));
 
     // And compose mail preview.
-    $previewtemplatecontext = ['mail' => $mail, 'type' => 'text', 'monospace' => true];
+    $previewtemplatecontext = ['mail' => $mail, 'type' => 'Text', 'monospace' => true];
     $preview = $OUTPUT->render_from_template('theme_boost_union/emailpreview', $previewtemplatecontext);
 
     return $preview;
@@ -1360,8 +1379,8 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
             $defaultpurpose = MOD_PURPOSE_OTHER;
         }
         // If the activity purpose setting is set and differs from the activity's default purpose.
-        $configname = 'activitypurpose'.$modname;
-        if (isset($theme->settings->{$configname}) && $theme->settings->{$configname} != $defaultpurpose) {
+        $activitypurpose = get_config('theme_boost_union', 'activitypurpose'.$modname);
+        if ($activitypurpose && $activitypurpose != $defaultpurpose) {
             // Add CSS to modify the activity purpose color in the activity chooser and the activity icon.
             $scss .= '.activity.modtype_'.$modname.' .activityiconcontainer.courseicon,';
             $scss .= '.modchoosercontainer .modicon_'.$modname.'.activityiconcontainer,';
@@ -1369,8 +1388,8 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
             $scss .= '.block_recentlyaccesseditems .theme-boost-union-'.$modname.'.activityiconcontainer,';
             $scss .= '.block_timeline .theme-boost-union-mod_'.$modname.'.activityiconcontainer {';
             // If the purpose is now different than 'other', change the background color to the new color.
-            if ($theme->settings->{$configname} != MOD_PURPOSE_OTHER) {
-                $scss .= 'background-color: var(--activity' . $theme->settings->{$configname} . ') !important;';
+            if ($activitypurpose != MOD_PURPOSE_OTHER) {
+                $scss .= 'background-color: var(--activity' . $activitypurpose . ') !important;';
 
                 // Otherwise, the background color is set to light grey (as there is no '--activityother' variable).
             } else {
@@ -1381,7 +1400,7 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
                 $scss .= '.activityicon, .icon { filter: brightness(0) invert(1); }';
             }
             // If the default purpose was not 'other' and now it is, make the icon black.
-            if ($theme->settings->{$configname} == MOD_PURPOSE_OTHER) {
+            if ($activitypurpose == MOD_PURPOSE_OTHER) {
                 $scss .= '.activityicon, .icon { filter: none; }';
             }
             $scss .= '}';
@@ -1403,8 +1422,8 @@ function theme_boost_union_get_scss_to_mark_external_links($theme) {
     $scss = '';
 
     // If the corresponding setting is set to 'yes'.
-    if (isset($theme->settings->markexternallinks) &&
-            $theme->settings->markexternallinks == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+    $markexternallinksconfig = get_config('theme_boost_union', 'markexternallinks');
+    if (isset($markexternallinksconfig) && $markexternallinksconfig == THEME_BOOST_UNION_SETTING_SELECT_YES) {
 
         // Get the scope setting.
         $scope = get_config('theme_boost_union', 'markexternallinksscope');
@@ -1489,8 +1508,8 @@ function theme_boost_union_get_scss_to_mark_broken_links($theme) {
     $scss = '';
 
     // If the corresponding setting is set to 'yes'.
-    if (isset($theme->settings->markbrokenlinks) &&
-            $theme->settings->markbrokenlinks == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+    $markbrokenlinksconfig = get_config('theme_boost_union', 'markbrokenlinks');
+    if (isset($markbrokenlinksconfig) && $markbrokenlinksconfig == THEME_BOOST_UNION_SETTING_SELECT_YES) {
         // Set font color to the 'danger' color.
         $scss .= 'a[href*="/brokenfile.php"] {
             color: $danger;
@@ -1525,8 +1544,8 @@ function theme_boost_union_get_scss_to_mark_mailto_links($theme) {
     $scss = '';
 
     // If the corresponding setting is set to 'yes'.
-    if (isset($theme->settings->markmailtolinks) &&
-            $theme->settings->markmailtolinks == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+    $markmailtolinksconfig = get_config('theme_boost_union', 'markmailtolinks');
+    if (isset($markmailtolinksconfig) && $markmailtolinksconfig == THEME_BOOST_UNION_SETTING_SELECT_YES) {
         // Get the scope setting.
         $scope = get_config('theme_boost_union', 'markmailtolinksscope');
 
@@ -1570,12 +1589,13 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
     $blockselector = '.block_myoverview.block div[data-region="courses-view"]';
 
     // Get the course image setting, defaults to true if the setting does not exist.
-    if (!isset($theme->settings->courseoverviewshowcourseimages)) {
+    $courseoverviewshowcourseimagesconfig = get_config('theme_boost_union', 'courseoverviewshowcourseimages');
+    if (!isset($courseoverviewshowcourseimagesconfig)) {
         $showcourseimagescard = true;
         $showcourseimageslist = true;
         $showimagessummary = true;
     } else {
-        $showcourseimages = explode(',', $theme->settings->courseoverviewshowcourseimages);
+        $showcourseimages = explode(',', $courseoverviewshowcourseimagesconfig);
         $showcourseimagescard = in_array(THEME_BOOST_UNION_SETTING_COURSEOVERVIEW_SHOWCOURSEIMAGES_CARD, $showcourseimages);
         $showcourseimageslist = in_array(THEME_BOOST_UNION_SETTING_COURSEOVERVIEW_SHOWCOURSEIMAGES_LIST, $showcourseimages);
         $showimagessummary = in_array(THEME_BOOST_UNION_SETTING_COURSEOVERVIEW_SHOWCOURSEIMAGES_SUMMARY, $showcourseimages);
@@ -1597,8 +1617,9 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
     }
 
     // Get the course progress setting, defaults to true if the setting does not exist.
-    if (!isset($theme->settings->courseoverviewshowcourseprogress) ||
-            $theme->settings->courseoverviewshowcourseprogress == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+    $courseoverviewshowcourseprogressconfig = get_config('theme_boost_union', 'courseoverviewshowcourseprogress');
+    if (!isset($courseoverviewshowcourseprogressconfig) ||
+            $courseoverviewshowcourseprogressconfig == THEME_BOOST_UNION_SETTING_SELECT_YES) {
         $showcourseprogress = true;
     } else {
         $showcourseprogress = false;
@@ -1608,6 +1629,76 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
     if (!$showcourseprogress) {
         $scss .= $blockselector.' .progress-text { display: none !important; }'.PHP_EOL;
     }
+
+    return $scss;
+}
+
+/**
+ * Helper function which returns an array of login methods on the login page.
+ *
+ * @return array
+ */
+function theme_boost_union_get_loginpage_methods() {
+    return [1 => 'local',
+            2 => 'idp',
+            3 => 'firsttimesignup',
+            4 => 'guest',
+    ];
+}
+
+/**
+ * Returns the SCSS code to re-order the elements of the login form, depending on the theme settings loginorder*.
+ *
+ * @param theme_config $theme The theme config object.
+ * @return string
+ */
+function theme_boost_union_get_scss_login_order($theme) {
+    // Initialize SCSS snippet.
+    $scss = '';
+
+    // Get the login methods.
+    $loginmethods = theme_boost_union_get_loginpage_methods();
+
+    // If the default orders are unchanged.
+    $unchanged = true;
+    foreach ($loginmethods as $key => $lm) {
+        $setting = get_config('theme_boost_union', 'loginorder'.$lm);
+        if ($setting != $key) {
+            $unchanged = false;
+        }
+    }
+    if ($unchanged == true) {
+        // Hide the first login-divider (as we have added login-dividers to all orderable login methods,
+        // but do not want a divider between the page heading and the first login method).
+        $scss .= '#theme_boost_union-loginorder .theme_boost_union-loginmethod:first-of-type .login-divider { display: none; }';
+
+        // Return the SCSS code as we are done.
+        return $scss;
+    }
+
+    // Make the loginform a flexbox.
+    $scss .= '#theme_boost_union-loginorder { display: flex; flex-direction: column; }';
+
+    // Initialize a variable to detect the very first method.
+    $veryfirstmethodname = '';
+    $veryfirstmethodorder = 99; // This assumes that we will never have more than 99 login methods which should be fair.
+
+    // Iterate over all login methods.
+    foreach ($loginmethods as $lm) {
+        // Set the flexbox order for this login method.
+        $setting = get_config('theme_boost_union', 'loginorder'.$lm);
+        $scss .= '#theme_boost_union-loginorder-'.$lm.' { order: '.$setting.'; }';
+
+        // If no other login method has a lower order than this one.
+        if ($setting < $veryfirstmethodorder) {
+            // Remember this login method as very first method.
+            $veryfirstmethodorder = $setting;
+            $veryfirstmethodname = $lm;
+        }
+    }
+
+    // Hide the first login-divider - similar to the 'unchanged settings' case, but in this case based on the flexbox orders.
+    $scss .= '#theme_boost_union-loginorder-'.$veryfirstmethodname.' .login-divider { display: none; }';
 
     return $scss;
 }
@@ -1793,5 +1884,327 @@ function theme_boost_union_yesno_to_boolstring($var) {
         return 'true';
     } else {
         return 'false';
+    }
+}
+
+/**
+ * Returns the HTML code for the starred courses popover.
+ * It fetches all favorite courses and renders them as a popover menu.
+ *
+ * This function is copied and modified from block_starredcourses_external::get_starred_courses()
+ *
+ * @return string HTML to display in the navbar.
+ */
+function theme_boost_union_get_navbar_starredcoursespopover() {
+    global $USER, $OUTPUT;
+
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    if (theme_boost_union_is_active_theme() != true) {
+        return '';
+    }
+
+    // The popover is relevant only for logged-in users. If the user is not logged in, return directly.
+    if (!isloggedin()) {
+        return '';
+    }
+
+    // If the popover is disabled, return directly.
+    $setting = get_config('theme_boost_union', 'shownavbarstarredcourses');
+    if (!isset($setting) || $setting != THEME_BOOST_UNION_SETTING_SELECT_YES) {
+        return '';
+    }
+
+    // Get the user context.
+    $usercontext = context_user::instance($USER->id);
+
+    // Get the user favourites service, scoped to a single user (their favourites only).
+    $userservice = \core_favourites\service_factory::get_service_for_user_context($usercontext);
+
+    // Get the favourites, by type, for the user.
+    $favourites = $userservice->find_favourites_by_type('core_course', 'courses');
+
+    // If there aren't any favourite courses, return directly.
+    if (!$favourites) {
+        return '';
+    }
+
+    // Pick the course IDs from the course objects.
+    $favouritecourseids = array_map(
+        function($favourite) {
+            return $favourite->itemid;
+        }, $favourites);
+
+    // Get all courses that the current user is enrolled in, restricted down to favourites.
+    $filteredcourses = [];
+    if ($favouritecourseids) {
+        $courses = course_get_enrolled_courses_for_logged_in_user(0, 0, null, null,
+            COURSE_DB_QUERY_LIMIT, $favouritecourseids);
+        list($filteredcourses, $processedcount) = course_filter_courses_by_favourites(
+            $courses,
+            $favouritecourseids,
+            0
+        );
+    }
+    // Grab the course ids.
+    $filteredcourseids = array_column($filteredcourses, 'id');
+
+    // Filter out any favourites that are not in the list of enroled courses.
+    $filteredfavourites = array_filter($favourites, function($favourite) use ($filteredcourseids) {
+        return in_array($favourite->itemid, $filteredcourseids);
+    });
+
+    // Compose the template context.
+    $coursesfortemplate = [];
+    foreach ($filteredfavourites as $favourite) {
+        $course = get_course($favourite->itemid);
+        $context = \context_course::instance($favourite->itemid);
+        $canviewhiddencourses = has_capability('moodle/course:viewhiddencourses', $context);
+
+        if ($course->visible || $canviewhiddencourses) {
+            $coursesfortemplate[] = [
+                'url' => new \moodle_url('/course/view.php', ['id' => $course->id]),
+                'fullname' => $course->fullname,
+                'visible' => $course->visible == 1,
+            ];
+        }
+    }
+
+    // Sort the favourites by name (if there is anything to be sorted).
+    if (count($coursesfortemplate) > 1) {
+        usort($coursesfortemplate, function($a, $b) {
+            if ($a['fullname'] == $b['fullname']) {
+                return 0;
+            }
+
+            return strcasecmp(trim($a['fullname']), trim($b['fullname']));
+        });
+    }
+
+    // Compose the popover menu.
+    $html = $OUTPUT->render_from_template('theme_boost_union/popover-favourites', ['favourites' => $coursesfortemplate]);
+
+    return $html;
+}
+
+/**
+ * Callback to add head elements.
+ * This function is implemented here and used from two locations:
+ * -> function theme_boost_union_before_standard_html_head in lib.php (for releases up to Moodle 4.3)
+ * -> class theme_boost_union\local\hook\output\before_standard_head_html_generation (for releases from Moodle 4.4 on).
+ *
+ * We use this callback
+ * -> to inject the flavour's CSS code to the page
+ * -> to add the touch icons to the page
+ *
+ * @param \core\hook\output\before_standard_head_html_generation $hook If the hook is passed, the hook implementation will
+ *                                                                     be used. If not, the legacy implementation will
+ *                                                                     be used.
+ * @return string|void The legacy implementation will return a string, the hook implementation will return nothing.
+ */
+function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
+    global $CFG;
+
+    // Require local library.
+    require_once($CFG->dirroot.'/theme/boost_union/locallib.php');
+
+    // Initialize HTML.
+    $html = '';
+
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    if (theme_boost_union_is_active_theme() != true) {
+        if ($hook != null) {
+            return;
+        } else {
+            return $html;
+        }
+    }
+
+    // Require local library.
+    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
+
+    // Add the flavour CSS to the page.
+    theme_boost_union_add_flavourcss_to_page();
+
+    // Add the touch icons to the page.
+    $html .= theme_boost_union_get_touchicons_html_for_page();
+
+    if ($hook != null) {
+        // Add the HTML code to the hook.
+        $hook->add_html($html);
+    } else {
+        // Return the HTML code.
+        return $html;
+    }
+}
+
+/**
+ * Gets and returns the external SCSS based on the theme configuration.
+ *
+ * @param string $type The type of SCSS which is requested (pre or post).
+ * @return string
+ */
+function theme_boost_union_get_external_scss($type) {
+    global $CFG;
+
+    // Require file library.
+    require_once($CFG->libdir . '/filelib.php');
+
+    // If an invalid type was requested, return directly.
+    if ($type != 'pre' && $type != 'post') {
+        return '';
+    }
+
+    // Get the SCSS source.
+    $scsssource = get_config('theme_boost_union', 'extscsssource');
+
+    // If fetching external SCSS is disabled, return directly.
+    if ($scsssource == THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_NONE) {
+        return '';
+    }
+
+    // If the admin wanted to use download URLs.
+    if ($scsssource == THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_DOWNLOAD) {
+        // Get the URL config.
+        switch ($type) {
+            case 'post':
+                $url = get_config('theme_boost_union', 'extscssurlpost');
+                break;
+            case 'pre':
+                $url = get_config('theme_boost_union', 'extscssurlpre');
+                break;
+        }
+
+        // If the URL is empty, return directly.
+        if (empty($url)) {
+            return '';
+        }
+
+        // If the URL is invalid, return directly.
+        // This should not happen as the URL has already validated when the setting was stored,
+        // but better be safe than sorry.
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return '';
+        }
+
+        // Otherwise, if the admin wanted to use a private Github repository.
+    } else if ($scsssource == THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_GITHUB) {
+        // Get the file path.
+        switch ($type) {
+            case 'post':
+                $ghfilepath = get_config('theme_boost_union', 'extscssgithubpostfilepath');
+                break;
+            case 'pre':
+                $ghfilepath = get_config('theme_boost_union', 'extscssgithubprefilepath');
+                break;
+        }
+
+        // Compose the request URL for the Github API.
+        $ghuser = get_config('theme_boost_union', 'extscssgithubuser');
+        $ghrepo = get_config('theme_boost_union', 'extscssgithubrepo');
+        $ghurl = 'https://api.github.com/repos/'.$ghuser.'/'.$ghrepo.'/contents/'.$ghfilepath;
+
+        // Get the download URL from the Github API.
+        $curl2 = new curl();
+        $curl2header = [
+            'Accept: application/vnd.github+json',
+            'Authorization: Bearer '.get_config('theme_boost_union', 'extscssgithubtoken'),
+            'X-GitHub-Api-Version: 2022-11-28',
+        ];
+        $curl2->setHeader($curl2header);
+        $curl2ret = $curl2->get($ghurl);
+
+        // If cURL had an error, return directly (as we cannot do anything about it).
+        $curl2errno = $curl2->get_errno();
+        if (!empty($curl2errno)) {
+            return '';
+        }
+
+        // If cURL did get anything different than HTTP 200, return directly
+        // (as we have to assume that something is broken).
+        $curl2info = $curl2->get_info();
+        if ($curl2info['http_code'] != 200) {
+            return '';
+        }
+
+        // Decode the JSON from the Github API JSON data.
+        $curl2data = json_decode($curl2ret);
+
+        // If the JSON data does not contain a download URL, return directly.
+        if (is_object($curl2data) !== true || property_exists($curl2data, 'download_url') !== true) {
+            return '';
+        }
+
+        // Extract the download URL from the JSON data.
+        $url = $curl2data->download_url;
+
+        // If the URL is empty, return directly.
+        if (empty($url)) {
+            return '';
+        }
+
+        // If the URL is invalid, return directly.
+        // This should not happen as the URL came directly from Github,
+        // but better be safe than sorry.
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return '';
+        }
+    }
+
+    // Initialize cURL.
+    $curl = new curl();
+
+    // If the URL is blocked, return directly.
+    // Again, this should not happen as the URL has already checked when the setting was stored,
+    // but the setting may have changed in the meantime.
+    if ($curl->get_security()->url_is_blocked($url)) {
+        return '';
+    }
+    // Get the external SCSS.
+    $extscss = $curl->get($url);
+
+    // If cURL had an error, return directly (as we cannot do anything about it).
+    $curlerrno = $curl->get_errno();
+    if (!empty($curlerrno)) {
+        return '';
+    }
+
+    // If cURL did get anything different than HTTP 200, return directly
+    // (as we have to assume that something is broken).
+    $curlinfo = $curl->get_info();
+    if ($curlinfo['http_code'] != 200) {
+        return '';
+    }
+
+    // If external SCSS validation is enabled.
+    if (get_config('theme_boost_union', 'extscssvalidation') == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+        // If the fetched SCSS code cannot be compiled, return directly
+        // (as we must not include broken SCSS code).
+        $compiler = new core_scss();
+        try {
+            $compiler->compile($extscss);
+        } catch (Exception $e) {
+            return '';
+        }
+    }
+
+    // Now return the (hopefully valid and working) SCSS code.
+    return $extscss;
+}
+
+/**
+ * Helper function to check if Boost Union or a child theme of Boost Union is active.
+ * This is needed at multiple locations to avoid that callbacks in Boost Union affect other active themes.
+ *
+ * @return bool
+ */
+function theme_boost_union_is_active_theme() {
+    global $PAGE;
+
+    if ($PAGE->theme->name == 'boost_union' || in_array('boost_union', $PAGE->theme->parents)) {
+        return true;
+    } else {
+        return false;
     }
 }

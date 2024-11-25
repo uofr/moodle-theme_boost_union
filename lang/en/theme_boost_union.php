@@ -24,14 +24,30 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Let codechecker ignore some sniffs for this file as it is perfectly well ordered, just not alphabetically.
+// phpcs:disable moodle.Files.LangFilesOrdering.UnexpectedComment
+// phpcs:disable moodle.Files.LangFilesOrdering.IncorrectOrder
+
 // General.
 $string['pluginname'] = 'Boost Union';
-$string['choosereadme'] = '<p>Theme Boost Union is an enhanced child theme of Boost which is intended, on the one hand, to make Boost simply more configurable and, on the other hand, to provide helpful additional features for the daily Moodle operation of admins, teachers and students.</p><p>Boost Union is maintained by<br />Moodle an Hochschulen e.V.,</p><p>in cooperation with<br />lern.link GmbH</p><p>together with<br />bdecent GmbH</p>';
+$string['choosereadme'] = 'Theme Boost Union is an enhanced child theme of Boost which is intended, on the one hand, to make Boost simply more configurable and, on the other hand, to provide helpful additional features for the daily Moodle operation of admins, teachers and students. Boost Union is maintained by Moodle an Hochschulen e.V., in cooperation with ssystems GmbH, together with bdecent GmbH and lern.link GmbH';
 $string['configtitle'] = 'Boost Union';
 $string['githubissueslink'] = '<a href="https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/issues">Github issues</a>';
 
 // Settings: General strings.
 $string['dontchange'] = 'Do not change anything';
+
+// Settings: Overview page.
+$string['settingsoverview'] = 'Settings overview';
+$string['settingsoverview_title'] = 'Boost Union settings overview';
+$string['settingsoverview_look_desc'] = 'Settings for branding your Moodle site are located here: Colors, icons, images, sizing and, of course, custom SCSS.';
+$string['settingsoverview_feel_desc'] = 'Settings for the overall behaviour of your Moodle site are located here: Navigation items, navigation helpers, blocks and links.';
+$string['settingsoverview_content_desc'] = 'Settings for the global content of your Moodle site are located here: Footer, static pages, info banners, advertisement tiles and sliders.';
+$string['settingsoverview_functionality_desc'] = 'Settings for additional useful global or course-related functionality on your Moodle site are located here.';
+$string['settingsoverview_flavours_desc'] = 'With flavours, you can diversify the look of your Moodle site between cohorts and / or course categories.';
+$string['settingsoverview_smartmenus_desc'] = 'With smart menus, you can extend the navigation items of your Moodle site in the main menu and the user menus well as introduce a bottom menu or a top menu.';
+$string['settingsoverview_all'] = 'All settings on one page';
+$string['settingsoverview_all_desc'] = 'Here, you can open the standard Moodle category settings page for Boost Union that shows all settings on one page. But beware, it is really packed.';
 
 // Settings: Look page.
 $string['configtitlelook'] = 'Look';
@@ -39,11 +55,58 @@ $string['configtitlelook'] = 'Look';
 // Settings: General settings tab.
 // ... Section: Theme presets.
 $string['presetheading'] = 'Theme presets';
+$string['presetheading_desc'] = 'Theme presets can be used to dramatically alter the appearance of the theme. Boost Union does not re-implement the theme preset setting. If you want to use theme presets, please set them directly in Boost. Boost Union will inherit and use the configured preset.';
+$string['presetbutton'] = 'Set theme preset in Boost';
 
 // Settings: SCSS tab.
 $string['scsstab'] = 'SCSS';
 // ... Section: Raw SCSS.
 $string['scssheading'] = 'Raw SCSS';
+
+// ... Section: External SCSS.
+$string['extscssheading'] = 'External SCSS';
+$string['extscssheading_desc'] = 'In addition to the raw SCSS settings above, Boost Union can load SCSS from an external source. It is included before the SCSS code which is defined above which means that you can manage a centralized external SCSS codebase and can still amend it with local SCSS additions.';
+$string['extscssheading_instr'] = 'Instructions:';
+$string['extscssheading_drop'] = 'If Boost Union cannot fetch the external SCSS file for any reason, it will simply ignore the external SCSS file to avoid hickups with SCSS compiling and broken frontends.';
+$string['extscssheading_structure'] = 'The external SCSS must be provided as plaintext file, without any headers or footers, containing just the SCSS code.';
+$string['extscssheading_prepost'] = 'Just like the raw SCSS settings above, the external SCSS is split into two pieces: Pre and Post SCSS. Pre SCSS can be used for initializing SCSS variables, Post SCSS is used for your actual SCSS code.';
+$string['extscssheading_sources'] = 'You can configure Boost Union to fetch the external SCSS file either from a public download URL (which will be accessed and fetched with an unauthenticated cURL request) or from a private Github repository (which will be accessed and fetched with a Github API token).';
+$string['extscssheading_task'] = 'There is a <a href="{$a}">scheduled task theme_boost_union\task\purge_cache</a> which is disabled by default but which you can enable if you want Boost Union to periodically fetch and compile the external SCSS code.';
+$string['invalidurl'] = 'The given URL is invalid';
+// ... ... Setting: External SCSS source.
+$string['extscsssource'] = 'External SCSS source';
+$string['extscsssource_desc'] = 'Pick the type of source from where you want to fetch the external SCSS.';
+$string['extscsssourcenone'] = 'None';
+$string['extscsssourcedownload'] = 'Public download URL';
+$string['extscsssourcegithub'] = 'Private Github repository';
+// ... ... Setting: External Pre SCSS download URL.
+$string['extscssurlpre'] = 'External Pre SCSS download URL';
+$string['extscssurlpre_desc'] = 'The public download URL from where the External Pre SCSS should be fetched.';
+// ... ... Setting: External Post SCSS download URL.
+$string['extscssurlpost'] = 'External Post SCSS download URL';
+$string['extscssurlpost_desc'] = 'The public download URL from where the external Post SCSS should be fetched.';
+// ... ... Setting: External SCSS Github API token.
+$string['extscssgithubtoken'] = 'External SCSS Github API token';
+$string['extscssgithubtoken_desc'] = 'The Github API token which will be used to fetch the SCSS code from the given private Github repository.';
+$string['extscssgithubtoken_docs'] = 'Go to <a href="https://github.com/settings/tokens">your Github token settings</a> to generate an API token and to see the official documentation.';
+// ... ... Setting: External SCSS Github API user.
+$string['extscssgithubuser'] = 'External SCSS Github API user';
+$string['extscssgithubuser_desc'] = 'The Github API user or organization which owns the private Github repository.';
+$string['extscssgithubuser_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the user will be <em>moodle-an-hochschulen</em>.';
+// ... ... Setting: External SCSS Github API repository.
+$string['extscssgithubrepo'] = 'External SCSS Github API repository';
+$string['extscssgithubrepo_desc'] = 'The private Github repository where the SCSS files are located.';
+$string['extscssgithubrepo_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the repository will be <em>moodle-theme_boost_union-extscsstest</em>.';
+// ... ... Setting: External Pre SCSS Github file path.
+$string['extscssgithubprefilepath'] = 'External Pre SCSS Github file path';
+$string['extscssgithubprefilepath_desc'] = 'The path within the private Github repository where the Pre SCSS file is located.';
+$string['extscssgithubfilepath_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the file path will be <em>/extscss.scss</em>.';
+// ... ... Setting: External Post SCSS Github file path.
+$string['extscssgithubpostfilepath'] = 'External Post SCSS Github file path';
+$string['extscssgithubpostfilepath_desc'] = 'The path within the private Github repository where the Post SCSS file is located.';
+// ... ... Setting: External SCSS validation.
+$string['extscssvalidationsetting'] = 'External SCSS validation';
+$string['extscssvalidationsetting_desc'] = 'If this setting is enabled, the external SCSS is validated if it can be compiled before it is added to the SCSS stack. External SCSS code which can\'t be compiled is silently ignored and not used. However, this validation is only run on the external SCSS code only, it is not run on the combined SCSS stack which would be the result of the integration of the external SCSS. This means that, as soon as you use SCSS variables from Moodle core or Bootstrap in your external SCSS, you have to disable the validation and verify yourself that the SCSS code is valid to avoid broken frontends.';
 
 // Settings: Page tab.
 $string['pagetab'] = 'Page';
@@ -209,9 +272,22 @@ $string['loginlocalloginenablesetting_desc'] = 'With this setting, you control i
 $string['loginlocalloginenablesetting_note'] = 'Please note: As soon as you hide the local login form, you risk that admins cannot log in anymore with a local account if there is a problem with the external identity provider. To allow local logins anyway in such cases, a <a href="{$a->url}">side entrance local login page</a> is provided. On this side entrance local login page, all of Moodle\'s login security measures apply as well.';
 $string['loginlocalloginformhead'] = 'Local login';
 $string['loginlocalloginlocalnotdisabled'] = 'The local login is enabled on the standard login form. There is no need to log in on this local login page here. Please use the <a href="{$a->url}">standard login page</a> for logging in.';
+// ... ... Setting: Local login intro.
+$string['loginlocalshowintrosetting'] = 'Local login intro';
+$string['loginlocalshowintrosetting_desc'] = 'With this setting, you control if a <em>\'{$a}\'</em> intro is shown above the local login form or not. By default, the intro is not shown. But if you enable it, this intro may help users to understand which credentials to use in the local login form, especially if you provide more than one login method or if you have changed the order of the login methods.';
+$string['loginlocalintro'] = 'Login with your Moodle account';
 // ... ... Setting: IDP login intro.
 $string['loginidpshowintrosetting'] = 'IDP login intro';
 $string['loginidpshowintrosetting_desc'] = 'With this setting, you control if the <em>\'{$a}\'</em> intro is shown above the IDP login buttons or not. By default, the intro is shown and users will be quickly informed what the IDP buttons are about. If you disable this setting, the IDP intro is hidden. This allows you to provide a clean user login interface if you just use external identity providers like OAuth2 or OIDC.';
+// ... Section: Login order.
+$string['loginorderheading'] = 'Login order';
+$string['loginorderheading_desc'] = 'With these settings, you control the order of the login methods in the login form. The presented order will be defined from lowest to highest ordinal number, skipping all login methods and login form elements which are disabled in Moodle.';
+$string['loginorderheading_note'] = 'Technical note: The presented order will be realized with CSS flexbox orders, not by rearranging the login widgets in the HTML DOM. This should be fine on all modern browsers but might not work on really old browsers.';
+// ... ... Settings: Login order.
+$string['loginorderlocalsetting'] = 'Local login';
+$string['loginorderidpsetting'] = 'IDP login';
+$string['loginorderfirsttimesignupsetting'] = 'Information for first time visitors & Self registration';
+$string['loginorderguestsetting'] = 'Guest login';
 
 // Settings: Dashboard / My courses tab.
 $string['dashboardtab'] = 'Dashboard / My courses';
@@ -242,6 +318,16 @@ $string['courseheaderimagelayoutstackedlight'] = 'Course title stacked on course
 $string['courseheaderimagelayoutheadingabove'] = 'Course title above of course image';
 $string['courseheaderimageposition'] = 'Course header image position';
 $string['courseheaderimageposition_desc'] = 'With this setting, you control the positioning of the course header image within the course header image container. The first value is the horizontal position, the second value is the vertical position.';
+// ... Section: Course index.
+$string['courseindexheading'] = 'Course Index';
+// ... ... Setting: Course index.
+$string['courseindexmodiconenabled'] = 'Display activity type icons in course index';
+$string['courseindexmodiconenabled_desc'] = 'When enabled, the corresponding activity type icon is displayed in front of the index row with the title of the activity. In doing so, the course activity type is either replacing the course completion indicator which is moved from the front to the end of the course index row line, or colored in by the completion state color.';
+$string['courseindexcompletioninfoposition'] = 'Position of activity completion indication';
+$string['courseindexcompletioninfoposition_desc'] = 'Choose the position where the completion indication is displayed. <em>End of line</em> displays the standard completion indicator at the end of the course index row line. <em>Start of line</em> displays the standard completion indicator at the start of the course index row line. <em>Icon color</em> does not show the standard completion indicator, but encodes the completion information as background of the course module icon.';
+$string['courseindexcompletioninfopositionendofline'] = 'End of line';
+$string['courseindexcompletioninfopositioniconcolor'] = 'Icon color';
+$string['courseindexcompletioninfopositionstartofline'] = 'Start of line';
 
 // Settings: E-Mail branding tab.
 $string['emailbrandingtab'] = 'E-Mail branding';
@@ -363,12 +449,27 @@ $string['primarynavigationheading'] = 'Primary navigation';
 $string['hidenodesprimarynavigationsetting'] = 'Hide nodes in primary navigation';
 $string['hidenodesprimarynavigationsetting_desc'] = 'With this setting, you can hide one or multiple nodes from the primary navigation.<br /><br />
 Please note: Here, you can just remove navigation nodes. But if you want to add custom navigation nodes, please consider using <a href="{$a->url}">Boost Union\'s smart menu functionality</a>.';
+// ... ... Settings: Alternative logo link URL.
+$string['alternativelogolinkurlsetting'] = 'Alternative logo link URL';
+$string['alternativelogolinkurlsetting_desc'] = 'With this setting, you can set an alternative link URL which will be used as link on the logo in the navigation bar. You can use this setting to, for example, link to your organization\'s website instead of the Moodle frontpage to maintain a homogeneous navigation bar throughout all of your organization\'s systems.';
+
 // ... Section: User menu.
 $string['usermenuheading'] = 'User menu';
+// ... ... Settings: Show full name in the user menu.
+$string['showfullnameinusermenussetting'] = 'Show full name in the user menu';
+$string['showfullnameinusermenussetting_desc'] = 'With this setting, you can show the logged-in user\'s full name at the top of the user menu. This can be especially helpful for exam situations where teachers have to confirm that the user is logged in with his own account, but it might also be helpful for the user himself. In contrast to the Classic theme which shows the user\'s full name in the navbar near the avatar, this approach here does not claim any additional rare space in the navbar.';
+$string['showfullnameinusermenussetting_loggedinas'] = 'You are logged in as:';
 // ... ... Settings: Add preferred language link to language menu.
 $string['addpreferredlangsetting'] = 'Add preferred language link to language menu';
 $string['addpreferredlangsetting_desc'] = 'With this setting, you can add a \'Set preferred language\' setting to the language menu within the user menu. Understandably, this setting is only processed if the setting <a href="{$a->url1}">Display language menu</a> is enabled, and if at least <a href="{$a->url2}">a second language pack is installed</a> and <a href="{$a->url3}">offered for selection</a>.';
 $string['setpreferredlanglink'] = 'Set preferred language';
+// ... Section: Navbar heading.
+$string['navbarheading'] = 'Navbar';
+// ... ... Setting: Show starred courses popover in the navbar.
+$string['shownavbarstarredcoursessetting'] = 'Show starred courses popover in the navbar';
+$string['shownavbarstarredcoursessetting_desc'] = 'With this setting, you can show a popover menu with links to starred courses next to the messages and notifications menus.';
+$string['shownavbarstarredcourses_config'] = 'Set starred courses on the \'My courses\' page';
+$string['shownavbarstarredcourses_label'] = 'Starred courses';
 // ... Section: Breadcrumbs.
 $string['breadcrumbsheading'] = 'Breadcrumbs';
 // ... ... Setting: Course category breadcrumb.
@@ -381,13 +482,11 @@ $string['backtotop'] = 'Back to top';
 $string['backtotopbuttonsetting'] = 'Back to top button';
 $string['backtotopbuttonsetting_desc'] = 'With this setting a back to top button will appear in the bottom right corner of the page as soon as the user scrolls down the page. A button like this existed already on Boost in Moodle Core until Moodle 3.11, but was removed in 4.0. With Boost Union, you can bring it back.';
 // ... ... Setting: Scroll-spy
-$string['scrollspy'] = 'Scroll-spy';
 $string['scrollspysetting'] = 'Scroll-spy';
 $string['scrollspysetting_desc'] = 'With this setting, upon toggling edit mode on and off, the scroll position at where the user was when performing the toggle is preserved.';
-// ... ... Setting: Activity navigation
-$string['activitynavigation'] = 'Activity navigation';
-$string['activitynavigationsetting'] = 'Activity navigation elements';
-$string['activitynavigationsetting_desc'] = 'With this setting the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource become displayed. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0. With Boost Union, you can bring them back.';
+// ... ... Setting: Activity & section navigation
+$string['activitynavigationsetting'] = 'Activity & section navigation elements';
+$string['activitynavigationsetting_desc'] = 'With this setting, the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource become displayed. Furthermore, within courses using the \'one section per page\' mode, similar elements for the previous and next section are displayed as well. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0. With Boost Union, you can bring them back.';
 
 // Settings: Blocks tab.
 $string['blockstab'] = 'Blocks';
@@ -463,6 +562,14 @@ $string['showsitehomerighthandblockdraweronfirstloginsetting_desc'] = 'With this
 $string['showsitehomerighthandblockdraweronguestloginsetting'] = 'Show right-hand block drawer of site home on guest login';
 $string['showsitehomerighthandblockdraweronguestloginsetting_desc'] = 'With this setting, the right-hand block drawer of site home will be displayed in its expanded state by default. This only applies to users who log in as a guest.';
 
+// Settings: Page layouts tab.
+$string['pagelayoutstab'] = 'Page layouts';
+// ... Section: tool_policy heading.
+$string['policyheading'] = 'Policies';
+// ... ... Setting: Navigation on policy overview page.
+$string['policyoverviewnavigationsetting'] = 'Show navigation on policy overview page';
+$string['policyoverviewnavigationsetting_desc'] = 'By default, the <a href="{$a->url}">policy overview page (provided by tool_policy)</a> does not show a navigation menu or footer. With this setting, you can show the primary navigation and footer on that page.';
+
 // Settings: Links tab.
 $string['linkstab'] = 'Links';
 // ... Section: Special links markup.
@@ -508,17 +615,20 @@ $string['footnotesetting_desc'] = 'Whatever you add to this textarea will be dis
 $string['footerheading'] = 'Footer';
 // ... ... Setting: Enable footer.
 $string['enablefooterbutton'] = 'Enable footer';
-$string['enablefooterbutton_desc'] = 'With "footer", the circle containing the question mark at the bottom of the page is meant.<br />Upon click, the user is presented with an overlay. Depending on the site configuration Moodle shows several links (like "Help and documentation" or "Data retention summary") are shown in this overlay.<br />With this setting, you can control whether to show or to suppress the footer button at the bottom of the page.';
+$string['enablefooterbutton_desc'] = 'With "footer", the circle containing the question mark at the bottom of the page is meant.<br />Upon click, the user is presented with an overlay. Depending on the site configuration Moodle shows several links (like "Documentation for this page" or "Data retention summary") are shown in this overlay.<br />With this setting, you can control whether to show or to suppress the footer button at the bottom of the page.';
 $string['enablefooterbuttonboth'] = 'Enable on desktop, tablet and mobile';
 $string['enablefooterbuttondesktop'] = 'Enable on desktop and tablet only, hide on mobile (unchanged as presented by Moodle core)';
 $string['enablefooterbuttonmobile'] = 'Enable on mobile only, hide on desktop and tablet';
 $string['enablefooterbuttonhidden'] = 'Hide on all devices';
+// ... ... Setting: Suppress icons in front of the footer links.
+$string['footersuppressiconssetting'] = 'Suppress icons in front of the footer links';
+$string['footersuppressiconssetting_desc'] = 'With this setting, you can entirely suppress the icons in front of the footer links. \'Documentation for this page\' has a book icon, \'Services and support\' a life ring etc.';
 // ... ... Setting: Suppress 'Chat to course participants' link.
 $string['footersuppresschatsetting'] = 'Suppress \'Chat to course participants\' link';
 $string['footersuppresschatsetting_desc'] = 'With this setting, you can entirely suppress the \'Chat to course participants\' link in the footer. This link would otherwise appear within courses as soon as a communication room is added in a course\'s settings.';
-// ... ... Setting: Suppress 'Help and documentation' link.
-$string['footersuppresshelpsetting'] = 'Suppress \'Help and documentation\' link';
-$string['footersuppresshelpsetting_desc'] = 'With this setting, you can entirely suppress the \'Help and documentation\' link in the footer. This link would otherwise appear if a <a href="{$a->url}">Moodle Docs document root</a> is set.';
+// ... ... Setting: Suppress 'Documentation for this page' link.
+$string['footersuppresshelpsetting'] = 'Suppress \'Documentation for this page\' link';
+$string['footersuppresshelpsetting_desc'] = 'With this setting, you can entirely suppress the \'Documentation for this page\' link in the footer. This link would otherwise appear if a <a href="{$a->url}">Moodle Docs document root</a> is set.';
 // ... ... Setting: Suppress 'Services and support' link.
 $string['footersuppressservicessetting'] = 'Suppress \'Services and support\' link';
 $string['footersuppressservicessetting_desc'] = 'With this setting, you can entirely suppress the \'Services and support\' link in the footer. This link would otherwise show the <a href="{$a->url}">Services and support link</a> to administrators.';
@@ -883,6 +993,10 @@ $string['showhintcoursehiddensetting'] = 'Show hint in hidden courses';
 $string['showhintcoursehiddensetting_desc'] = 'With this setting a hint will appear in the course header as long as the visibility of the course is hidden. This helps to identify the visibility state of a course at a glance without the need for looking at the course settings.';
 $string['showhintcoursehiddengeneral'] = 'This course is currently <strong>hidden</strong>. Only enrolled teachers can access this course when hidden.';
 $string['showhintcoursehiddensettingslink'] = 'You can change the visibility in the <a href="{$a->url}">course settings</a>.';
+// ... ... Setting: Show hint for forum notifications in hidden courses.
+$string['showhintforumnotificationssetting'] = 'Show hint for forum notifications in hidden courses';
+$string['showhintforumnotificationssetting_desc'] = 'With this setting a hint will not only appear in the course header but also in forums as long as the visibility of the course is hidden. This is to clarify that notifications within a forum are not send to students and to help the teachers understand this circumstance.';
+$string['showhintforumnotifications'] = 'This course is currently <strong>hidden</strong>. This means that <strong>students will not be notified</strong> online or by email of any messages you post in this forum.';
 // ... ... Setting: Show hint for guest access.
 $string['showhintcoursguestaccesssetting'] = 'Show hint for guest access';
 $string['showhintcourseguestaccesssetting_desc'] = 'With this setting a hint will appear in the course header when a user is accessing it with the guest access feature. If the course provides an active self enrolment, a link to that page is also presented to the user.';
@@ -971,6 +1085,11 @@ $string['smartmenusbylanguage'] = 'By language';
 $string['smartmenusbylanguage_help'] = 'Restrict the visibility based on the user\'s language';
 $string['smartmenusbyrole'] = 'By role';
 $string['smartmenusbyrole_help'] = 'Restrict the visibility based on the user\'s roles.';
+$string['smartmenusbyadmin'] = 'Show to';
+$string['smartmenusbyadmin_help'] = 'Restrict the visibility based on the fact if the user is a site admin or not.';
+$string['smartmenusbyadmin_all'] = 'All users';
+$string['smartmenusbyadmin_admins'] = 'Site admins only';
+$string['smartmenusbyadmin_nonadmins'] = 'Non-admins only';
 $string['smartmenusdynamiccoursescompletionstatus'] = 'Completion status';
 $string['smartmenusdynamiccoursescompletionstatus_help'] = 'The dynamic courses menu item list will contain all courses of the user which match the selected completion status. For example, if you select \'In progress\' as the completion status, the dynamic courses menu item list will only contain courses that the current user is currently working on.';
 $string['smartmenusdynamiccoursescompletionstatuscompleted'] = 'Completed';
@@ -978,6 +1097,8 @@ $string['smartmenusdynamiccoursescompletionstatusenrolled'] = 'Enrolled';
 $string['smartmenusdynamiccoursescompletionstatusinprogress'] = 'In progress';
 $string['smartmenusdynamiccoursescoursecategory'] = 'Course category';
 $string['smartmenusdynamiccoursescoursecategory_help'] = 'The dynamic courses menu item list will contain all courses from the selected course categories.';
+$string['smartmenusdynamiccoursescoursecategorysubcats'] = 'Include subcategories';
+$string['smartmenusdynamiccoursescoursecategorysubcats_help'] = 'If checked, the dynamic courses menu will also contain all courses from the subcategories of the selected courses categories.';
 $string['smartmenusdynamiccoursesdaterange'] = 'Date range';
 $string['smartmenusdynamiccoursesdaterange_help'] = 'The dynamic courses menu item list will contain all courses which fall into the selected date range.';
 $string['smartmenusdynamiccoursesdaterangefuture'] = 'Future';
@@ -1099,7 +1220,7 @@ $string['smartmenusmenulocationuser'] = 'User menu';
 $string['smartmenusmenumode'] = 'Menu mode';
 $string['smartmenusmenumode_help'] = '<p>Select the mode how the menu\'s items should be displayed.</p><ul><li>Submenu: The menu items is displayed as a submenu with the menu\'s title as parent node. This is the default option.</li><li>Inline: The menu\'s items are displayed directly in the navigation, one after another. Please note that this option is not supported for card type menus.</li></ul>';
 $string['smartmenusmenumoremenubehavior'] = 'More menu behavior';
-$string['smartmenusmenumoremenubehavior_help'] = '<p>Select what should happen if there are too many menus to fit in the menu location.</p><ul><li>Do not change anything: No particular behaviour will be enforced, excess menus will be moved into the \'More\' menu automatically.</li><li>Force into more menu: This mode moves the menu directly into the \'More\' menu even if there would still be space.</li><li>Keep outside of more menu: This mode keeps the menu outside of the \'More\' menu as long as possible.</li></ul>';
+$string['smartmenusmenumoremenubehavior_help'] = '<p>Select what should happen if there are too many menus to fit in the menu location.</p><ul><li>Do not change anything: No particular behaviour will be enforced, excess menus will be moved into the \'More\' menu automatically.</li><li>Force into more menu: This mode moves the menu directly into the \'More\' menu even if there would still be space.</li><li>Keep outside of more menu: This mode keeps the menu outside of the \'More\' menu as long as possible – moving other subsequent menus to the more menu instead if needed.</li></ul><p>Please note that this setting only affects menus which are located in the main navigation or in the menu bar area.</p>';
 $string['smartmenusmenumoremenubehaviorforceinto'] = 'Force into more menu';
 $string['smartmenusmenumoremenubehaviorkeepoutside'] = 'Keep outside of more menu';
 $string['smartmenusmenunothingtodisplay'] = 'There aren\'t any smart menus created yet. Please create your first smart menu to get things going.';
@@ -1126,6 +1247,7 @@ $string['smartmenusrestrictbycohortsheader'] = 'Restrict visibility by cohorts';
 $string['smartmenusrestrictbydateheader'] = 'Restrict visibility by date';
 $string['smartmenusrestrictbylanguageheader'] = 'Restrict visibility by language';
 $string['smartmenusrestrictbyrolesheader'] = 'Restrict visibility by roles';
+$string['smartmenusrestrictbyadminheader'] = 'Restrict visibility by site admin status';
 $string['smartmenusrolecontext'] = 'Context';
 $string['smartmenusrolecontext_help'] = 'Select the context for which the user\'s role should be checked (Any context or system context only)';
 $string['smartmenussavechangesandconfigure'] = 'Save and configure items';
@@ -1170,6 +1292,9 @@ $string['cachedef_flavours'] = 'Flavours which apply to a given page\'s category
 $string['cachedef_smartmenus'] = 'Smart menus';
 $string['cachedef_smartmenu_items'] = 'Smart menu items';
 $string['cachedef_touchiconsios'] = 'Touch icon files for iOS';
+
+// Scheduled tasks.
+$string['task_purgecache'] = 'Purge theme cache';
 
 // Upgrade notices.
 $string['upgradenotice_2022080922'] = 'From this release on, Boost Union has its own logo and compact logo settings and does not use these files from the Moodle core settings anymore.';

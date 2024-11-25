@@ -84,6 +84,10 @@ define('THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_STACKEDDARK', 'stackeddark')
 define('THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_STACKEDLIGHT', 'stackedlight');
 define('THEME_BOOST_UNION_SETTING_COURSEIMAGELAYOUT_HEADINGABOVE', 'headingabove');
 
+define('THEME_BOOST_UNION_SETTING_COMPLETIONINFOPOSITION_STARTOFLINE', 'startofline');
+define('THEME_BOOST_UNION_SETTING_COMPLETIONINFOPOSITION_ENDOFLINE', 'endofline');
+define('THEME_BOOST_UNION_SETTING_COMPLETIONINFOPOSITION_ICONCOLOR', 'iconcolor');
+
 define('THEME_BOOST_UNION_SETTING_CONTENTSTYLE_NOCHANGE', 'nochange');
 define('THEME_BOOST_UNION_SETTING_CONTENTSTYLE_LIGHT', 'light');
 define('THEME_BOOST_UNION_SETTING_CONTENTSTYLE_LIGHTSHADOW', 'lightshadow');
@@ -120,6 +124,10 @@ define('THEME_BOOST_UNION_SETTING_COURSEOVERVIEW_SHOWCOURSEIMAGES_SUMMARY', 'sum
 define('THEME_BOOST_UNION_SETTING_MARKLINKS_WHOLEPAGE', 'wholepage');
 define('THEME_BOOST_UNION_SETTING_MARKLINKS_COURSEMAIN', 'coursemain');
 
+define('THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_NONE', 0);
+define('THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_DOWNLOAD', 1);
+define('THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_GITHUB', 2);
+
 /**
  * Returns the main SCSS content.
  *
@@ -130,18 +138,26 @@ function theme_boost_union_get_main_scss_content($theme) {
     global $CFG;
 
     $scss = '';
-    $filename = !empty($theme->settings->preset) ? $theme->settings->preset : null;
-    $fs = get_file_storage();
 
-    $context = context_system::instance();
+    // Require Boost Core library.
+    require_once($CFG->dirroot.'/theme/boost/lib.php');
+
+    // Include pre.scss from Boost Union.
     $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/boost_union/pre.scss');
-    if ($filename && ($presetfile = $fs->get_file($context->id, 'theme_boost_union', 'preset', 0, '/', $filename))) {
-        $scss .= $presetfile->get_content();
-    } else {
-        // Safety fallback - maybe new installs etc.
-        $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/preset/default.scss');
-    }
+
+    // Get and include the main SCSS from Boost Core.
+    // This particularly covers the theme preset which is set in Boost Core and not Boost Union.
+    $scss .= theme_boost_get_main_scss_content(theme_config::load('boost'));
+
+    // Include post.scss from Boost Union.
     $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/boost_union/post.scss');
+
+    // Get and include the external Post SCSS.
+    // This should actually be in theme_boost_union_get_extra_scss().
+    // But as the *_get_extra_scss() functions work in practice, this is not possible as the external Raw SCSS code
+    // would end of _after_ the code from theme_boost_get_extra_scss() and not _before_.
+    // Thus, we sadly have to get and include the external Post SCSS here already.
+    $scss .= theme_boost_union_get_external_scss('post');
 
     return $scss;
 }
@@ -234,6 +250,9 @@ function theme_boost_union_get_pre_scss($theme) {
     // Add custom Boost Union SCSS variable as goody for designers: $themerev.
     $scss .= '$themerev: '.$CFG->themerev.";\n";
 
+    // Get and include the external Pre SCSS.
+    $scss .= theme_boost_union_get_external_scss('pre');
+
     // Prepend pre-scss.
     if (get_config('theme_boost_union', 'scsspre')) {
         $scss .= get_config('theme_boost_union', 'scsspre');
@@ -320,7 +339,7 @@ function theme_boost_union_get_extra_scss($theme) {
     // Instead, the flavour is overriding the background image later in flavours/styles.php.
 
     // For the rest of this function, we add SCSS snippets to the SCSS stack based on enabled admin settings.
-    // This is done here as it is quite easy to do. As an alternative, it could also been done in post.css by using
+    // This is done here as it is quite easy to do. As an alternative, it could also been done in post.scss by using
     // SCSS variables with @if conditions and SCSS variables. However, we preferred to do it here in a single place.
 
     // Setting: Activity icon purpose.
@@ -337,6 +356,9 @@ function theme_boost_union_get_extra_scss($theme) {
 
     // Setting: Course overview block.
     $content .= theme_boost_union_get_scss_courseoverview_block($theme);
+
+    // Setting: Login order.
+    $content .= theme_boost_union_get_scss_login_order($theme);
 
     return $content;
 }
@@ -494,35 +516,18 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
 }
 
 /**
- * Callback to add head elements.
- *
- * We use this callback to inject the flavour's CSS code to the page.
+ * Callback to add head elements (for releases up to Moodle 4.3).
  *
  * @return string
  */
 function theme_boost_union_before_standard_html_head() {
-    global $CFG, $PAGE;
-
-    // Initialize HTML.
-    $html = '';
-
-    // If a theme other than Boost Union or a child theme of it is active, return directly.
-    // This is necessary as the before_standard_html_head() callback is called regardless of the active theme.
-    if ($PAGE->theme->name != 'boost_union' && !in_array('boost_union', $PAGE->theme->parents)) {
-        return $html;
-    }
+    global $CFG;
 
     // Require local library.
-    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
+    require_once($CFG->dirroot.'/theme/boost_union/locallib.php');
 
-    // Add the flavour CSS to the page.
-    theme_boost_union_add_flavourcss_to_page();
-
-    // Add the touch icons to the page.
-    $html .= theme_boost_union_get_touchicons_html_for_page();
-
-    // Return the HTML code.
-    return $html;
+    // Call and return callback implementation.
+    return theme_boost_union_callbackimpl_before_standard_html();
 }
 
 /**
@@ -596,4 +601,25 @@ function theme_boost_union_user_preferences(): array {
         ];
     }
     return $preferences;
+}
+
+/**
+ * Returns the html for the starred courses popover menu.
+ *
+ * @return string
+ */
+function theme_boost_union_render_navbar_output() {
+    global $CFG;
+
+    // Require local library.
+    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
+
+    // Initialize the navbar content.
+    $content = '';
+
+    // Setting: Show starred courses popover in the navbar.
+    $content .= theme_boost_union_get_navbar_starredcoursespopover();
+
+    // Return.
+    return $content;
 }

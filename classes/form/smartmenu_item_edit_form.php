@@ -117,6 +117,13 @@ class smartmenu_item_edit_form extends \moodleform {
         $catwidget->setMultiple(true);
         $mform->addHelpButton('category', 'smartmenusdynamiccoursescoursecategory', 'theme_boost_union');
 
+        // Add include-subcategories as checkbox.
+        $mform->addElement('advcheckbox', 'category_subcats',
+                get_string('smartmenusdynamiccoursescoursecategorysubcats', 'theme_boost_union'));
+        $mform->setType('category_subcats', PARAM_BOOL);
+        $mform->addHelpButton('category_subcats', 'smartmenusdynamiccoursescoursecategorysubcats', 'theme_boost_union');
+        $mform->hideIf('category_subcats', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+
         // Add roles (for the dynamic courses menu item type) as autocomplete element.
         $courseroles = get_roles_for_contextlevels(CONTEXT_COURSE);
         list($insql, $inparams) = $DB->get_in_or_equal(array_values($courseroles));
@@ -351,7 +358,9 @@ class smartmenu_item_edit_form extends \moodleform {
         $rolelist = role_get_names(\context_system::instance());
         $roleoptions = [];
         foreach ($rolelist as $role) {
-            $roleoptions[$role->id] = $role->localname;
+            if ($role->archetype !== 'frontpage') { // Frontpage roles are not supported in the items restriction.
+                $roleoptions[$role->id] = $role->localname;
+            }
         }
         $byroleswidget = $mform->addElement('autocomplete', 'roles', get_string('smartmenusbyrole', 'theme_boost_union'),
                 $roleoptions);
@@ -368,6 +377,24 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->setType('rolecontext', PARAM_INT);
         $mform->addHelpButton('rolecontext', 'smartmenusrolecontext', 'theme_boost_union');
 
+        // Add restrict visibility by admin as header element.
+        $mform->addElement('header', 'restrictbyadminheader',
+                get_string('smartmenusrestrictbyadminheader', 'theme_boost_union'));
+        if (isset($this->_customdata['menuitem']) && $this->_customdata['menuitem']->byadmin) {
+            $mform->setExpanded('restrictbyadminheader');
+        }
+
+        // Add restriction as select element.
+        $rolecontext = [
+            smartmenu::BYADMIN_ALL => get_string('smartmenusbyadmin_all', 'theme_boost_union'),
+            smartmenu::BYADMIN_ADMINS => get_string('smartmenusbyadmin_admins', 'theme_boost_union'),
+            smartmenu::BYADMIN_NONADMINS => get_string('smartmenusbyadmin_nonadmins', 'theme_boost_union'),
+        ];
+        $mform->addElement('select', 'byadmin', get_string('smartmenusbyadmin', 'theme_boost_union'), $rolecontext);
+        $mform->setDefault('byadmin', smartmenu::BYADMIN_ALL);
+        $mform->setType('byadmin', PARAM_INT);
+        $mform->addHelpButton('byadmin', 'smartmenusbyadmin', 'theme_boost_union');
+
         // Add restrict visibility by cohorts as header element.
         $mform->addElement('header', 'restrictbycohortsheader',
                 get_string('smartmenusrestrictbycohortsheader', 'theme_boost_union'));
@@ -378,7 +405,7 @@ class smartmenu_item_edit_form extends \moodleform {
         }
 
         // Add by cohorts as autocomplete element.
-        $cohortslist = \cohort_get_all_cohorts();
+        $cohortslist = \cohort_get_all_cohorts(0, 0);
         $cohortoptions = $cohortslist['cohorts'];
         if ($cohortoptions) {
             array_walk($cohortoptions, function(&$value) {

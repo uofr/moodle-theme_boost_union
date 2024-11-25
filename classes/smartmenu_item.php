@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use context_system;
 use html_writer;
-use smartmenu_helper;
 use stdClass;
 use cache;
 use core_course\external\course_summary_exporter;
@@ -248,7 +247,7 @@ class smartmenu_item {
 
     /**
      * The helper object for this menu item.
-     * @var \smartmenu_helper
+     * @var smartmenu_helper
      */
     public $helper;
 
@@ -271,7 +270,7 @@ class smartmenu_item {
      * @param stdclass|null $menu Data of the menu the item belongs to.
      * @return smartmenu_item A new instance of this class.
      */
-    public static function instance($item, $menu=null) {
+    public static function instance($item, $menu = null) {
         return new self($item, $menu);
     }
 
@@ -282,7 +281,7 @@ class smartmenu_item {
      * @param int|stdclass $item Record or id of the menu.
      * @param stdclass|null $menu Menu data belongs to this item, it fetch the menus data if empty.
      */
-    public function __construct($item, $menu=null) {
+    public function __construct($item, $menu = null) {
 
         if (is_scalar($item)) {
             $item = $this->get_item($item);
@@ -332,7 +331,7 @@ class smartmenu_item {
      * @return \stdclass Menu record if found or false.
      * @throws \moodle_exception When menu is not found.
      */
-    public function get_item($itemid=null) {
+    public function get_item($itemid = null) {
         global $DB;
 
         // Verfiy and Fetch menu record from DB.
@@ -803,8 +802,33 @@ class smartmenu_item {
         }
 
         list($insql, $inparams) = $DB->get_in_or_equal($this->item->category, SQL_PARAMS_NAMED, 'cg');
-        $query->where[] = "c.category $insql";
-        $query->params += $inparams;
+
+        // If subcategories should be included, we have to investigate the whole category sub-path.
+        // Unfortunately, as there is no combination of IN and LIKE in SQL, we have to chain up a list of
+        // LIKE-statements.
+        if (property_exists($this->item, 'category_subcats') && $this->item->category_subcats == true) {
+            // Join the course category table.
+            $query->join[] = "JOIN {course_categories} cc ON c.category = cc.id";
+
+            // Build a LIKE clause for each selected category.
+            $likesqlparts = [];
+            foreach ($this->item->category as $subcat) {
+                $likesqlparts[] = $DB->sql_like('cc.path', ':pathcat'.$subcat);
+                $likeparams['pathcat'.$subcat] = '%/'.$subcat.'/%';
+            }
+            $likesql = implode(' OR ', $likesqlparts);
+
+            // Add the categories filter to the query.
+            $query->where[] = "c.category $insql OR $likesql";
+            $query->params += $inparams;
+            $query->params += $likeparams;
+
+            // Otherwise, the query is simpler.
+        } else {
+            // Add the categories filter to the query.
+            $query->where[] = "c.category $insql";
+            $query->params += $inparams;
+        }
     }
 
     /**
@@ -1090,8 +1114,8 @@ class smartmenu_item {
      *
      * @return array An associative array of node data for the item.
      */
-    public function generate_node_data($title, $url, $key=null, $tooltip=null,
-        $itemtype='link', $haschildren=0, $children=[], $itemimage='', $sortstring='') {
+    public function generate_node_data($title, $url, $key = null, $tooltip = null,
+        $itemtype = 'link', $haschildren = 0, $children = [], $itemimage = '', $sortstring = '') {
 
         global $OUTPUT;
 
@@ -1225,10 +1249,21 @@ class smartmenu_item {
             $fieldid = $field->get('id');
             $field = \core_customfield\field_controller::create($fieldid);
             $data = \core_customfield\api::get_instance_fields_data([$fieldid => $field], 0);
+            // If this field is a textarea, adjust the shortname to include _editor.
+            $istextarea = $field->get('type') == 'textarea';
+            if ($istextarea) {
+                $shortname .= "_editor";
+            }
             if (isset($data[$fieldid])) {
                 $data = $data[$fieldid];
                 $data->instance_form_definition($mform);
                 $elem = $mform->getElement("customfield_".$shortname);
+                // If this field is a textarea, we'll remove the element and re-add
+                // it in a group as textareas can't be conditionally hidden due to a limitation in Moodle core.
+                if ($istextarea) {
+                    $mform->removeElement("customfield_" . $shortname);
+                    $mform->addGroup([$elem], "group_customfield_" . $shortname, $elem->getLabel());
+                }
                 // Remove the rules for custom fields.
                 if (isset($mform->_rules["customfield_".$shortname])) {
                     unset($mform->_rules["customfield_".$shortname]);
@@ -1253,7 +1288,12 @@ class smartmenu_item {
                     $mform->setDefault("customfield_".$shortname, 0);
                 }
 
-                $mform->hideif("customfield_".$shortname, 'type', 'neq', self::TYPEDYNAMIC);
+                // Hide the field if needed (and distinguish between textareas and other fields here as explained above).
+                if ($istextarea) {
+                    $mform->hideif("group_customfield_" . $shortname, 'type', 'neq', self::TYPEDYNAMIC);
+                } else {
+                    $mform->hideif("customfield_" . $shortname, 'type', 'neq', self::TYPEDYNAMIC);
+                }
             }
         }
 
@@ -1278,7 +1318,7 @@ class smartmenu_item {
      * @param int|null $type Optional. The specific type to retrieve. Defaults to null.
      * @return array|string An array of types if $type is null, or a string with the name of the specific type.
      */
-    public static function get_types(int $type=null) {
+    public static function get_types(?int $type = null) {
         $types = [
                 self::TYPESTATIC => get_string('smartmenusmenuitemtypestatic', 'theme_boost_union'),
                 self::TYPEHEADING => get_string('smartmenusmenuitemtypeheading', 'theme_boost_union'),
@@ -1295,7 +1335,7 @@ class smartmenu_item {
      * @return array|string The array of display options if $option is null, or the display option string if $option is set.
      * @throws coding_exception if $option is set but invalid.
      */
-    public static function get_display_options(int $option=null) {
+    public static function get_display_options(?int $option = null) {
         $displayoptions = [
                 self::DISPLAY_SHOWTITLEICON => get_string('smartmenusmenuitemdisplayoptionsshowtitleicon', 'theme_boost_union'),
                 self::DISPLAY_HIDETITLE => get_string('smartmenushidetitle', 'theme_boost_union'),

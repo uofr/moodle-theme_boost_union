@@ -11,17 +11,14 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
       | fullname | shortname | category |
       | Test     | C1        | 0        |
     And the following "users" exist:
-      | username      |
-      | student1      |
-      | student2      |
-      | teacher       |
-      | coursemanager |
-      | systemmanager |
+      | username |
+      | student1 |
+      | student2 |
+      | teacher  |
     And the following "course enrolments" exist:
-      | user          | course | role           |
-      | teacher       | C1     | editingteacher |
-      | student1      | C1     | student        |
-      | coursemanager | C1     | manager        |
+      | user     | course | role           |
+      | teacher  | C1     | editingteacher |
+      | student1 | C1     | student        |
     And the following "cohorts" exist:
       | name     | idnumber |
       | Cohort 1 | CH1      |
@@ -39,6 +36,11 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
       | Title          | Resources          |
       | Menu item type | Static             |
       | URL            | https://moodle.org |
+    # Empty menus are hidden from view. To prevent that the whole menu is missing and the test fails,
+    # a sample item is created.
+    And I set "Quick links" smart menu items with the following fields to these values:
+      | Title          | Info    |
+      | Menu item type | Heading |
     And the following "language packs" exist:
       | language |
       | de       |
@@ -46,10 +48,23 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
 
   @javascript
   Scenario Outline: Smartmenu: Menu items: Rules - Show smart menu item based on the user roles
-    Given the following "system role assigns" exist:
+    Given the following "users" exist:
+      | username      |
+      | coursemanager |
+      | systemmanager |
+    And the following "course enrolments" exist:
+      | user          | course | role    |
+      | coursemanager | C1     | manager |
+    And the following "system role assigns" exist:
       | user          | course               | role    |
       | systemmanager | Acceptance test site | manager |
-    And I navigate to smart menus
+    And the following "roles" exist:
+      | name    | shortname | description     |
+      | Visitor | visitor   | My visitor role |
+    And I navigate to "Users > Permissions > User policies" in site administration
+    And I set the field "Role for visitors" to "Visitor (visitor)"
+    And I press "Save changes"
+    When I navigate to smart menus
     And I should see "Quick links" in the "smartmenus" "table"
     And I should see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
     And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
@@ -58,7 +73,7 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
     And I set the field "By role" to "<byrole>"
     And I set the field "Context" to "<context>"
     And I click on "Save changes" "button"
-    And I should not see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+    And I <adminshouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
     And I log out
     And I log in as "coursemanager"
     Then I <managershouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
@@ -70,14 +85,42 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
     Then I <teachershouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
     And I log out
     And I log in as "systemmanager"
-    Then I should see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+    Then I <systemshouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+    And I log in as "guest"
+    Then I <guestshouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, Bottom"
+    And I log out
+    And I <visitorshouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, Bottom"
 
     Examples:
-      | byrole                    | context | student1shouldorshouldnot | teachershouldorshouldnot | managershouldorshouldnot |
-      | Manager                   | Any     | should not                | should not               | should                   |
-      | Manager, Student          | Any     | should                    | should not               | should                   |
-      | Manager, Student, Teacher | Any     | should                    | should                   | should                   |
-      | Manager, Student, Teacher | System  | should not                | should not               | should not               |
+      | byrole                    | context | student1shouldorshouldnot | teachershouldorshouldnot | managershouldorshouldnot | guestshouldorshouldnot | adminshouldorshouldnot | systemshouldorshouldnot | visitorshouldorshouldnot |
+      | Manager                   | Any     | should not                | should not               | should                   | should not             | should not             | should                  | should not               |
+      | Manager, Student          | Any     | should                    | should not               | should                   | should not             | should not             | should                  | should not               |
+      | Manager, Student, Teacher | Any     | should                    | should                   | should                   | should not             | should not             | should                  | should not               |
+      | Manager, Student, Teacher | System  | should not                | should not               | should not               | should not             | should not             | should                  | should not               |
+      | Authenticated user        | Any     | should                    | should                   | should                   | should not             | should                 | should                  | should not               |
+      | Guest                     | Any     | should not                | should not               | should not               | should                 | should not             | should not              | should not               |
+      | Visitor                   | Any     | should not                | should not               | should not               | should not             | should not             | should not              | should                   |
+
+  @javascript
+  Scenario Outline: Smartmenu: Menu items: Rules - Show smart menu item based on being site admin
+    When I navigate to smart menus
+    And I should see "Quick links" in the "smartmenus" "table"
+    And I should see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+    And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
+    And I click on ".action-edit" "css_element" in the "Resources" "table_row"
+    And I expand all fieldsets
+    And I set the field "Show to" to "<byadmin>"
+    And I click on "Save changes" "button"
+    And I <adminshouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+    And I log out
+    And I log in as "student1"
+    Then I <student1shouldorshouldnot> see smart menu "Quick links" item "Resources" in location "Main, Menu, User, Bottom"
+
+    Examples:
+      | byadmin | adminshouldorshouldnot | student1shouldorshouldnot |
+      | 0       | should                 | should                    |
+      | 1       | should                 | should not                |
+      | 2       | should not             | should                    |
 
   @javascript
   Scenario Outline: Smartmenu: Menu items: Rules - Show smart menu item based on the user assignment in single cohorts
@@ -257,3 +300,48 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
       | byrole                    | bycohort           | bylanguage       | student1shouldorshouldnot | student2shouldorshouldnot | teachershouldorshouldnot |
       | Manager, Student          | Cohort 1           | English          | should                    | should not                | should not               |
       | Manager, Student, Teacher | Cohort 1, Cohort 2 | English, Deutsch | should                    | should not                | should                   |
+
+  @javascript
+  Scenario: Smartmenu: Menu items: Rules - Deleting a cohort used for a rule removes it from the rule
+    Given I navigate to smart menus
+    And I should see "Quick links" in the "smartmenus" "table"
+    And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
+    And I click on ".action-edit" "css_element" in the "Resources" "table_row"
+    And I expand all fieldsets
+    And I set the field "By cohort" to "Cohort 1, Cohort 2"
+    And I set the field "Operator" to "Any"
+    And I click on "Save changes" "button"
+    And I should see "Cohort 1" in the "Resources" "table_row"
+    And I should see "Cohort 2" in the "Resources" "table_row"
+    When I navigate to "Users > Cohorts" in site administration
+    And I open the action menu in "Cohort 1" "table_row"
+    And I choose "Delete" in the open action menu
+    And I press "Continue"
+    And I navigate to smart menus
+    And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
+    And I should not see "Cohort 1" in the "Resources" "table_row"
+    And I should see "Cohort 2" in the "Resources" "table_row"
+
+  @javascript
+  Scenario: Smartmenu: Menu items: Rules - Deleting a role used for a rule removes it from the rule
+    Given the following "roles" exist:
+      | shortname | name        |
+      | test1     | Test role 1 |
+      | test2     | Test role 2 |
+    And I navigate to smart menus
+    And I should see "Quick links" in the "smartmenus" "table"
+    And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
+    And I click on ".action-edit" "css_element" in the "Resources" "table_row"
+    And I expand all fieldsets
+    And I set the field "By role" to "Test role 1, Test role 2"
+    And I set the field "Operator" to "Any"
+    And I click on "Save changes" "button"
+    And I should see "Test role 1" in the "Resources" "table_row"
+    And I should see "Test role 2" in the "Resources" "table_row"
+    When I navigate to "Users > Define roles" in site administration
+    And I click on "Delete" "link" in the "Test role 1" "table_row"
+    And I press "Yes"
+    And I navigate to smart menus
+    And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
+    And I should not see "Test role 1" in the "Resources" "table_row"
+    And I should see "Test role 2" in the "Resources" "table_row"

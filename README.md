@@ -21,7 +21,7 @@ On the other hand, many Moodle installations share the same basic functional nee
 
 One highlight is the main design principle of Boost Union: As soon as it is activated on a Moodle site, it does not change anything yet and simply behaves as Boost from Moodle core does. The admin can enable and configure only the theme features he needs and does not need to care about side effects from other, disabled theme features.
 
-As a side note, it is quite easy to create a grandchild theme of Boost Union. That way, you can benefit from all the / only the Boost Union features you need, but you can also add additional local features or settings (that are not interesting as a pull request or feature request for the whole Boost Union community) to your local grandchild theme at the same time.
+As a side note, it is quite easy to create a grandchild theme of Boost Union. See the 'Grandchild theme support' section below for details.
 
 
 Installation
@@ -39,7 +39,7 @@ Usage & Settings
 After installing the theme, it does not do anything to Moodle yet.
 
 To configure the theme and its behaviour, please visit:
-Site administration -> Appearance -> Themes -> Boost Union.
+Site administration -> Appearance -> Boost Union.
 
 There, you find multiple setting pages:
 
@@ -51,13 +51,7 @@ In this tab there are the following settings:
 
 ##### Theme presets
 
-###### Theme preset
-
-This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
-
-###### Additional theme preset files
-
-This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
+Theme presets can be used to dramatically alter the appearance of the theme. Boost Union does not re-implement the theme preset setting. If you want to use theme presets, please set them directly in Boost. Boost Union will inherit and use the configured preset.
 
 #### Tab "SCSS"
 
@@ -72,6 +66,10 @@ This setting is already available in the Moodle core theme Boost. For more infor
 ###### Raw SCSS
 
 This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
+
+##### External SCSS
+
+In addition to the raw SCSS settings above, Boost Union can load SCSS from an external source. It is included before the SCSS code which is defined above which means that you can manage a centralized external SCSS codebase and can still amend it with local SCSS additions.
 
 #### Tab "Page"
 
@@ -185,27 +183,35 @@ As text color, you can use the values "dark" or "light".
 
 You can declare texts for an arbitrary amount of your uploaded login background images. The texts will be added only to those images that match their filename with the identifier declared in this setting.
 
-#### Login form
+##### Login form
 
-##### Login form position
+###### Login form position
 
 With this setting, you can optimize the login form to fit to a greater variety of background images. By default, the login form is displayed centered on the login page. Alternatively, you can move it to the left or to the right of the login page to let other parts of the background image shine through. Of course, you can also change this setting if no background images are uploaded at all.
 
-##### Login form transparency
+###### Login form transparency
 
 With this setting, you can make the login form slightly transparent to let the background image shine through even more.
 
-#### Login providers
+##### Login providers
 
-##### Local login
+###### Local login
 
 With this setting, you control if the local login form is shown on the login page or not. By default, the local login form is shown and users an login into the site as normal. If you disable this setting, the local login form is hidden. This allows you to just provide login buttons for external identity providers like OAuth2 or OIDC.
 
 Please note: As soon as you hide the local login form, you risk that admins cannot log in anymore with a local account if there is a problem with the external identity provider. To allow local logins anyway in such cases, a side entrance local login page is provided on /theme/boost_union/locallogin.php. On this side entrance local login page, all of Moodle's login security measures apply as well.
 
-##### IDP login intro
+###### Local login intro
+
+With this setting, you control if a 'Login with your Moodle account' intro is shown above the local login form or not. By default, the intro is not shown. But if you enable it, this intro may help users to understand which credentials to use in the local login form, especially if you provide more than one login method or if you have changed the order of the login methods.
+
+###### IDP login intro
 
 With this setting, you control if the 'Log in using your account on' intro is shown above the IDP login buttons or not. By default, the intro is shown and users will be quickly informed what the IDP buttons are about. If you disable this setting, the IDP intro is hidden. This allows you to provide a clean user login interface if you just use external identity providers like OAuth2 or OIDC.
+
+##### Login order
+
+With these settings, you control the order of the login methods in the login form. The presented order will be defined from lowest to highest ordinal number, skipping all login methods and login form elements which are disabled in Moodle.
 
 #### Tab "Dashboard / My courses"
 
@@ -242,6 +248,16 @@ With this setting, you control the height of the presented course header image.
 ###### Course header image position
 
 With this setting, you control the positioning of the course header image within the course header container. The first value is the horizontal position, the second value is the vertical position.
+
+##### Course index
+
+###### Display activity icon in course index
+
+When enabled, the corresponding activity type icon is displayed in front of the index row with the title of the activity. As soon as the icon is displayed at the start of the line, you will get a second setting to decide where to show the activity completion indication instead.
+
+###### Position of activity completion indication.
+
+Choose the position where the completion indication is displayed.
 
 #### Tab "E-Mail branding"
 
@@ -299,11 +315,25 @@ In this tab there are the following settings:
 
 With this setting, you can hide one or multiple nodes from the primary navigation.
 
+###### Alternative logo link URL
+
+With this setting, you can set an alternative link URL which will be used as link on the logo in the navigation bar. You can use this setting to, for example, link to your organization's website instead of the Moodle frontpage to maintain a homogeneous navigation bar throughout all of your organization's systems.
+
 ##### User menu
+
+###### Show full name in the user menu
+
+With this setting, you can show the logged-in user's full name at the top of the user menu. This can be especially helpful for exam situations where teachers have to confirm that the user is logged in with his own account, but it might also be helpful for the user himself. In contrast to the Classic theme which shows the user's full name in the navbar near the avatar, this approach here does not claim any additional rare space in the navbar.
 
 ###### Add preferred language link to language menu
 
 With this setting, you can add a 'Set preferred language' setting to the language menu within the user menu. Understandably, this setting is only processed if the language menu is enabled at all.
+
+##### Navbar
+
+###### Show starred courses popover in the navbar
+
+With this setting, you can show a popover menu with links to starred courses next to the messages and notifications menus.
 
 ##### Breadcrumbs
 
@@ -324,6 +354,10 @@ With this setting, upon toggling edit mode on and off, the scroll position at wh
 ###### Activity navigation elements
 
 With this setting the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource become displayed. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0. With Boost Union, you can bring them back.
+
+###### Show navigation on policy overview page
+
+By default, the policy overview page (provided by tool_policy) does not show a navigation menu or footer. With this setting, you can show the primary navigation and footer on that page.
 
 #### Tab "Blocks"
 
@@ -447,6 +481,10 @@ Whatever you add to this textarea will be displayed at the end of a page, in the
 
 With this setting, you can control whether to show or to suppress the footer button at the bottom of the page.
 
+###### Suppress icons in front of the footer links
+
+With this setting, you can entirely suppress the icons in front of the footer links.
+
 ###### Suppress ... link
 
 With these settings, you can entirely suppress particular links in the footer.
@@ -519,6 +557,10 @@ In this tab there are the following settings:
 
 With this setting a hint will appear in the course header if the user has switched the role in the course.
 
+###### Show hint for forum notifications in hidden courses
+
+With this setting a hint will not only appear in the course header but also in forums as long as the visibility of the course is hidden.
+
 ###### Show hint in hidden courses
 
 With this setting a hint will appear in the course header as long as the visibility of the course is hidden.
@@ -576,6 +618,17 @@ These capabilities are used to control who is allowed to see a particular block 
 These capabilities are used to control who is allowed to edit a particular block region. By default, they are assigned to teachers, non-editing teachers and managers.
 
 
+Scheduled Tasks
+---------------
+
+This plugin also introduces these additional scheduled tasks:
+
+### \theme_boost_union\task\purge_cache
+
+This scheduled task can be used to purge the theme cache periodically, for example every night. It is especially there to fetch external SCSS code which might have been updated since the last purging of the theme cache.\
+By default, the task is disabled.
+
+
 How this theme works
 --------------------
 
@@ -621,6 +674,19 @@ This theme ships with some additions for companion plugins:
   * Renderer additions to add necessary additional CSS and JS files.
 
 
+Grandchild theme support
+------------------------
+
+It is quite easy to create a grandchild theme of Boost Union. That way, you can benefit from all the / only the Boost Union features you need, but you can also add additional local features or settings to your local grandchild theme at the same time.
+
+If you plan to build a grandchild theme of Boost Union, we have prepared a 'Boost Union Child' boilerplate for you which can help you to do the first steps.
+
+Boost Union Child can be found on Github:
+https://github.com/moodle-an-hochschulen/moodle-theme_boost_union_child
+
+While Boost Union Child will surely help you to realize all your local Boost Union dreams, please do yourself and the whole community a favour and verify that your planned features are indeed not interesting as a pull request or feature request for the whole Boost Union community and could be contributed to Boost Union directly instead.
+
+
 Plugin repositories
 -------------------
 
@@ -640,7 +706,7 @@ Please report bugs and problems on Github:
 https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/issues
 
 Support thread:
-https://moodle.org/mod/forum/discuss.php?d=452129
+https://s.gwdg.de/bxqZti
 
 We kindly invite you to use this support thread in case of any questions you might have. We are a team of many (sometimes power) users of Boost Union and will try to answer or collectively according to our measures. If any other users know answers or are quicker, don't hesitate to answer. We will do our best to solve your problems, but please note that due to limited resources we can't always provide per-case support.
 
@@ -693,10 +759,13 @@ The plugin is maintained by\
 Moodle an Hochschulen e.V.
 
 in cooperation with\
-lern.link GmbH
+ssystems GmbH
 
 together with\
 bdecent GmbH
+
+and\
+lern.link GmbH
 
 
 Copyright
@@ -726,23 +795,29 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * bdecent GmbH, Stefan Scholz: Code, Ideating, Funding
 * Bern University of Applied Sciences (BFH), Luca Bösch: Code, Peer Review, Ideating
 * Carinthia University of Applied Sciences, Mario Wehr: Code
+* Catalyst IT Europe, Mark Johnson: Code
+* Catalyst IT Europe, Simon Thornett: Code
 * ELAN e.V., Farbod Zamani: Code
 * FernUniversität in Hagen, Daniel Poggenpohl: Code, Ideating
 * Hochschule Hannover - University of Applied Sciences and Arts: Code, Funding, Ideating
 * Käferfreie Software, Nina Herrmann: Code
 * lern.link GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
+* lern.link GmbH, Lukas MuLu Müller: Code
 * lern.link GmbH, Beata Waloszczyk: Code
 * Moodle.NRW / Ruhr University Bochum, Annika Lambert: Code
 * Moodle.NRW / Ruhr University Bochum, Matthias Buttgereit: Code, Ideating
 * Moodle.NRW / Ruhr University Bochum, Tim Trappen: Code, Ideating
 * moodleSCHULE e.V., Ralf Krause: German translation and curation, Ideating
+* Plakos GmbH, Waldemar Erdmann: Funding, Ideating
 * Ruhr University Bochum, Melanie Treitinger: Code, Ideating
 * RWTH Aachen, Amrita Deb Dutta: Code
 * RWTH Aachen, Josha Bartsch: Code
 * Solent University, Mark Sharp: Code
+* ssystems GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
 * Technische Universität Berlin, Lars Bonczek: Code
+* University of Bayreuth, Nikolai Jahreis: Code
 * University of Graz, André Menrath: Code
-* University of Lübeck, Christian Wolters: Peer Review, Ideating
+* University of Lübeck, Christian Wolters: Code, Peer Review, Ideating
 * Zurich University of Applied Sciences (ZHAW): Funding, Ideating
 
 Additionally, we thank all other contributors who contributed ideas, feedback and code snippets within the Github issues and pull requests as well as all contributors who contributed additional translations in AMOS, the Moodle translation tool.

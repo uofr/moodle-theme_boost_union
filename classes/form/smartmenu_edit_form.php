@@ -77,6 +77,7 @@ class smartmenu_edit_form extends \moodleform {
                 $locationtypes);
         $mform->addHelpButton('location', 'smartmenusmenulocation', 'theme_boost_union');
         $location->setMultiple(true);
+        $mform->addRule('location', get_string('required'), 'required');
 
         // Add mode as select element.
         $modeoptions = [
@@ -188,7 +189,9 @@ class smartmenu_edit_form extends \moodleform {
         $rolelist = role_get_names(\context_system::instance());
         $roleoptions = [];
         foreach ($rolelist as $role) {
-            $roleoptions[$role->id] = $role->localname;
+            if ($role->archetype !== 'frontpage') { // Frontpage roles are not supported in the menus restriction.
+                $roleoptions[$role->id] = $role->localname;
+            }
         }
         $byroleswidget = $mform->addElement('autocomplete', 'roles', get_string('smartmenusbyrole', 'theme_boost_union'),
                 $roleoptions);
@@ -205,6 +208,24 @@ class smartmenu_edit_form extends \moodleform {
         $mform->setType('rolecontext', PARAM_INT);
         $mform->addHelpButton('rolecontext', 'smartmenusrolecontext', 'theme_boost_union');
 
+        // Add restrict visibility by admin as header element.
+        $mform->addElement('header', 'restrictbyadminheader',
+                get_string('smartmenusrestrictbyadminheader', 'theme_boost_union'));
+        if (isset($this->_customdata['menu']) && $this->_customdata['menu']->byadmin) {
+            $mform->setExpanded('restrictbyadminheader');
+        }
+
+        // Add restriction as select element.
+        $rolecontext = [
+            smartmenu::BYADMIN_ALL => get_string('smartmenusbyadmin_all', 'theme_boost_union'),
+            smartmenu::BYADMIN_ADMINS => get_string('smartmenusbyadmin_admins', 'theme_boost_union'),
+            smartmenu::BYADMIN_NONADMINS => get_string('smartmenusbyadmin_nonadmins', 'theme_boost_union'),
+        ];
+        $mform->addElement('select', 'byadmin', get_string('smartmenusbyadmin', 'theme_boost_union'), $rolecontext);
+        $mform->setDefault('byadmin', smartmenu::BYADMIN_ALL);
+        $mform->setType('byadmin', PARAM_INT);
+        $mform->addHelpButton('byadmin', 'smartmenusbyadmin', 'theme_boost_union');
+
         // Add restrict visibility by cohorts as header element.
         $mform->addElement('header', 'restrictbycohortsheader',
                 get_string('smartmenusrestrictbycohortsheader', 'theme_boost_union'));
@@ -215,7 +236,7 @@ class smartmenu_edit_form extends \moodleform {
         }
 
         // Add by cohorts as autocomplete element.
-        $cohortslist = \cohort_get_all_cohorts();
+        $cohortslist = \cohort_get_all_cohorts(0, 0);
         $cohortoptions = $cohortslist['cohorts'];
         if ($cohortoptions) {
             array_walk($cohortoptions, function(&$value) {
@@ -318,6 +339,11 @@ class smartmenu_edit_form extends \moodleform {
             if (empty($data['cardoverflowbehavior'])) {
                 $errors['cardoverflowbehavior'] = get_string('required');
             }
+        }
+
+        // Validate the smart menu location is filled.
+        if (empty($data['location'])) {
+            $errors['location'] = get_string('required');
         }
 
         // Return errors.

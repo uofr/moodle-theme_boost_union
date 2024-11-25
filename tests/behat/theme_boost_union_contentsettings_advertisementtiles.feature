@@ -57,7 +57,7 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
       | tile1content          | This is a test content for tile 1 | theme_boost_union |
     When I log in as "teacher1"
     And I am on site homepage
-    Then "#themeboostunionadvtiles" "css_element" should appear <beforeafter> "#region-main" "css_element"
+    Then "#themeboostunionadvtiles" "css_element" should appear <beforeafter> "div[role='main']" "css_element"
 
     Examples:
       | position | beforeafter |
@@ -185,27 +185,19 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
       | tile2enabled | no                                | theme_boost_union |
       | tile2content | This is a test content for tile 2 | theme_boost_union |
     When I log in as "admin"
-    # We deactivate debugging for a while as the Behat step would otherwise fail due to the
-    # stupid 'Too much data passed as arguments to js_call_amd' debugging message which can't be avoided
-    # on this settings page. This debugging message can't be avoided as we simple use too much hide_if() there.
-    And the following config values are set as admin:
-      | debug          | 0 |
-      | debugdisplay   | 0 |
+    And Behat debugging is disabled
     And I navigate to "Appearance > Boost Union > Content" in site administration
     And I click on "Advertisement tiles" "link" in the "#adminsettings .nav-tabs" "css_element"
-    And I upload "theme/boost_union/tests/fixtures/login_bg1.jpg" file to "Advertisement tile 1 background image" filemanager
+    And I upload "theme/boost_union/tests/fixtures/login_bg1.png" file to "Advertisement tile 1 background image" filemanager
     And I press "Save changes"
     And I am on site homepage
-    # We reactivate debugging again.
-    And the following config values are set as admin:
-      | debug          | 32767 |
-      | debugdisplay   | 1     |
+    And Behat debugging is enabled
     And I log out
     And I am on site homepage
     And I follow "Log in"
     And I log in as "teacher1"
     And I am on site homepage
-    Then "//div[@id='themeboostunionadvtile1']/*[1][contains(@style, 'pluginfile.php/1/theme_boost_union/tilebackgroundimage1/0/login_bg1.jpg')]" "xpath_element" should exist
+    Then "//div[@id='themeboostunionadvtile1']/*[1][contains(@style, 'pluginfile.php/1/theme_boost_union/tilebackgroundimage1/0/login_bg1.png')]" "xpath_element" should exist
     And "//div[@id='themeboostunionadvtile2']/*[1][contains(@style, 'pluginfile.php')]" "xpath_element" should not exist
 
   Scenario Outline: Setting: Advertisement tiles - Define the tile (min-)height.
@@ -232,21 +224,13 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
       | tile1content                 | This is a test content for tile 1 | theme_boost_union |
       | tile1backgroundimageposition | <position>                        | theme_boost_union |
     When I log in as "admin"
-    # We deactivate debugging for a while as the Behat step would otherwise fail due to the
-    # stupid 'Too much data passed as arguments to js_call_amd' debugging message which can't be avoided
-    # on this settings page. This debugging message can't be avoided as we simple use too much hide_if() there.
-    And the following config values are set as admin:
-      | debug          | 0 |
-      | debugdisplay   | 0 |
+    And Behat debugging is disabled
     And I navigate to "Appearance > Boost Union > Content" in site administration
     And I click on "Advertisement tiles" "link" in the "#adminsettings .nav-tabs" "css_element"
-    And I upload "theme/boost_union/tests/fixtures/login_bg1.jpg" file to "Advertisement tile 1 background image" filemanager
+    And I upload "theme/boost_union/tests/fixtures/login_bg1.png" file to "Advertisement tile 1 background image" filemanager
     And I press "Save changes"
     And I am on site homepage
-    # We reactivate debugging again.
-    And the following config values are set as admin:
-      | debug          | 32767 |
-      | debugdisplay   | 1     |
+    And Behat debugging is enabled
     And I log out
     And I am on site homepage
     And I follow "Log in"
@@ -266,12 +250,7 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
       | config       | value | plugin            |
       | tile1enabled | yes   | theme_boost_union |
     When I log in as "admin"
-    # We deactivate debugging for a while as the Behat step would otherwise fail due to the
-    # stupid 'Too much data passed as arguments to js_call_amd' debugging message which can't be avoided
-    # on this settings page. This debugging message can't be avoided as we simple use too much hide_if() there.
-    And the following config values are set as admin:
-      | debug          | 0 |
-      | debugdisplay   | 0 |
+    And Behat debugging is disabled
     And I navigate to "Appearance > Boost Union > Content" in site administration
     And I click on "Advertisement tiles" "link" in the "#adminsettings .nav-tabs" "css_element"
     Then "#admin-tile1title" "css_element" should be visible

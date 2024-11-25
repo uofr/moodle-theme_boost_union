@@ -31,7 +31,10 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, man
       | Links | Main             |
     And I should see "Links" in the "smartmenus" "table"
     And ".smartmenu-actions" "css_element" should exist in the "smartmenus" "table"
-    And I should see "Links" in the "nav.moremenu" "css_element"
+    And I set "Links" smart menu items with the following fields to these values:
+      | Title          | Info    |
+      | Menu item type | Heading |
+    And I should see smart menu "Links" in location "Main"
 
   @javascript
   Scenario: Smart menus: Menus: Management - Edit an existing smart menu
@@ -59,6 +62,7 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, man
     And I click on "Create menu" "button"
     And I set the following fields to these values:
       | Title | Links |
+      | Menu location(s) | Main |
     And I click on "Save and return" "button"
     And I should see "Links" in the "smartmenus" "table"
     And ".action-delete" "css_element" should exist in the "smartmenus" "table"
@@ -74,12 +78,9 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, man
   @javascript
   Scenario: Smartmenus: Menus: Management - Duplicate an existing smart menu
     When I log in as "admin"
-    And I navigate to smart menus
-    And I click on "Create menu" "button"
-    And I set the following fields to these values:
+    And I create smart menu with a default item with the following fields to these values:
       | Title            | Links |
       | Menu location(s) | Main  |
-    And I click on "Save and return" "button"
     And I should see "Links" in the "smartmenus" "table"
     And ".action-copy" "css_element" should exist in the "Links" "table_row"
     And I click on ".action-copy" "css_element" in the "Links" "table_row"
@@ -88,41 +89,41 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, man
     And I click on ".action-edit" "css_element" in the "table#smartmenus #smartmenus_r1" "css_element"
     And I set the field "Title" to "Useful Links"
     And I click on "Save and return" "button"
-    And I should see "Links" in the "nav.moremenu" "css_element"
-    Then I should see "Useful Links" in the "nav.moremenu" "css_element"
+    Then I should see smart menu "Links" in location "Main"
+    And I should see smart menu "Useful Links" in location "Main"
 
   @javascript
   Scenario: Smartmenus: Menus: Management - Modify the visibility of an existing smart menu
     When I log in as "admin"
-    And I navigate to smart menus
-    And I click on "Create menu" "button"
-    And I set the following fields to these values:
-      | Title            | Links |
-      | Menu location(s) | Main  |
-    And I click on "Save and return" "button"
+    And I create smart menu with a default item with the following fields to these values:
+      | Title            | Links                    |
+      | Menu location(s) | Main, Menu, User, Bottom |
     And I should see "Links" in the "smartmenus" "table"
     And ".action-hide" "css_element" should exist in the "Links" "table_row"
     And ".action-show" "css_element" should not exist in the "Links" "table_row"
-    And I should see "Links" in the "nav.moremenu" "css_element"
+    Then I should see smart menu "Links" in location "Main, Menu, User, Bottom"
     And ".action-hide" "css_element" should exist in the "Links" "table_row"
     And I click on ".action-hide" "css_element" in the "Links" "table_row"
-    Then I should not see "Links" in the "nav.moremenu" "css_element"
+    Then I should not see smart menu "Links" in location "Main, Menu, User, Bottom"
     And ".action-show" "css_element" should exist in the "Links" "table_row"
     And ".action-hide" "css_element" should not exist in the "Links" "table_row"
     And I click on ".action-show" "css_element" in the "Links" "table_row"
-    Then I should see "Links" in the "nav.moremenu" "css_element"
+    Then I should see smart menu "Links" in location "Main, Menu, User, Bottom"
 
+  @javascript
   Scenario: Smartmenus: Menus: Management - Move an existing smart menu up and down
     When I log in as "admin"
     And I navigate to smart menus
     And I click on "Create menu" "button"
     And I set the following fields to these values:
       | Title | Enrolled courses |
+      | Menu location(s) | Main  |
     And I click on "Save and return" "button"
     And I should see "Enrolled courses" in the "smartmenus" "table"
     And I click on "Create menu" "button"
     And I set the following fields to these values:
       | Title | Completed courses |
+      | Menu location(s) | Main   |
     And I click on "Save and return" "button"
     And I should see "Completed courses" in the "smartmenus" "table"
     And "Enrolled courses" "table_row" should appear before "Completed courses" "table_row"
@@ -130,3 +131,20 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, man
     Then "Enrolled courses" "table_row" should appear after "Completed courses" "table_row"
     And I click on ".sort-smartmenus-up-action" "css_element" in the "Enrolled courses" "table_row"
     And "Enrolled courses" "table_row" should appear before "Completed courses" "table_row"
+
+  @javascript
+  Scenario: Smartmenus: Menus: Management - Make sure that location field is filled
+    When I log in as "admin"
+    And I navigate to smart menus
+    And I click on "Create menu" "button"
+    And I set the following fields to these values:
+      | Title            | Links     |
+    And I click on "Save and return" "button"
+    Then I should see "Required" in the "#fitem_id_location" "css_element"
+    And I set the field "Menu location(s)" to "Main"
+    And I click on "Save and return" "button"
+    Then I should see "Links" in the "smartmenus" "table"
+    And I set "Links" smart menu items with the following fields to these values:
+      | Title          | Info    |
+      | Menu item type | Heading |
+    Then I should see smart menu "Links" in location "Main"
