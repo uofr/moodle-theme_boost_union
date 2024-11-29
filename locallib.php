@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\di;
+use core\hook\manager as hook_manager;
+
 /**
  * Build the course related hints HTML code.
  * This function evaluates and composes all course related hints which may appear on a course page below the course header.
@@ -51,7 +54,7 @@ function theme_boost_union_get_course_related_hints() {
         $hintcoursehiddentext = '';
 
         // The general hint will only be shown when the course is viewed.
-        if ($PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)) {
+        if ($PAGE->url->compare(new core\url('/course/view.php'), URL_MATCH_BASE)) {
             // Use the default hint text for hidden courses.
             $hintcoursehiddentext = get_string('showhintcoursehiddengeneral', 'theme_boost_union');
         }
@@ -59,9 +62,9 @@ function theme_boost_union_get_course_related_hints() {
         // If the setting showhintcoursehiddennotifications is set too and we view a forum (e.g. announcement) within a hidden
         // course a hint will be shown that no notifications via forums will be sent out to students.
         if (get_config('theme_boost_union', 'showhintforumnotifications') == THEME_BOOST_UNION_SETTING_SELECT_YES
-                && ($PAGE->url->compare(new moodle_url('/mod/forum/view.php'), URL_MATCH_BASE) ||
-                        $PAGE->url->compare(new moodle_url('/mod/forum/discuss.php'), URL_MATCH_BASE) ||
-                        $PAGE->url->compare(new moodle_url('/mod/forum/post.php'), URL_MATCH_BASE))) {
+                && ($PAGE->url->compare(new core\url('/mod/forum/view.php'), URL_MATCH_BASE) ||
+                        $PAGE->url->compare(new core\url('/mod/forum/discuss.php'), URL_MATCH_BASE) ||
+                        $PAGE->url->compare(new core\url('/mod/forum/post.php'), URL_MATCH_BASE))) {
             // Use the specialized hint text for hidden courses on forum pages.
             $hintcoursehiddentext = get_string('showhintforumnotifications', 'theme_boost_union');
         }
@@ -89,7 +92,7 @@ function theme_boost_union_get_course_related_hints() {
     if (get_config('theme_boost_union', 'showhintcourseguestaccess') == THEME_BOOST_UNION_SETTING_SELECT_YES
             && is_guest(\context_course::instance($COURSE->id), $USER->id)
             && $PAGE->has_set_url()
-            && $PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)
+            && $PAGE->url->compare(new core\url('/course/view.php'), URL_MATCH_BASE)
             && !is_role_switched($COURSE->id)) {
 
         // Require self enrolment library.
@@ -129,7 +132,7 @@ function theme_boost_union_get_course_related_hints() {
     if (get_config('theme_boost_union', 'showhintcourseselfenrol') == THEME_BOOST_UNION_SETTING_SELECT_YES
             && has_capability('theme/boost_union:viewhintcourseselfenrol', \context_course::instance($COURSE->id))
             && $PAGE->has_set_url()
-            && $PAGE->url->compare(new moodle_url('/course/view.php'), URL_MATCH_BASE)
+            && $PAGE->url->compare(new core\url('/course/view.php'), URL_MATCH_BASE)
             && $COURSE->visible == true) {
 
         // Get the active enrol instances for this course.
@@ -223,9 +226,9 @@ function theme_boost_union_get_course_related_hints() {
             foreach ($selfenrolinstances as $selfenrolinstanceid => $selfenrolinstanceobject) {
                 // If the user has the capability to config self enrolments, enrich the instance name with the settings link.
                 if (has_capability('enrol/self:config', \context_course::instance($COURSE->id))) {
-                    $url = new moodle_url('/enrol/editinstance.php', ['courseid' => $COURSE->id,
+                    $url = new core\url('/enrol/editinstance.php', ['courseid' => $COURSE->id,
                             'id' => $selfenrolinstanceid, 'type' => 'self', ]);
-                    $selfenrolinstanceobject->name = html_writer::link($url, $selfenrolinstanceobject->name);
+                    $selfenrolinstanceobject->name = core\output\html_writer::link($url, $selfenrolinstanceobject->name);
                 }
 
                 // Add the enrolment instance information to the template context depending on the instance configuration.
@@ -279,7 +282,7 @@ function theme_boost_union_get_course_related_hints() {
         $role = $opts->metadata['rolename'];
 
         // Get the URL to switch back (normal role).
-        $url = new moodle_url('/course/switchrole.php',
+        $url = new core\url('/course/switchrole.php',
                 ['id' => $COURSE->id,
                         'sesskey' => sesskey(),
                         'switchrole' => 0,
@@ -305,7 +308,7 @@ function theme_boost_union_get_course_related_hints() {
  */
 function theme_boost_union_get_staticpage_link($page) {
     // Compose the URL object.
-    $url = new moodle_url('/theme/boost_union/pages/'.$page.'.php');
+    $url = new core\url('/theme/boost_union/pages/'.$page.'.php');
 
     // Return the string representation of the URL.
     return $url->out();
@@ -598,7 +601,7 @@ function theme_boost_union_get_urloftilebackgroundimage($tileno) {
         $file = reset($files);
 
         // Build and return the image URL.
-        return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+        return core\url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
                 $file->get_itemid(), $file->get_filepath(), $file->get_filename());
     }
 
@@ -644,7 +647,7 @@ function theme_boost_union_get_urlofslidebackgroundimage($slideno) {
         $file = reset($files);
 
         // Build and return the image URL.
-        return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+        return core\url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
                 $file->get_itemid(), $file->get_filepath(), $file->get_filename());
     }
 
@@ -669,7 +672,7 @@ function theme_boost_union_get_loginbackgroundimage_scss() {
     foreach ($files as $file) {
         $count++;
         // Get url from file.
-        $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+        $url = core\url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
                 $file->get_itemid(), $file->get_filepath(), $file->get_filename());
         // Add this url to the body class loginbackgroundimage[n] as a background image.
         $scss .= 'body.pagelayout-login.loginbackgroundimage'.$count.' {';
@@ -759,8 +762,8 @@ function theme_boost_union_get_additionalresources_templatecontext() {
         // Iterate over the files and fill the templatecontext of the file list.
         $filesforcontext = [];
         foreach ($files as $af) {
-            $urlpersistent = new moodle_url('/pluginfile.php/1/theme_boost_union/additionalresources/0/'.$af->get_filename());
-            $urlrevisioned = new moodle_url('/pluginfile.php/1/theme_boost_union/additionalresources/'.theme_get_revision().
+            $urlpersistent = new core\url('/pluginfile.php/1/theme_boost_union/additionalresources/0/'.$af->get_filename());
+            $urlrevisioned = new core\url('/pluginfile.php/1/theme_boost_union/additionalresources/'.theme_get_revision().
                     '/'.$af->get_filename());
             $filesforcontext[] = ['filename' => $af->get_filename(),
                                         'filetype' => $af->get_mimetype(),
@@ -818,7 +821,7 @@ function theme_boost_union_get_customfonts_templatecontext() {
             }
 
             // Otherwise, fill the templatecontext of the file list.
-            $urlpersistent = new moodle_url('/pluginfile.php/1/theme_boost_union/customfonts/0/'.$filename);
+            $urlpersistent = new core\url('/pluginfile.php/1/theme_boost_union/customfonts/0/'.$filename);
             $filesforcontext[] = ['filename' => $filename,
                     'fileurlpersistent' => $urlpersistent->out(), ];
         }
@@ -1024,7 +1027,7 @@ function theme_boost_union_add_flavourcss_to_page() {
     $flavour = theme_boost_union_get_flavour_which_applies();
     if ($flavour != null) {
         // Build the flavour CSS file URL.
-        $flavourcssurl = new moodle_url('/theme/boost_union/flavours/styles.php',
+        $flavourcssurl = new core\url('/theme/boost_union/flavours/styles.php',
                 ['id' => $flavour->id, 'rev' => theme_get_revision()]);
 
         // Add the CSS file to the page.
@@ -1072,7 +1075,7 @@ function theme_boost_union_get_course_header_image_url() {
         $file = reset($files);
 
         // Build and return the image URL.
-        return moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+        return core\url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
             $file->get_itemid(), $file->get_filepath(), $file->get_filename());
     }
 
@@ -1096,7 +1099,7 @@ function theme_boost_union_set_mobilecss_url() {
         // This parameter isn't the theme revision as the theme cache is not cleared when this setting is stored.
         // It is just the time when the setting is saved.
         // This is the best we can do to make the Mobile app load the new styles when needed.
-        $mobilescssurl = new moodle_url('/theme/boost_union/mobile/styles.php', ['rev' => time()]);
+        $mobilescssurl = new core\url('/theme/boost_union/mobile/styles.php', ['rev' => time()]);
 
         // Set the $CFG->mobilecssurl setting.
         set_config('mobilecssurl', $mobilescssurl->out());
@@ -1359,7 +1362,7 @@ function theme_boost_union_get_modicon_templatecontext () {
 /**
  * Returns the SCSS code to modify the activity icon purpose.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
@@ -1373,37 +1376,68 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
     foreach ($installedactivities as $modname => $modinfo) {
         // Get default purpose of activity module.
         $defaultpurpose = plugin_supports('mod', $modname, FEATURE_MOD_PURPOSE, MOD_PURPOSE_OTHER);
+
         // If the plugin does not have any default purpose.
         if (!$defaultpurpose) {
             // Fallback to "other" purpose.
             $defaultpurpose = MOD_PURPOSE_OTHER;
         }
+
+        // Compose selectors for blocks.
+        $blocksscss = [];
+        // If the admin wanted us to tint the timeline block as well.
+        if (get_config('theme_boost_union', 'timelinetintenabled') == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            $blocksscss[] = '.block_timeline .theme-boost-union-mod_'.$modname.'.activityiconcontainer img';
+        }
+        // If the admin wanted us to tint the upcoming events block as well.
+        if (get_config('theme_boost_union', 'upcomingeventstintenabled') == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            $blocksscss[] = '.block_calendar_upcoming .theme-boost-union-mod_'.$modname.'.activityiconcontainer img';
+        }
+        // If the admin wanted us to tint the recently accessed items block as well.
+        if (get_config('theme_boost_union', 'recentlyaccesseditemstintenabled') == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            $blocksscss[] = '.block_recentlyaccesseditems .theme-boost-union-'.$modname.'.activityiconcontainer img';
+        }
+        // If the admin wanted us to tint the activities block as well.
+        if (get_config('theme_boost_union', 'activitiestintenabled') == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            $blocksscss[] = '.block_activity_modules .content .icon[title="'.$modinfo.'"]';
+        }
+        $blocksscss = implode(', ', $blocksscss);
+
         // If the activity purpose setting is set and differs from the activity's default purpose.
         $activitypurpose = get_config('theme_boost_union', 'activitypurpose'.$modname);
         if ($activitypurpose && $activitypurpose != $defaultpurpose) {
             // Add CSS to modify the activity purpose color in the activity chooser and the activity icon.
-            $scss .= '.activity.modtype_'.$modname.' .activityiconcontainer.courseicon,';
-            $scss .= '.modchoosercontainer .modicon_'.$modname.'.activityiconcontainer,';
-            $scss .= '#page-header .modicon_'.$modname.'.activityiconcontainer,';
-            $scss .= '.block_recentlyaccesseditems .theme-boost-union-'.$modname.'.activityiconcontainer,';
-            $scss .= '.block_timeline .theme-boost-union-mod_'.$modname.'.activityiconcontainer {';
-            // If the purpose is now different than 'other', change the background color to the new color.
+            $scss .= '.activity.modtype_'.$modname.' .activityiconcontainer.courseicon img,';
+            $scss .= '.modchoosercontainer .modicon_'.$modname.'.activityiconcontainer img,';
+            $scss .= '#page-header .modicon_'.$modname.'.activityiconcontainer img';
+            // Add CSS for the configured blocks.
+            if (strlen($blocksscss) > 0) {
+                $scss .= ', '.$blocksscss;
+            }
+            $scss .= ' {';
+            // If the purpose is now different than 'other', change the filter to the new color.
             if ($activitypurpose != MOD_PURPOSE_OTHER) {
-                $scss .= 'background-color: var(--activity' . $activitypurpose . ') !important;';
+                $scss .= 'filter: var(--activity' . $activitypurpose . ') !important;';
 
-                // Otherwise, the background color is set to light grey (as there is no '--activityother' variable).
+                // Otherwise, the filter is removed (as there is no '--activityother' variable).
             } else {
-                $scss .= 'background-color: $light !important;';
-            }
-            // If the default purpose originally was 'other' and now is overridden, make the icon white.
-            if ($defaultpurpose == MOD_PURPOSE_OTHER) {
-                $scss .= '.activityicon, .icon { filter: brightness(0) invert(1); }';
-            }
-            // If the default purpose was not 'other' and now it is, make the icon black.
-            if ($activitypurpose == MOD_PURPOSE_OTHER) {
-                $scss .= '.activityicon, .icon { filter: none; }';
+                $scss .= 'filter: none !important;';
             }
             $scss .= '}';
+
+            // Otherwise, if the purpose is unchanged.
+        } else {
+            // Add CSS for the configured blocks.
+            if (strlen($blocksscss) > 0) {
+                $scss .= $blocksscss.'{ ';
+
+                // If the purpose is now different than 'other', set the filter to tint the icon.
+                if ($activitypurpose != MOD_PURPOSE_OTHER) {
+                    $scss .= 'filter: var(--activity' . $defaultpurpose . ') !important;';
+                }
+
+                $scss .= '}';
+            }
         }
     }
     return $scss;
@@ -1412,7 +1446,7 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
 /**
  * Returns the SCSS code to add an external link icon after external links to mark them visually.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_to_mark_external_links($theme) {
@@ -1473,23 +1507,25 @@ function theme_boost_union_get_scss_to_mark_external_links($theme) {
             // a course).
             // * The "Give feedback about this software" link in the questionmark menu (if the $CFG->enableuserfeedback setting
             // is enabled).
+            // * The "EXIF remover" link on /admin/settings.php?section=exifremover.
             // * Anything else which is shown in the call-to-action notification banners on the Dashboard
             // (Currently just the "Give feedback about this software" link as well).
             // These icons become obsolete now. We remove them with the sledgehammer.
-            $scss .= '.footer-support-link a[href^="https://moodle.com/help/"] .fa-external-link,
-                    .footer-support-link a[target="_blank"] .fa-external-link';
+            $scss .= '.footer-support-link a[href^="https://moodle.com/help/"] .fa-arrow-up-right-from-square,
+                    .footer-support-link a[target="_blank"] .fa-arrow-up-right-from-square';
             if (!empty($CFG->servicespage)) {
-                $scss .= ', .footer-support-link a[href="'.$CFG->servicespage.'"] .fa-external-link';
+                $scss .= ', .footer-support-link a[href="'.$CFG->servicespage.'"] .fa-arrow-up-right-from-square';
             }
             if (!empty($CFG->supportpage)) {
-                $scss .= ', a[href="'.$CFG->supportpage.'"] .fa-external-link';
+                $scss .= ', a[href="'.$CFG->supportpage.'"] .fa-arrow-up-right-from-square';
             }
             if (!empty($CFG->enableuserfeedback)) {
-                $scss .= ', a[href^="https://feedback.moodle.org"] .fa-external-link,
-                a[href^="https://feedback.moodle.org"] .ml-1';
+                $scss .= ', a[href^="https://feedback.moodle.org"] .fa-arrow-up-right-from-square,
+                a[href^="https://feedback.moodle.org"] .ms-1';
             }
-            $scss .= ', a[href^="'.get_docs_url().'"] .fa-external-link,
-                    div.cta a .fa-external-link {
+            $scss .= ', a[href^="'.get_docs_url().'"] .fa-arrow-up-right-from-square,
+                    a[href^="https://exiftool.sourceforge.net"] .fa-arrow-up-right-from-square,
+                    div.cta a .fa-arrow-up-right-from-square {
                 display: none;
             }';
         }
@@ -1500,7 +1536,7 @@ function theme_boost_union_get_scss_to_mark_external_links($theme) {
 /**
  * Returns the SCSS to add a broken-chain symbol in front of broken links and make the font red to mark them visually.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_to_mark_broken_links($theme) {
@@ -1536,7 +1572,7 @@ function theme_boost_union_get_scss_to_mark_broken_links($theme) {
 /**
  * Returns the SCSS to add an envelope symbol in front of mailto links to mark them visually.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_to_mark_mailto_links($theme) {
@@ -1578,7 +1614,7 @@ function theme_boost_union_get_scss_to_mark_mailto_links($theme) {
  * Returns the SCSS code to hide the course image and/or the course progress in the course overview block, depending
  * on the theme settings courseoverviewshowcourseimages and courseoverviewshowcourseprogress respectively.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_courseoverview_block($theme) {
@@ -1613,7 +1649,7 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
         $scss .= $listitemselector.'> .col-md-9 { @extend .col-md-11; }'.PHP_EOL;
     }
     if (!$showcourseimagescard) {
-        $scss .= $blockselector.' .dashboard-card-img { display: none !important; }'.PHP_EOL;
+        $scss .= $blockselector.' .card-img-top { display: none !important; }'.PHP_EOL;
     }
 
     // Get the course progress setting, defaults to true if the setting does not exist.
@@ -1649,7 +1685,7 @@ function theme_boost_union_get_loginpage_methods() {
 /**
  * Returns the SCSS code to re-order the elements of the login form, depending on the theme settings loginorder*.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_scss_login_order($theme) {
@@ -1858,7 +1894,7 @@ function theme_boost_union_get_touchicons_html_for_page() {
             // If the file exists (i.e. it has been uploaded).
             if ($file->exists == true) {
                 // Build the file URL.
-                $fileurl = new moodle_url('/pluginfile.php/1/theme_boost_union/touchiconsios/' .
+                $fileurl = new core\url('/pluginfile.php/1/theme_boost_union/touchiconsios/' .
                     theme_get_revision().'/'.$file->filename);
 
                 // Compose and append the HTML tag.
@@ -1963,7 +1999,7 @@ function theme_boost_union_get_navbar_starredcoursespopover() {
 
         if ($course->visible || $canviewhiddencourses) {
             $coursesfortemplate[] = [
-                'url' => new \moodle_url('/course/view.php', ['id' => $course->id]),
+                'url' => new \core\url('/course/view.php', ['id' => $course->id]),
                 'fullname' => $course->fullname,
                 'visible' => $course->visible == 1,
             ];
@@ -2191,6 +2227,196 @@ function theme_boost_union_get_external_scss($type) {
 
     // Now return the (hopefully valid and working) SCSS code.
     return $extscss;
+}
+
+/**
+ * Helper function which wxtracts and returns the pluginname for the given callback name.
+ * This function simply differentiates between real plugins and core components.
+ * The result is especially used in the footersuppressstandardfooter_* feature.
+ *
+ * @param stdClass $callback The callback.
+ * @return string
+ */
+function theme_boost_union_get_pluginname_from_callbackname($callback) {
+    // If the component is 'core', things are somehow different.
+    if ($callback['component'] == 'core') {
+        $hookexplode = explode('::', $callback['callback']);
+        $pluginname = array_shift($hookexplode);
+    } else {
+        $pluginname = $callback['component'];
+    }
+
+    return $pluginname;
+}
+
+/**
+ * Helper function which is called from the before_session_start() callback which manipulates Moodle core's hooks.
+ */
+function theme_boost_union_manipulate_hooks() {
+    global $CFG;
+
+    // If this is called by a CLI script.
+    if (CLI_SCRIPT) {
+        // Return directly.
+        return;
+    }
+
+    // If $CFG->hooks_callback_overrides is not set yet.
+    if (!isset($CFG->hooks_callback_overrides)) {
+        // Initialize it as empty array.
+        $CFG->hooks_callback_overrides = [];
+    }
+
+    // Note: You might think that this function does not need to be processed during AJAX requests as well.
+    // But in this case, due to the way how Moodle's setup works, AJAX requests would "rollback" the hook manipulations
+    // and Boost Union would have to compose the manipulated hooks again on the next "real" page load.
+    // This would result in longer page load times for real end users.
+
+    // Get Moodle core's hookcallbacks cache.
+    $corecache = \cache::make('core', 'hookcallbacks');
+
+    // Get Boost Union's hookoverrides cache.
+    $bucache = \cache::make('theme_boost_union', 'hookoverrides');
+
+    // Get the latest overrides from cache.
+    $overridesfromcache = $bucache->get('overrides');
+
+    // If a value for the latest overrides was found in the cache.
+    if ($overridesfromcache !== false) {
+        // Set it as the new $CFG->hooks_callback_overrides.
+        $CFG->hooks_callback_overrides = $overridesfromcache;
+
+        // Otherwise.
+    } else {
+        // Use a temporary marker in the hookoverrides cache as mutex (to avoid that this code is run in parallel and
+        // race conditions appear).
+        // This is a quite lightweight approach compared to a lock and especially helpful as the hookoverrides cache
+        // is a local cache store which means that this code should be run on each node.
+        $alreadystarted = $bucache->get('manipulationstarted');
+
+        // If the manipulation has already been started, return directly.
+        // In this case, the hooks will not be manipulated, but we can't do anything about it.
+        if ($alreadystarted == true) {
+            return;
+        }
+
+        // Set the mutex marker.
+        $bucache->set('manipulationstarted', true);
+
+        // Require the own library.
+        require_once($CFG->dirroot.'/theme/boost_union/lib.php');
+
+        // Get the array of plugins with the before_standard_footer_html_generation hook which can be suppressed by Boost Union.
+        //
+        // Ideally, this would be done with:
+        // $pluginswithhook =
+        // di::get(hook_manager::class)->get_callbacks_for_hook('core\\hook\\output\\before_standard_footer_html_generation');
+        // like it's done in settings.php, but it's not that easy.
+        // If we use get_callbacks_for_hook() to get the list of plugins, the hook manager will be instantiated,
+        // will create the list of callbacks and will be kept as static object for the rest of the script lifetime.
+        // We won't have a possibility to modify the list of callbacks with $CFG->hooks_callback_overrides after that point.
+        //
+        // Thus, we adopt the code from init_standard_callbacks(), load_callbacks() and add_component_callbacks()
+        // to here to search for existing hooks ourselves.
+        // In addition to that, it is important to know that this hook list is cached. We thus set a marker in
+        // the hookoverrides cache to store the fact that we have manipulated the hooks and do not need to do that
+        // again until the cache is cleared. On the other hand, if we already have manipulated the hooks, we have to
+        // "convince" Moodle to use it (see later).
+
+        // Get list of all files with callbacks, one per component.
+        $components = ['core' => "{$CFG->dirroot}/lib/db/hooks.php"];
+        $plugintypes = \core\component::get_plugin_types();
+        foreach ($plugintypes as $plugintype => $plugintypedir) {
+            $plugins = \core\component::get_plugin_list($plugintype);
+            foreach ($plugins as $pluginname => $plugindir) {
+                if (!$plugindir) {
+                    continue;
+                }
+                $components["{$plugintype}_{$pluginname}"] = "{$plugindir}/db/hooks.php";
+            }
+        }
+
+        // Iterate over the hooks files and collect all hooks.
+        // Doing this, we do not do the same cleanup and check operations as the hook manager does.
+        // If there would be a problem with a particular hook file, the hook manager itself would stumble upon it anyway.
+        $callbacks = [];
+        $parsecallbacks = function ($hookfile) {
+            $callbacks = [];
+            include($hookfile);
+            return $callbacks;
+        };
+        foreach ($components as $component => $hookfile) {
+            if (!file_exists($hookfile)) {
+                continue;
+            }
+            $newcallbacks = $parsecallbacks($hookfile);
+            if (!is_array($newcallbacks) || !$newcallbacks) {
+                continue;
+            }
+            foreach ($newcallbacks as &$ncb) {
+                $ncb['component'] = $component;
+            }
+            $callbacks = array_merge($callbacks, $newcallbacks);
+        }
+
+        // Pick the callbacks which implement the core\hook\output\before_standard_footer_html_generation hook.
+        $bsfhgcallbacks = [];
+        foreach ($callbacks as $callback) {
+            if ($callback['hook'] == 'core\\hook\\output\\before_standard_footer_html_generation') {
+                // If the callback is a string.
+                if (is_string($callback['callback'])) {
+                    // Use it directly.
+                    $bsfhgcallbacks[] = ['callback' => $callback['callback'], 'component' => $callback['component']];
+
+                    // Otherwise, if the callback is an array with two elements.
+                } else if (is_array($callback['callback']) && count($callback['callback']) == 2) {
+                    // Normalize and use it.
+                    $bsfhgcallbacks[] = ['callback' => implode('::', $callback['callback']), 'component' => $callback['component']];
+                }
+
+                // In all other cases, ignore the callback as it does not match our expectations.
+            }
+        }
+
+        // Iterate over all found callbacks.
+        foreach ($bsfhgcallbacks as $callback) {
+            // Extract the pluginname.
+            $pluginname = theme_boost_union_get_pluginname_from_callbackname($callback);
+            // If the given plugin's output is suppressed by Boost Union's settings.
+            $suppresssetting = get_config('theme_boost_union', 'footersuppressstandardfooter_'.$pluginname);
+            if (isset($suppresssetting) && $suppresssetting == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                // Set the plugin's hook as disabled.
+                // phpcs:disable moodle.Files.LineLength.TooLong
+                $CFG->hooks_callback_overrides['core\\hook\\output\\before_standard_footer_html_generation'][$callback['callback']] =
+                        ['disabled' => true];
+                // phpcs:enable
+            }
+        }
+
+        // Remember the hook overrides in the cache.
+        $bucache->set('overrides', $CFG->hooks_callback_overrides);
+
+        // Remove the mutex marker.
+        $bucache->delete('manipulationstarted');
+    }
+
+    // Now, as this function is called via before_session_start(), we can (and have to) assume that the hook_manager
+    // has not been instantiated yet on this page load.
+    // But it will be instantiated soon at the end of /lib/setup.php and our modifications which we set in
+    // $CFG->hooks_callback_overrides will be taken into account then.
+}
+
+/**
+ * Helper function which is called from settings.php as callback.
+ * It simply removes the cached hook overrides for the Boost Union hook manipulations so that they are
+ * processed again on the next page load.
+ */
+function theme_boost_union_remove_hookmanipulation() {
+    // Get the cache.
+    $cache = \cache::make('theme_boost_union', 'hookoverrides');
+
+    // Remove the hook overrides.
+    $cache->delete('overrides');
 }
 
 /**

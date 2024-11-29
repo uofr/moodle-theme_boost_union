@@ -26,7 +26,6 @@ namespace theme_boost_union\output\navigation;
 
 use renderable;
 use renderer_base;
-use templatable;
 use custom_menu;
 use theme_boost_union\smartmenu;
 
@@ -203,7 +202,7 @@ class primary extends \core\navigation\output\primary {
                             'text' => get_string('setpreferredlanglink', 'theme_boost_union'),
                             'link' => true,
                             'isactive' => false,
-                            'url' => new \moodle_url('/user/language.php'),
+                            'url' => new \core\url('/user/language.php'),
                         ];
                         $sm->items[] = $spfnode;
 

@@ -109,8 +109,8 @@ Feature: Configuring the theme_boost_union plugin for the "Navigation" tab on th
     And the theme cache is purged and the theme is reloaded
     When I log in as "student1"
     And I follow "My courses"
-    And I click on ".coursemenubtn" "css_element" in the "//div[@class='card dashboard-card' and contains(.,'Course 1')]" "xpath_element"
-    And I click on "Star this course" "link" in the "//div[@class='card dashboard-card' and contains(.,'Course 1')]" "xpath_element"
+    And I click on ".coursemenubtn" "css_element" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 1')]" "xpath_element"
+    And I click on "Star this course" "link" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 1')]" "xpath_element"
     And I reload the page
     Then "nav.navbar #usernavigation .popover-region-favourites" "css_element" <shouldornot> be visible
 
@@ -137,10 +137,10 @@ Feature: Configuring the theme_boost_union plugin for the "Navigation" tab on th
     And the theme cache is purged and the theme is reloaded
     When I log in as "student1"
     And I follow "My courses"
-    And I click on ".coursemenubtn" "css_element" in the "//div[@class='card dashboard-card' and contains(.,'Course 2')]" "xpath_element"
-    And I click on "Star this course" "link" in the "//div[@class='card dashboard-card' and contains(.,'Course 2')]" "xpath_element"
-    And I click on ".coursemenubtn" "css_element" in the "//div[@class='card dashboard-card' and contains(.,'Course 3')]" "xpath_element"
-    And I click on "Star this course" "link" in the "//div[@class='card dashboard-card' and contains(.,'Course 3')]" "xpath_element"
+    And I click on ".coursemenubtn" "css_element" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 2')]" "xpath_element"
+    And I click on "Star this course" "link" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 2')]" "xpath_element"
+    And I click on ".coursemenubtn" "css_element" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 3')]" "xpath_element"
+    And I click on "Star this course" "link" in the "//div[contains(@class, 'card course-card') and contains(.,'Course 3')]" "xpath_element"
     And I log out
     And I log in as "admin"
     And I am on "Course 3" course homepage
@@ -212,14 +212,13 @@ Feature: Configuring the theme_boost_union plugin for the "Navigation" tab on th
     And the following config values are set as admin:
       | config              | value     | plugin            |
       | categorybreadcrumbs | yes       | theme_boost_union |
-    And "Course C1" has been set to one page per section
     When I log in as "teacher1"
-    And I am on section "1" page of "Course C1" course
+    And I am on the "Course C1 > New section" "course > section" page
     Then "Category E" "link" should exist in the ".breadcrumb" "css_element"
     And "Category ED" "link" should exist in the ".breadcrumb" "css_element"
-    And "Topic 1" "link" should exist in the ".breadcrumb" "css_element"
+    And "New section" "link" should exist in the ".breadcrumb" "css_element"
     And "Category ED" "link" should appear after "Category E" "link" in the ".breadcrumb" "css_element"
-    And "Topic 1" "link" should appear after "Category ED" "link" in the ".breadcrumb" "css_element"
+    And "New section" "link" should appear after "Category ED" "link" in the ".breadcrumb" "css_element"
 
   @javascript
   Scenario: Setting: back to top button - Enable "Back to top button"

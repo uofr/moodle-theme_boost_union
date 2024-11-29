@@ -316,7 +316,7 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
     When I navigate to "Users > Cohorts" in site administration
     And I open the action menu in "Cohort 1" "table_row"
     And I choose "Delete" in the open action menu
-    And I press "Continue"
+    And I click on "Delete" "button" in the "Delete selected" "dialogue"
     And I navigate to smart menus
     And I click on ".action-list-items" "css_element" in the "Quick links" "table_row"
     And I should not see "Cohort 1" in the "Resources" "table_row"

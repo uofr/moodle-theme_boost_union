@@ -14,21 +14,26 @@ Feature: Configuring the theme_boost_union plugin for the "Activity branding" ta
     Given the following config values are set as admin:
       | config                         | value      | plugin            |
       | activityiconcolor<purposename> | <colorhex> | theme_boost_union |
+      | activityiconcolorfidelity      | 500        | theme_boost_union |
     And the theme cache is purged and the theme is reloaded
     When I log in as "admin"
     And I am on "Course 1" course homepage
     And I turn editing mode on
-    And I click on "Add an activity or resource" "button" in the "Topic 1" "section"
-    Then DOM element ".chooser-container .activityiconcontainer.modicon_<modname>" should have computed style "background-color" "<colorrgb>"
+    And I click on "Add an activity or resource" "button" in the "New section" "section"
+    # First, we test that the default filter is _not_ set anymore.
+    Then DOM element ".chooser-container .activityiconcontainer.modicon_<modname> img" should not have computed style "filter" "<originalfilter>"
+    # And then, as the hex color to CSS filter conversion results are not reproducible, we test if the applied filter is close enough to the hex color.
+    And DOM element ".chooser-container .activityiconcontainer.modicon_<modname> img" should have a CSS filter close enough to hex color "<colorhex>"
 
     # Unfortunately, we can only test 4 out of 6 purpose types as Moodle does does not ship with any activity with the
     # administration and interface types. But this should be an acceptable test coverage anyway.
     Examples:
-      | purposename   | modname | colorhex | colorrgb         |
-      | assessment    | assign  | #FF0000  | rgb(255, 0, 0)   |
-      | collaboration | data    | #00FF00  | rgb(0, 255, 0)   |
-      | communication | choice  | #0000FF  | rgb(0, 0, 255)   |
-      | content       | book    | #FFFF00  | rgb(255, 255, 0) |
+      | purposename        | modname | colorhex | originalfilter                                                                              |
+      | assessment         | assign  | #FF0000  | invert(0.36) sepia(0.98) saturate(69.69) hue-rotate(315deg) brightness(0.9) contrast(1.19)  |
+      | collaboration      | data    | #00FF00  | invert(0.25) sepia(0.54) saturate(62.26) hue-rotate(245deg) brightness(1) contrast(1.02)    |
+      | communication      | choice  | #0000FF  | invert(0.48) sepia(0.74) saturate(48.87) hue-rotate(11deg) brightness(1.02) contrast(1.01)  |
+      | content            | book    | #FFFF00  | invert(0.49) sepia(0.52) saturate(46.75) hue-rotate(156deg) brightness(0.89) contrast(1.02) |
+      | interactivecontent | lesson  | #00FFFF  | invert(0.25) sepia(0.63) saturate(11.52) hue-rotate(344deg) brightness(0.94) contrast(0.91) |
 
   @javascript
   Scenario Outline: Setting: Activity icon purposes - Setting the purpose
@@ -39,20 +44,24 @@ Feature: Configuring the theme_boost_union plugin for the "Activity branding" ta
     And I select "<purpose>" from the "<modname>" singleselect
     And I press "Save changes"
     And Behat debugging is enabled
-    And I am on "Course 1" course homepage
+    When I am on "Course 1" course homepage
     And I turn editing mode on
-    When I click on "Add an activity or resource" "button" in the "Topic 1" "section"
-    # We just test if the color in the activity chooser was changed.
-    # Testing all other locations where the activity icons are shown as well and where Boost Union had to modify
-    # the color individually as well would be an overhead which does not really make sense here.
-    Then DOM element ".chooser-container .activityiconcontainer.modicon_<mod>" should have computed style "background-color" "<colorrgb>"
+    And I add a <mod> activity to course "Course 1" section "0" and I fill the form with:
+      | <titlesetting> | Test name |
+    Then DOM element ".activity.modtype_<mod> .activityiconcontainer.courseicon img" should have computed style "filter" "<filter>"
+    And I click on "Add an activity or resource" "button" in the "New section" "section"
+    Then DOM element ".chooser-container .activityiconcontainer.modicon_<mod> img" should have computed style "filter" "<filter>"
+    And I am on the "Test name" "<mod> activity" page
+    Then DOM element "#page-header .modicon_<mod>.activityiconcontainer img" should have computed style "filter" "<filter>"
 
     # We do not want to burn too much CPU time by testing all plugins. We just test two plugins which is fine as all plugins are handled with the same PHP code.
+    # In addition to that, we test the 'other purpose' which is special.
     # These examples will work until Moodle core changes the default colors of the module purpose types.
     Examples:
-      | modname    | purpose       | mod    | colorrgb          |
-      | Assignment | Collaboration | assign | rgb(247, 99, 77)  |
-      | Book       | Communication | book   | rgb(17, 166, 118) |
+      | modname    | titlesetting    | purpose       | mod    | filter                                                                                     |
+      | Assignment | Assignment name | Collaboration | assign | invert(0.25) sepia(0.54) saturate(62.26) hue-rotate(245deg) brightness(1) contrast(1.02)   |
+      | Book       | Name            | Communication | book   | invert(0.48) sepia(0.74) saturate(48.87) hue-rotate(11deg) brightness(1.02) contrast(1.01) |
+      | Assignment | Assignment name | Other         | assign | none                                                                                       |
 
   @javascript @_file_upload
   Scenario Outline: Setting: Custom icons files - Upload custom icons files
@@ -63,7 +72,7 @@ Feature: Configuring the theme_boost_union plugin for the "Activity branding" ta
     And Behat debugging is disabled
     And I navigate to "Appearance > Boost Union > Look" in site administration
     And I click on "Activity branding" "link" in the "#adminsettings .nav-tabs" "css_element"
-    And I click on ".fa-folder-o" "css_element" in the "#admin-modiconsfiles .fp-btn-mkdir" "css_element"
+    And I click on ".fa-folder-plus" "css_element" in the "#admin-modiconsfiles .fp-btn-mkdir" "css_element"
     And I set the field "New folder name" to "assign"
     And I click on ".fp-dlg-butcreate" "css_element" in the ".moodle-dialogue .fp-mkdir-dlg" "css_element"
     And I click on ".aabtn" "css_element" in the "#admin-modiconsfiles .fp-folder" "css_element"

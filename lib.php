@@ -131,7 +131,7 @@ define('THEME_BOOST_UNION_SETTING_EXTSCSSSOURCE_GITHUB', 2);
 /**
  * Returns the main SCSS content.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_main_scss_content($theme) {
@@ -147,7 +147,7 @@ function theme_boost_union_get_main_scss_content($theme) {
 
     // Get and include the main SCSS from Boost Core.
     // This particularly covers the theme preset which is set in Boost Core and not Boost Union.
-    $scss .= theme_boost_get_main_scss_content(theme_config::load('boost'));
+    $scss .= theme_boost_get_main_scss_content(\core\output\theme_config::load('boost'));
 
     // Include post.scss from Boost Union.
     $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/boost_union/post.scss');
@@ -165,7 +165,7 @@ function theme_boost_union_get_main_scss_content($theme) {
 /**
  * Get SCSS to prepend.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_pre_scss($theme) {
@@ -187,12 +187,6 @@ function theme_boost_union_get_pre_scss($theme) {
         'bootstrapcolorinfo' => ['info'],
         'bootstrapcolorwarning' => ['warning'],
         'bootstrapcolordanger' => ['danger'],
-        'activityiconcoloradministration' => ['activity-icon-administration-bg'],
-        'activityiconcolorassessment' => ['activity-icon-assessment-bg'],
-        'activityiconcolorcollaboration' => ['activity-icon-collaboration-bg'],
-        'activityiconcolorcommunication' => ['activity-icon-communication-bg'],
-        'activityiconcolorcontent' => ['activity-icon-content-bg'],
-        'activityiconcolorinterface' => ['activity-icon-interface-bg'],
     ];
 
     // Prepend variables first.
@@ -227,6 +221,32 @@ function theme_boost_union_get_pre_scss($theme) {
     // Set variables which are influenced by the blockdrawerwidth setting.
     if (get_config('theme_boost_union', 'blockdrawerwidth')) {
         $scss .= '$drawer-right-width: '.get_config('theme_boost_union', 'blockdrawerwidth').";\n";
+    }
+
+    // Set variables which are influenced by the activityiconcolor* settings.
+    $purposes = [MOD_PURPOSE_ADMINISTRATION,
+            MOD_PURPOSE_ASSESSMENT,
+            MOD_PURPOSE_COLLABORATION,
+            MOD_PURPOSE_COMMUNICATION,
+            MOD_PURPOSE_CONTENT,
+            MOD_PURPOSE_INTERACTIVECONTENT,
+            MOD_PURPOSE_INTERFACE];
+    // Iterate over all purposes.
+    foreach ($purposes as $purpose) {
+        // Get color setting.
+        $activityiconcolor = get_config('theme_boost_union', 'activityiconcolor'.$purpose);
+
+        // If a color is set.
+        if (!empty($activityiconcolor)) {
+            // Set the activity-icon-*-bg variable which was replaced by the CSS filters in Moodle 4.4 but which is still part
+            // of the codebase.
+            $scss .= '$activity-icon-'.$purpose.'-bg: '.$activityiconcolor.";\n";
+
+            // Set the activity-icon-*-filter variable which holds the CSS filters for the activity icon colors now.
+            $solver = new \theme_boost_union\lib\hextocssfilter\solver($activityiconcolor);
+            $cssfilterresult = $solver->solve();
+            $scss .= '$activity-icon-'.$purpose.'-filter: '.$cssfilterresult['filter'].";\n";
+        }
     }
 
     // Set custom Boost Union SCSS variable: The block region outside left width.
@@ -264,7 +284,7 @@ function theme_boost_union_get_pre_scss($theme) {
 /**
  * Inject additional SCSS.
  *
- * @param theme_config $theme The theme config object.
+ * @param \core\output\theme_config $theme The theme config object.
  * @return string
  */
 function theme_boost_union_get_extra_scss($theme) {
@@ -459,7 +479,7 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
                 $filearea === 'touchiconsios' ||
                 preg_match("/tilebackgroundimage[2-9]|1[0-2]?/", $filearea) ||
                 preg_match("/slidebackgroundimage[2-9]|1[0-2]?/", $filearea))) {
-        $theme = theme_config::load('boost_union');
+        $theme = \core\output\theme_config::load('boost_union');
         // By default, theme files must be cache-able by both browsers and proxies.
         if (!array_key_exists('cacheability', $options)) {
             $options['cacheability'] = 'public';
@@ -545,7 +565,7 @@ function theme_boost_union_output_fragment_icons_list($args) {
         $icons = [];
 
         // Load the theme config.
-        $theme = \theme_config::load($PAGE->theme->name);
+        $theme = \core\output\theme_config::load($PAGE->theme->name);
 
         // Get the FA system.
         $faiconsystem = \core\output\icon_system_fontawesome::instance($theme->get_icon_system());
@@ -568,7 +588,7 @@ function theme_boost_union_output_fragment_icons_list($args) {
             $component = isset($icon[0]) ? $icon[0] : '';
 
             // Render the pix icon.
-            $icon = new \pix_icon($iconstr,  "", $component);
+            $icon = new \core\output\pix_icon($iconstr,  "", $component);
             $icons[] = [
                 'icon' => $faiconsystem->render_pix_icon($OUTPUT, $icon),
                 'value' => $iconkey,
@@ -584,7 +604,7 @@ function theme_boost_union_output_fragment_icons_list($args) {
 /**
  * Define preferences which may be set via the core_user_set_user_preferences external function.
  *
- * @uses core_user::is_current_user
+ * @uses \core\user::is_current_user
  *
  * @return array[]
  */
@@ -597,7 +617,7 @@ function theme_boost_union_user_preferences(): array {
             'null' => NULL_NOT_ALLOWED,
             'default' => 0,
             'choices' => [0, 1],
-            'permissioncallback' => [core_user::class, 'is_current_user'],
+            'permissioncallback' => [\core\user::class, 'is_current_user'],
         ];
     }
     return $preferences;
@@ -622,4 +642,24 @@ function theme_boost_union_render_navbar_output() {
 
     // Return.
     return $content;
+}
+
+/**
+ * Triggered as soon as practical on every moodle bootstrap before session is started.
+ *
+ * We use this callback function to manipulate / set settings which would normally be manipulated / set through
+ * /config.php, but we do not want to urge the admin to add stuff to /config.php when installing Boost Union.
+ */
+function theme_boost_union_before_session_start() {
+    global $CFG;
+
+    // Note: At this point, the $PAGE object does not exist yet. Thus, we cannot quickly and reliably detect if Boost Union
+    // (or a Boost Union child theme) is the active theme. Thus, the following code is executed for every theme.
+    // This fact is noted in the README.
+
+    // Require own local library.
+    require_once($CFG->dirroot.'/theme/boost_union/locallib.php');
+
+    // Manipulate Moodle core hooks.
+    theme_boost_union_manipulate_hooks();
 }

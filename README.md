@@ -1,7 +1,7 @@
 moodle-theme_boost_union
 ========================
 
-[![Moodle Plugin CI](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/workflows/Moodle%20Plugin%20CI/badge.svg?branch=MOODLE_403_STABLE)](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3AMOODLE_403_STABLE)
+[![Moodle Plugin CI](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/workflows/Moodle%20Plugin%20CI/badge.svg?branch=MOODLE_405_STABLE)](https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3AMOODLE_405_STABLE)
 
 Theme Boost Union is an enhanced child theme of Boost which is intended, on the one hand, to make Boost simply more configurable and, on the other hand, to provide helpful additional features for the daily Moodle operation of admins, teachers and students.
 
@@ -9,7 +9,7 @@ Theme Boost Union is an enhanced child theme of Boost which is intended, on the 
 Requirements
 ------------
 
-This theme requires Moodle 4.3+
+This theme requires Moodle 4.5+
 
 
 Motivation for this theme
@@ -224,6 +224,32 @@ With this setting, you can control whether the course image is visible inside th
 ###### Show course completion progress
 
 With this setting, you can control whether the course completion progress is visible inside the course overview block or not.
+
+#### Tab "Blocks"
+
+##### Timeline block
+
+###### Tint timeline activity icons
+
+With this setting, you can tint the activity icons in the timeline block based on the activity purposes. By default, Moodle core displays them just as black icons.
+
+##### Upcoming events block
+
+###### Tint upcoming events activity icons
+
+With this setting, you can tint the activity icons in the upcoming events block based on the activity purposes. By default, Moodle core displays them just as black icons.
+
+##### Recently accessed items block
+
+###### Tint recently accessed items activity icons
+
+With this setting, you can tint the activity icons in the recently accessed items block based on the activity purposes. By default, Moodle core displays them just as black icons.
+
+##### Activities block
+
+###### Tint activities activity icons
+
+With this setting, you can tint the activity icons in the activities block based on the activity purposes. By default, Moodle core displays them just as black icons.
 
 #### Tab "Course"
 
@@ -649,16 +675,29 @@ In addition to our mission to provide admin settings for each and every feature 
 Exceptions to our main design principle
 ---------------------------------------
 
-As you have read in the introduction, the main design principle of Boost Union is not to change anything in the GUI until a particular feature is enabled in the theme settings. However, due to the way how Moodle core and Boost in Moodle core is built, this main design principle sometimes could not be fully satisfied:
+As you have read in the introduction, the main design principle of Boost Union is not to change anything in the GUI until Boost Union is set as active theme and a particular feature is enabled in the theme settings. However, due to the way how Moodle core and Boost in Moodle core is built, this main design principle sometimes could not be fully satisfied:
 
 * Footer popover:
   As soon as you click the footer button (questionmark icon) in the bottom right corner of the screen, a popover with several links appears. However, the content of this link list is far from being well-structured and looks more like a garage sale. When implementing the settings to individually suppress each of these popover links, we had to make some code re-arrangements which result in the fact that the popover links are slightly more well-structured even if you do not enable any setting in Boost Union.
+* Suppress footer outputs by plugin / core component:
+  Due to the way how the settings `theme_boost_union | footersuppressstandardfooter_*` had to be built, it was not possible to quickly and reliably detect if Boost Union (or a Boost Union child theme) is the active theme. Thus, these settings are also applied if another theme than Boost Union is active. Please make sure to disable these settings if Boost Union is installed but should not be used.
 
 
 Companion plugin local_navbarplus
 ---------------------------------
 
 With the footersuppressusertour setting, you can disable the possibility to reset a user tour in the footer popover. If you have enabled this setting, you might want to have a look at our plugin local_navbarplus as a companion plugin which allows you, among other things, to add a "Reset user tour" link to the navigation bar instead. local_navbarplus is published on https://moodle.org/plugins/local_navbarplus and on https://github.com/moodle-an-hochschulen/moodle-local_navbarplus.
+
+
+Interference with forced settings in config.php
+-----------------------------------------------
+
+Due to the way how some Boost Union features had to be built, you have to be aware of the following interferences if you force settings in config.php:
+
+* $CFG->hooks_callback_overrides:
+  With this setting, you can override hook definitions in config.php - see https://moodledev.io/docs/4.4/apis/core/hooks#hooks-overview-page.
+  However, if you use the `theme_boost_union | footersuppressstandardfooter_*` settings, this forced setting will be set as well during each page load.
+  Using the Boost Union settings and overriding hooks manually in config.php at the same time should work, but is not officially supported and tested by Boost Union.
 
 
 Support for other companion plugins

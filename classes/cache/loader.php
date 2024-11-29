@@ -24,18 +24,12 @@
 
 namespace theme_boost_union\cache;
 
-defined('MOODLE_INTERNAL') || die();
-
-// Require the cache loaders class, but only if the file exists (which is the case before Moodle 4.5).
-// This is just done to support a seamless upgrade to 4.5.
-if (file_exists($CFG->dirroot.'/cache/classes/loaders.php')) {
-    require_once($CFG->dirroot.'/cache/classes/loaders.php');
-}
+use core_cache\application_cache;
 
 /**
  * Custom cache loader to handle the smart menus and items deletion.
  */
-class loader extends \cache_application {
+class loader extends application_cache {
 
     /**
      * Delete the cached menus or menu items for all of its users.

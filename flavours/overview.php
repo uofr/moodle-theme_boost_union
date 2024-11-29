@@ -47,7 +47,7 @@ admin_externalpage_setup('theme_boost_union_flavours');
 
 // Prepare the page (to make sure that all necessary information is already set even if we just handle the actions as a start).
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/theme/boost_union/flavours/overview.php'));
+$PAGE->set_url(new core\url('/theme/boost_union/flavours/overview.php'));
 $PAGE->set_cacheable(false);
 
 // Process actions.
@@ -71,9 +71,9 @@ if ($action !== null && confirm_sesskey()) {
                         ['id' => $prevflavour->id]);
 
                 // Purge the flavours cache as the users might get other flavours which apply after the sorting.
-                // We would have preferred using cache_helper::purge_by_definition, but this just purges the session cache
+                // We would have preferred using \core_cache\helper::purge_by_definition, but this just purges the session cache
                 // of the current user and not for all users.
-                cache_helper::purge_by_event('theme_boost_union_flavours_resorted');
+                \core_cache\helper::purge_by_event('theme_boost_union_flavours_resorted');
             }
             break;
         case 'down':
@@ -87,9 +87,9 @@ if ($action !== null && confirm_sesskey()) {
                         ['id' => $nextflavour->id]);
 
                 // Purge the flavours cache as the users might get other flavours which apply after the sorting.
-                // We would have preferred using cache_helper::purge_by_definition, but this just purges the session cache
+                // We would have preferred using \core_cache\helper::purge_by_definition, but this just purges the session cache
                 // of the current user and not for all users.
-                cache_helper::purge_by_event('theme_boost_union_flavours_resorted');
+                \core_cache\helper::purge_by_event('theme_boost_union_flavours_resorted');
             }
             break;
     }
@@ -119,7 +119,7 @@ echo get_string('flavoursoverview_desc', 'theme_boost_union');
 // Prepare 'Create flavours' button.
 $createbutton = $OUTPUT->box_start();
 $createbutton .= $OUTPUT->single_button(
-        new \moodle_url('/theme/boost_union/flavours/edit.php', ['action' => 'create', 'sesskey' => sesskey()]),
+        new \core\url('/theme/boost_union/flavours/edit.php', ['action' => 'create', 'sesskey' => sesskey()]),
         get_string('flavourscreateflavour', 'theme_boost_union'), 'get');
 $createbutton .= $OUTPUT->box_end();
 

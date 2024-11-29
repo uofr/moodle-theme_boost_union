@@ -92,15 +92,15 @@ $string['extscssgithubtoken_docs'] = 'Go to <a href="https://github.com/settings
 // ... ... Setting: External SCSS Github API user.
 $string['extscssgithubuser'] = 'External SCSS Github API user';
 $string['extscssgithubuser_desc'] = 'The Github API user or organization which owns the private Github repository.';
-$string['extscssgithubuser_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the user will be <em>moodle-an-hochschulen</em>.';
+$string['extscssgithubuser_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/main/extscss.scss, the user will be <em>moodle-an-hochschulen</em>.';
 // ... ... Setting: External SCSS Github API repository.
 $string['extscssgithubrepo'] = 'External SCSS Github API repository';
 $string['extscssgithubrepo_desc'] = 'The private Github repository where the SCSS files are located.';
-$string['extscssgithubrepo_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the repository will be <em>moodle-theme_boost_union-extscsstest</em>.';
+$string['extscssgithubrepo_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/main/extscss.scss, the repository will be <em>moodle-theme_boost_union-extscsstest</em>.';
 // ... ... Setting: External Pre SCSS Github file path.
 $string['extscssgithubprefilepath'] = 'External Pre SCSS Github file path';
 $string['extscssgithubprefilepath_desc'] = 'The path within the private Github repository where the Pre SCSS file is located.';
-$string['extscssgithubfilepath_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/master/extscss.scss, the file path will be <em>/extscss.scss</em>.';
+$string['extscssgithubfilepath_example'] = 'Example: If you can see the file in your Github account on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union-extscsstest/blob/main/extscss.scss, the file path will be <em>/extscss.scss</em>.';
 // ... ... Setting: External Post SCSS Github file path.
 $string['extscssgithubpostfilepath'] = 'External Post SCSS Github file path';
 $string['extscssgithubpostfilepath_desc'] = 'The path within the private Github repository where the Post SCSS file is located.';
@@ -197,9 +197,19 @@ $string['activityiconcolorcommunicationsetting_desc'] = 'The activity icon color
 // ... ... Setting: Activity icon color for 'Content'.
 $string['activityiconcolorcontentsetting'] = 'Activity icon color for "Content"';
 $string['activityiconcolorcontentsetting_desc'] = 'The activity icon color for "Content"';
+// ... ... Setting: Activity icon color for 'Interactive content'.
+$string['activityiconcolorinteractivecontentsetting'] = 'Activity icon color for "Interactive content"';
+$string['activityiconcolorinteractivecontentsetting_desc'] = 'The activity icon color for "Interactive content"';
 // ... ... Setting: Activity icon color for 'Interface'.
 $string['activityiconcolorinterfacesetting'] = 'Activity icon color for "Interface"';
 $string['activityiconcolorinterfacesetting_desc'] = 'The activity icon color for "Interface"';
+// ... ... Setting: Activity icon color fidelity'.
+$string['activityiconcolorfidelitysetting'] = 'Activity icon color fidelity';
+$string['activityiconcolorfidelitysetting_desc'] = 'With the settings above, you set a hex color which will be used to tint the particular activity icon. However, technically, the activity icon is tinted with a CSS filter. Boost Union uses a sophisticated algorithm to determine a CSS filter which matches the given hex color visually, but this algorithm is based on a randomized search and might produce suboptimal results when it is run just once. With this setting, you can allow Boost Union to run the algorithm multiple times and pick the filter which deviates least from the hex color at the end. Please note that this setting has an impact on the cache purging times (the more iterations you allow, the longer Moodle will take to purge the theme cache), but it will not have an impact on page load times.';
+$string['activityiconcolorfidelity_oneshot'] = 'One shot (1 iteration)';
+$string['activityiconcolorfidelity_sometries'] = 'Some tries (up to 10 iterations)';
+$string['activityiconcolorfidelity_detailled'] = 'Detailled research (up to 100 iterations)';
+$string['activityiconcolorfidelity_insane'] = 'Insane quest (up to 500 iterations)';
 // ... Section: Activity icon purposes.
 $string['activitypurposeheading'] = 'Activity icon purposes';
 $string['activitypurposeheading_desc'] = 'With these settings, you can override the activity icon background color which is defined by the activity\'s purpose (and which is a hardcoded plugin feature in each activity).';
@@ -209,6 +219,7 @@ $string['activitypurposeassessment'] = 'Assessment';
 $string['activitypurposecollaboration'] = 'Collaboration';
 $string['activitypurposecommunication'] = 'Communication';
 $string['activitypurposecontent'] = 'Content';
+$string['activitypurposeinteractivecontent'] = 'Interactive content';
 $string['activitypurposeinterface'] = 'Interface';
 $string['activitypurposeother'] = 'Other';
 // ... Section: Activity icons.
@@ -266,6 +277,7 @@ $string['loginformtransparencysetting'] = 'Login form transparency';
 $string['loginformtransparencysetting_desc'] = 'With this setting, you can make the login form slightly transparent to let the background image shine through even more.';
 // ... Section: Login providers.
 $string['loginprovidersheading'] = 'Login providers';
+$string['loginprovidersheading_desc'] = 'Please note: Boost Union has its own login providers settings and does not use the \'{$a->settingname}\' setting from <a href="{$a->url}">Moodle core\'s authentication setting</a>.';
 // ... ... Setting: Local login form.
 $string['loginlocalloginenablesetting'] = 'Local login';
 $string['loginlocalloginenablesetting_desc'] = 'With this setting, you control if the local login form is shown on the login page or not. By default, the local login form is shown and users an login into the site as normal. If you disable this setting, the local login form is hidden. This allows you to just provide login buttons for external identity providers like OAuth2 or OIDC.';
@@ -299,6 +311,29 @@ $string['courseoverviewshowcourseimagessetting_desc'] = 'With this setting, you 
 // ... ... Setting: Show course completion progress.
 $string['courseoverviewshowprogresssetting'] = 'Show course completion progress';
 $string['courseoverviewshowprogresssetting_desc'] = 'With this setting, you can control whether the course completion progress is visible inside the course overview block or not.';
+
+// Settings: Blocks tab.
+// The string for this tab is the same as on the 'Feel' page.
+// ... Section: Timeline block.
+$string['timelineheading'] = 'Timeline block';
+// Setting: Tint activity icons in the timeline block.
+$string['timelinetintenabled'] = 'Tint timeline activity icons';
+$string['timelinetintenabled_desc'] = 'With this setting, you can tint the activity icons in the timeline block based on the activity purposes. By default, Moodle core displays them just as black icons.';
+// ... Section: Upcoming events block.
+$string['upcomingeventsheading'] = 'Upcoming events block';
+// Setting: Tint activity icons in the upcoming events block.
+$string['upcomingeventstintenabled'] = 'Tint upcoming events activity icons';
+$string['upcomingeventstintenabled_desc'] = 'With this setting, you can tint the activity icons in the upcoming events block based on the activity purposes. By default, Moodle core displays them just as black icons.';
+// ... Section: Recently accessed items block.
+$string['recentlyaccesseditemsheading'] = 'Recently accessed items block';
+// Setting: Tint activity icons in the recently accessed items block.
+$string['recentlyaccesseditemstintenabled'] = 'Tint recently accessed items activity icons';
+$string['recentlyaccesseditemstintenabled_desc'] = 'With this setting, you can tint the activity icons in the recently accessed items block based on the activity purposes. By default, Moodle core displays them just as black icons.';
+// ... Section: Activities block.
+$string['activitiesheading'] = 'Activities block';
+// Setting: Tint activity icons in the activities block.
+$string['activitiestintenabled'] = 'Tint activities activity icons';
+$string['activitiestintenabled_desc'] = 'With this setting, you can tint the activity icons in the activities block based on the activity purposes. By default, Moodle core displays them just as black icons.';
 
 // Settings: Course tab.
 $string['coursetab'] = 'Course';
@@ -641,18 +676,18 @@ $string['footersuppresslogininfosetting_desc'] = 'With this setting, you can ent
 // ... ... Setting: Suppress 'Reset user tour on this page' link.
 $string['footersuppressusertoursetting'] = 'Suppress \'Reset user tour on this page\' link';
 $string['footersuppressusertoursetting_desc'] = 'With this setting, you can entirely suppress the \'Reset user tour on this page\' link in the footer. This link would otherwise provide the possibility to reset a user tour on a particular page.';
-// ... ... Setting: Suppress 'Give feedback about this software' link.
-$string['footersuppressfeedbacksetting'] = 'Suppress \'Give feedback about this software\' link';
-$string['footersuppressfeedbacksetting_desc'] = 'With this setting, you can entirely suppress the \'Give feedback about this software\' link in the footer. This link would otherwise appear if the <a href="{$a->url}">feedback about this software</a> setting is enabled.';
 // ... ... Setting: Suppress theme switcher links.
 $string['footersuppressthemeswitchsetting'] = 'Suppress theme switcher links';
 $string['footersuppressthemeswitchsetting_desc'] = 'With this setting, you can entirely suppress the theme switcher links in the footer. The underlying system for device-specific themes was removed in Moodle 4.3, but the output routines are still there, so better be save than sorry.';
 // ... ... Setting: Suppress 'Powered by Moodle' link.
 $string['footersuppresspoweredsetting'] = 'Suppress \'Powered by Moodle\' link';
 $string['footersuppresspoweredsetting_desc'] = 'With this setting, you can entirely suppress the \'Powered by Moodle\' link in the footer. This link would otherwise show an information that this site is running Moodle and provide a link to Moodle HQ.';
+// ... ... Setting: Suppress footer output by core components.
+$string['footersuppressstandardfootercore'] = 'Suppress footer output by core component \'{$a}\'';
+$string['footersuppressstandardfootercore_desc'] = 'With this setting, you can entirely suppress the footer output by the core component \'{$a}\'. Core components can add additional content to the footer by implementing a particular hook or function. This core component has implemented this hook / function and might add content to the footer in certain circumstances.';
 // ... ... Setting: Suppress footer output by plugins.
 $string['footersuppressstandardfooter'] = 'Suppress footer output by plugin \'{$a}\'';
-$string['footersuppressstandardfooter_desc'] = 'With this setting, you can entirely suppress the footer output by plugin \'{$a}\'. Plugins (even if they are shipped with Moodle core, but are still technically plugins) can add additional content to the footer by implementing a particular function. This plugin has implemented this function and might add content to the footer in certain circumstances.';
+$string['footersuppressstandardfooter_desc'] = 'With this setting, you can entirely suppress the footer output by plugin \'{$a}\'. Plugins (even if they are shipped with Moodle core, but are still technically plugins) can add additional content to the footer by implementing a particular hook or function. This plugin has implemented this hook / function and might add content to the footer in certain circumstances.<br />Please note: Due to the way how the suppressing feature is implemented, the setting might not take effect before the second page load after saving the setting.';
 
 // Settings: Static pages tab.
 $string['staticpagestab'] = 'Static pages';
@@ -1292,6 +1327,7 @@ $string['cachedef_flavours'] = 'Flavours which apply to a given page\'s category
 $string['cachedef_smartmenus'] = 'Smart menus';
 $string['cachedef_smartmenu_items'] = 'Smart menu items';
 $string['cachedef_touchiconsios'] = 'Touch icon files for iOS';
+$string['cachedef_hookoverrides'] = 'Hook overrides';
 
 // Scheduled tasks.
 $string['task_purgecache'] = 'Purge theme cache';

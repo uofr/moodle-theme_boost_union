@@ -34,7 +34,7 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
     And I click on ".action-edit" "css_element" in the "Useful Resources" "table_row"
     And I set the field "Show description" to "Help"
     And I click on "Save and return" "button"
-    And "i.fa-question-circle" "css_element" should appear before "Info" "link"
+    And "i.fa-circle-question" "css_element" should appear before "Info" "link"
     And I click on ".action-edit" "css_element" in the "Useful Resources" "table_row"
     And I set the field "Show description" to "Never"
     And I click on "Save and return" "button"
@@ -475,7 +475,7 @@ Feature: Configuring the theme_boost_union plugin on the "Smart menus" page, app
   @javascript
   Scenario: Smartmenu: Menus: Presentation - Verify that the correct _custom_ menu item is displayed as active when viewing the custom menu item's page (Moodle core behaviour which must not be broken by the smart menus)
     Given I log in as "admin"
-    And I navigate to "Appearance > Themes > Theme settings" in site administration
+    And I navigate to "Appearance > Advanced theme settings" in site administration
     And I set the field "Custom menu items" to multiline:
     """
     Test node|/admin/tool/dataprivacy/summary.php
