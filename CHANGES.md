@@ -4,7 +4,58 @@ moodle-theme_boost_union
 Changes
 -------
 
-### Unreleased
+### v4.5-r10
+
+* 2025-03-10 - Bugfix: The course details modal did not work on all site home widgets, resolves #851.
+* 2025-03-09 - Bugfix: The theme's SCSS could not be built if setting activityiconcolorfidelity was not set yet, resolves #838
+* 2025-03-09 - Upgrade: Remove theme_boost_union_before_standard_html_head and theme_boost_union_before_standard_top_of_body_html callbacks from Moodle 4.5 and 4.4 releases finally, resolves #604.
+* 2025-03-09 - Improvement: Introduce a Boost Union specific string for "submit" to be used in the accessbility support form which allows better translatons, resolves #830.
+* 2025-03-08 - Upgrade: Replace .media Bootstrap class according to MDL-80396, resolves #835.
+* 2025-03-08 - Improvement: Add setting to limit the maximum width of the navbar logo if it is too broad or has a special aspect ratio, resolves #544.
+
+### v4.5-r9
+
+* 2025-02-22 - Feature: Add some styling to the category listings on site home and on the category index pages, resolves #840.
+* 2025-02-16 - Feature: Show the course listing on site home and on the category index pages as (proper) list, resolves #573.
+* 2025-02-07 - Feature: Show the course listing on site home and on the category index pages as cards, resolves #558.
+
+### v4.5-r8
+
+* 2025-02-17 - Bugfix: Remove the possibility to set the activity purpose for subsections to avoid that activities within subsections get tinted with the wrong color, resolves #823.
+* 2025-02-12 - Bugfix: Accessibility page link in description differed from real location, resolves #818.
+
+### v4.5-r7
+
+* 2025-02-11 - Bugfix: Using smart menus together with custom menus broke Moodle, resolves #814, regression of #602.
+* 2025-02-10 - Bugfix: Adopt accessibility changes from MDL-67683 which led to Boost Union Behat failures on Moodle core 4.5.2 and 4.4.6, resolves #813.
+               Please note: This change raises Boost Union's required Moodle core version to 4.5.2.
+
+### v4.5-r6
+
+* 2025-02-04 - Improvement: Hide the 'Menu item mode' settings for smart menu items which are not of the 'dynamic courses' item type, resolves #804.
+* 2025-02-04 - Bugfix: Smart menu 3rd level submenus were being cut-off in responsive / mobile view, resolves #356.
+               Please note: This is a comparably large visual change which effectively replaces the presentation of a 3rd level smart menu (which can only be realized with dynamic courses menu items up to now). Flyout menus in the main navigation area and the menu bar area have been replaced with the 'sliding door' submenu behaviour which has been used in the user menu only up to now. If you are using dynamic courses menu items, please test your particular smart menu setup before updating to this Boost Union release.
+* 2025-02-04 - Bugfix: Smart menu 3rd level submenus had a font color which differed from the 2nd level and might have been even invisible, resolves #459.
+* 2025-02-04 - Bugfix: Long smart menus were not scrollable vertically, resolves #406.
+* 2025-02-04 - Bugfix: Fix smart menu dynamic course items not updating properly based on course role assignments, resolves #749.
+* 2025-02-04 - Bugfix: Smart menu item pointing to external site gets highlighted as active by mistake, resolves #758.
+* 2025-02-04 - Improvement: Allow changing of home URL on small devices as well, resolves #802.
+* 2025-01-31 - Improvement: Add option to include alt text for item image in smart menu cards, resolves #752.
+
+### v4.5-r5
+
+* 2024-12-31 - Child theme support: Fully replicate Boost Union's extra SCSS if a Boost Union Child theme is the current theme, resolves #718, resolves theme_boost_union_child/#5.
+* 2024-12-31 - Bugfix / Child theme support: The theme_boost_union_get_pre_scss() and theme_boost_union_get_extra_scss() function used $theme->settings although they should not do that anymore, resolves #791
+* 2024-12-31 - Tests: Increase the test coverage for the background image setting, helps to resolve theme_boost_union_child/#5
+* 2024-12-31 - Bugfix: In flavours, not setting the brand color / bootstrap colors in a flavour did not result in the global brand color / bootstrap colors being served properly, resolves #790.
+* 2024-12-30 - Improvement: Add more flavour settings (Activity icon colors, navbar color, background image position), resolves #789.
+* 2024-12-25 - Documentation: Explain the SCSS stack order in the README.
+* 2024-12-25 - Bugfix: Fix the order in which all the pre SCSS assets are added to the SCSS stack, resolves #788.
+* 2024-12-22 - Feature: Allow overwriting of brand colors and the usage of SCSS (instead of pure CSS) in flavours, resolves #155.
+               Child theme support: If you are running a Boost Union Child theme, please make sure to adapt your child theme to our latest boilerplate.
+* 2024-12-15 - Feature: Add declaration of accessibility page and accessibility support page, resolves #567.
+
+### v4.5-r4
 
 * 2024-12-06 - Tests: Add several Behat optimisations to bring down the test suite run time, resolves #765.
 * 2024-12-06 - Upstream change: Adopt changes from MDL-83759 ('System notification navbar popover is misplaced in Moodle 4.4 and 4.5')

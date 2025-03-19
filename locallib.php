@@ -338,6 +338,45 @@ function theme_boost_union_get_staticpage_pagetitle($page) {
 }
 
 /**
+ * Build the link to a accessibility page.
+ *
+ * @param string $page The accessibility page's identifier.
+ * @return string.
+ */
+function theme_boost_union_get_accessibility_link($page) {
+    // Compose the URL object.
+    $url = new core\url('/theme/boost_union/accessibility/'.$page.'.php');
+
+    // Return the string representation of the URL.
+    return $url->out();
+}
+
+/**
+ * Build the page title of a accessibility page.
+ *
+ * @param string $page The accessibility page's identifier.
+ * @return string.
+ */
+function theme_boost_union_get_accessibility_pagetitle($page) {
+    // Re-use the theme_boost_union_get_staticpage_pagetitle() as we are basically doing the same thing here.
+    return theme_boost_union_get_staticpage_pagetitle('accessibility'.$page);
+}
+
+/**
+ * Build the screenreader link title to the accessibility support page.
+ *
+ * @return string.
+ */
+function theme_boost_union_get_accessibility_srlinktitle() {
+    $supporttitle = get_config('theme_boost_union', 'accessibilitysupportpagesrlinktitle');
+    if (empty($supporttitle)) {
+        $supporttitle = get_string('accessibilitysupportpagesrlinktitledefault', 'theme_boost_union');
+    }
+
+    return $supporttitle;
+}
+
+/**
  * Helper function to check if a given info banner should be shown on this page.
  * This function checks
  * a) if the banner is enabled at all
@@ -1010,32 +1049,6 @@ function theme_boost_union_get_externaladminpage_heading() {
 }
 
 /**
- * Helper function which adds the CSS file from the flavour to the Moodle page.
- * It's meant to be called by theme_boost_union_before_standard_html_head() only.
- * *
- * @throws coding_exception
- * @throws dml_exception
- * @throws moodle_exception
- */
-function theme_boost_union_add_flavourcss_to_page() {
-    global $CFG, $PAGE;
-
-    // Require flavours library.
-    require_once($CFG->dirroot . '/theme/boost_union/flavours/flavourslib.php');
-
-    // If any flavour applies to this page.
-    $flavour = theme_boost_union_get_flavour_which_applies();
-    if ($flavour != null) {
-        // Build the flavour CSS file URL.
-        $flavourcssurl = new core\url('/theme/boost_union/flavours/styles.php',
-                ['id' => $flavour->id, 'rev' => theme_get_revision()]);
-
-        // Add the CSS file to the page.
-        $PAGE->requires->css($flavourcssurl);
-    }
-}
-
-/**
  * Helper function which returns the course header image url, picking the current course from the course settings
  * or the fallback image from the theme.
  * If no course header image can should be shown for the current course, the function returns null.
@@ -1669,6 +1682,28 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
     return $scss;
 }
 
+
+/**
+ * Returns the SCSS code to be used in the navbar.
+ *
+ * @param theme_config $theme The theme config object.
+ * @return string
+ */
+function theme_boost_union_get_scss_navbar($theme) {
+    // Initialize SCSS snippet.
+    $scss = '';
+
+    // Set styles bases on the maxlogowidth setting.
+    if (!empty(get_config('theme_boost_union', 'maxlogowidth'))) {
+        $scss .= '.navbar-brand, .navbar-brand .logo {
+                max-width: '.get_config('theme_boost_union', 'maxlogowidth').';
+                height: auto;
+        }'.PHP_EOL;
+    }
+
+    return $scss;
+}
+
 /**
  * Helper function which returns an array of login methods on the login page.
  *
@@ -2057,14 +2092,56 @@ function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
         }
     }
 
+    // Add the touch icons to the page.
+    $html .= theme_boost_union_get_touchicons_html_for_page();
+
+    if ($hook != null) {
+        // Add the HTML code to the hook.
+        $hook->add_html($html);
+    } else {
+        // Return the HTML code.
+        return $html;
+    }
+}
+
+/**
+ * Callback to add body elements on top.
+ * This function is implemented here and used from two locations:
+ * -> function theme_boost_union_before_standard_top_of_body_html in lib.php (for releases up to Moodle 4.3)
+ * -> class theme_boost_union\local\hook\output\before_standard_top_of_body_html_generation (for releases from Moodle 4.4 on).
+ *
+ * We use this callback
+ * -> to add the accessibility form link
+ *
+ * @param \core\hook\output\before_standard_top_of_body_html_generation $hook If the hook is passed, the hook implementation will
+ *                                                                      be used. If not, the legacy implementation will
+ *                                                                      be used.
+ * @return string|void The legacy implementation will return a string, the hook implementation will return nothing.
+ */
+function theme_boost_union_callbackimpl_before_standard_top_of_body_html(&$hook = null) {
+    global $CFG, $PAGE;
+
+    // Require local library.
+    require_once($CFG->dirroot.'/theme/boost_union/locallib.php');
+
+    // Initialize HTML.
+    $html = '';
+
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    if (theme_boost_union_is_active_theme() != true) {
+        if ($hook != null) {
+            return;
+        } else {
+            return $html;
+        }
+    }
+
     // Require local library.
     require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
 
-    // Add the flavour CSS to the page.
-    theme_boost_union_add_flavourcss_to_page();
-
-    // Add the touch icons to the page.
-    $html .= theme_boost_union_get_touchicons_html_for_page();
+    // Add the accessibility support skip link to the page.
+    $html .= theme_boost_union_get_accessibility_support_skip_link();
 
     if ($hook != null) {
         // Add the HTML code to the hook.
@@ -2227,6 +2304,39 @@ function theme_boost_union_get_external_scss($type) {
 
     // Now return the (hopefully valid and working) SCSS code.
     return $extscss;
+}
+
+/**
+ * Build the link to the accessibility support page visible for screen readers.
+ *
+ * @return string
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function theme_boost_union_get_accessibility_support_skip_link() {
+    $output = '';
+
+    // If the accessibility support is enabled.
+    $enableaccessibilitysupportsetting = get_config('theme_boost_union', 'enableaccessibilitysupport');
+    if (isset($enableaccessibilitysupportsetting) && $enableaccessibilitysupportsetting == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+
+        // If user login is either not required or if the user is logged in.
+        $allowaccessibilitysupportwithoutloginsetting = get_config('theme_boost_union', 'allowaccessibilitysupportwithoutlogin');
+        if (!(isset($allowaccessibilitysupportwithoutloginsetting) &&
+                $allowaccessibilitysupportwithoutloginsetting != THEME_BOOST_UNION_SETTING_SELECT_YES) ||
+                (isloggedin() && !isguestuser())) {
+
+            // Add link for screen readers to accessibility support page.
+            $supporturl = new \core\url('/theme/boost_union/accessibility/support.php');
+            $supporttitle = theme_boost_union_get_accessibility_srlinktitle();
+            $output .= \core\output\html_writer::link($supporturl, $supporttitle, [
+                'id' => 'access-support-form-sr-link',
+                'class' => 'sr-only sr-only-focusable',
+            ]);
+        }
+    }
+
+    return $output;
 }
 
 /**
@@ -2429,6 +2539,22 @@ function theme_boost_union_is_active_theme() {
     global $PAGE;
 
     if ($PAGE->theme->name == 'boost_union' || in_array('boost_union', $PAGE->theme->parents)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Helper function to check if a child theme of Boost Union (and _not_ Boost Union itself) is active.
+ * This is needed at multiple locations to improve child theme support in Boost Union already.
+ *
+ * @return bool
+ */
+function theme_boost_union_is_active_childtheme() {
+    global $PAGE;
+
+    if ($PAGE->theme->name != 'boost_union') {
         return true;
     } else {
         return false;

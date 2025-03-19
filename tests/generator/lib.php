@@ -42,7 +42,7 @@ class theme_boost_union_generator extends component_generator_base {
             throw new Exception('A Smart menu location must be specified.');
         }
         $validlocations = array_keys(smartmenu::get_locations());
-        if (!empty(array_diff($validlocations, $location))) {
+        if (!empty(array_diff($location, $validlocations))) {
             throw new Exception('Invalid Smart menu location.');
         }
         $validdescriptions = array_keys(smartmenu::get_showdescription_options());
@@ -81,7 +81,7 @@ class theme_boost_union_generator extends component_generator_base {
                 throw new Exception('Invalid cardform.');
             }
             $validbehaviours = array_keys(smartmenu::get_cardoverflowbehaviour_options());
-            $cardoverflowbehaviour = strtolower($data['cardoverflowbehaviour']) ?? smartmenu::CARDOVERFLOWBEHAVIOUR_NOWRAP;
+            $cardoverflowbehaviour = strtolower($data['cardoverflowbehaviour'] ?? smartmenu::CARDOVERFLOWBEHAVIOUR_NOWRAP);
             if (!in_array($cardoverflowbehaviour, $validbehaviours)) {
                 throw new Exception('Invalid cardoverflowbehaviour.');
             }
@@ -239,6 +239,7 @@ class theme_boost_union_generator extends component_generator_base {
             'tooltip' => $data['tooltip'] ?? null,
             'target' => $target,
             'cssclass' => $data['cssclass'] ?? null,
+            'imagealt' => $data['imagealt'] ?? null,
             'textposition' => $textposition,
             'textcolor' => $data['textcolor'] ?? null,
             'backgroundcolor' => $data['backgroundcolor'] ?? null,

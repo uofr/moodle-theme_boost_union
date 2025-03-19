@@ -47,11 +47,18 @@ class smartmenu_item_edit_form extends \moodleform {
         global $DB, $PAGE, $CFG;
 
         // Require and register the QuickForm colorpicker element.
-        require_once($CFG->dirroot.'/theme/boost_union/form/element-colorpicker.php');
+        require_once($CFG->dirroot.'/theme/boost_union/classes/formelement/colorpicker.php');
         \MoodleQuickForm::registerElementType(
                 'theme_boost_union_colorpicker',
-                $CFG->dirroot.'/theme/boost_union/form/element-colorpicker.php',
-                'moodlequickform_themeboostunion_colorpicker'
+                $CFG->dirroot.'/theme/boost_union/classes/formelement/colorpicker.php',
+                '\theme_boost_union\formelement\colorpicker'
+        );
+        // Register validation rule for the QuickForm colorpicker element.
+        \MoodleQuickForm::registerRule(
+                'theme_boost_union_colorpicker_rule',
+                null,
+                '\theme_boost_union\formelement\colorpicker_rule',
+                $CFG->dirroot.'/theme/boost_union/classes/formelement/colorpicker_rule.php'
         );
 
         // Get an easier handler for the form.
@@ -102,6 +109,7 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->addElement('select', 'mode', get_string('smartmenusmenuitemmode', 'theme_boost_union'), $modeoptions);
         $mform->setDefault('mode', smartmenu_item::MODE_INLINE);
         $mform->setType('mode', PARAM_INT);
+        $mform->hideIf('mode', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
         $mform->addHelpButton('mode', 'smartmenusmenuitemmode', 'theme_boost_union');
 
         // Add category (for the dynamic courses menu item type) as autocomplete element.
@@ -271,6 +279,11 @@ class smartmenu_item_edit_form extends \moodleform {
                     $filepickeroptions);
             $mform->addHelpButton('image', 'smartmenusmenuitemcardimage', 'theme_boost_union');
 
+            // Add alt text option for the card image.
+            $mform->addElement('text', 'imagealt', get_string('smartmenusmenuitemcardimagealt', 'theme_boost_union'));
+            $mform->setType('imagealt', PARAM_TEXT);
+            $mform->addHelpButton('imagealt', 'smartmenusmenuitemcardimagealt', 'theme_boost_union');
+
             // Add card text position as select element.
             $textpositionoptions = smartmenu_item::get_textposition_options();
             $mform->addElement('select', 'textposition',
@@ -283,12 +296,14 @@ class smartmenu_item_edit_form extends \moodleform {
             $mform->addElement('theme_boost_union_colorpicker', 'textcolor',
                     get_string('smartmenusmenuitemcardtextcolor', 'theme_boost_union'));
             $mform->setType('textcolor', PARAM_TEXT);
+            $mform->addRule('textcolor', get_string('validateerror', 'admin'), 'theme_boost_union_colorpicker_rule');
             $mform->addHelpButton('textcolor', 'smartmenusmenuitemcardtextcolor', 'theme_boost_union');
 
             // Add card background color as color picker element.
             $mform->addElement('theme_boost_union_colorpicker', 'backgroundcolor',
                     get_string('smartmenusmenuitemcardbackgroundcolor', 'theme_boost_union'));
             $mform->setType('backgroundcolor', PARAM_TEXT);
+            $mform->addRule('backgroundcolor', get_string('validateerror', 'admin'), 'theme_boost_union_colorpicker_rule');
             $mform->addHelpButton('backgroundcolor', 'smartmenusmenuitemcardbackgroundcolor', 'theme_boost_union');
         }
 
