@@ -90,6 +90,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
                         'theme_boost_union',
                         'flavours_look_favicon',
                         $flavour->id,
+                        '/64x64'.
                         '/'.theme_get_revision(),
                         '/'.$flavour->look_favicon
                     );
@@ -263,13 +264,28 @@ class core_renderer extends \theme_boost\output\core_renderer {
                     // Remember this fact for subsequent runs of this function.
                     $hasflavourlogo = true;
 
+                    // If the flavour logo is a SVG image, do not add a size to the path.
+                    $flavourlogoextension = pathinfo($flavour->look_logocompact, PATHINFO_EXTENSION);
+                    if (in_array($flavourlogoextension, ['svg', 'svgz'])) {
+                        // The theme_boost_union_pluginfile() function will look for a filepath and will extract the size from that.
+                        // If we add a path without an 'x' in it, it will then be interpreted by theme_boost_union_pluginfile()
+                        // as "no resize requested".
+                        // This mechanism is used for the normal compact logo as well.
+                        $flavourfilepath = '1/';
+
+                        // Otherwise, add a size to the path.
+                    } else {
+                        // Hide the requested size in the file path.
+                        $flavourfilepath = ((int)$maxwidth . 'x' . (int)$maxheight) . '/';
+                    }
+
                     // Compose the URL to the flavour's compact logo.
                     $flavourlogourl = \core\url::make_pluginfile_url(
                         context_system::instance()->id,
                         'theme_boost_union',
                         'flavours_look_logocompact',
-                        $flavour->id,
-                        '/'.theme_get_revision(),
+                        $flavour->id.'/'.$flavourfilepath,
+                        theme_get_revision(),
                         '/'.$flavour->look_logocompact
                     );
 
@@ -729,6 +745,44 @@ class core_renderer extends \theme_boost\output\core_renderer {
         if ($this->page->pagelayout !== 'embedded' && !empty($CFG->additionalhtmlfooter)) {
             $output .= "\n" . $CFG->additionalhtmlfooter;
         }
+        return $output;
+    }
+
+    /**
+     * Start output by sending the HTTP headers, and printing the HTML <head>
+     * and the start of the <body>.
+     *
+     * To control what is printed, you should set properties on $PAGE.
+     *
+     * @return string HTML that you must output this, preferably immediately.
+     */
+    public function header() {
+        global $CFG, $SESSION, $USER;
+
+        // Get the header output from the parent class.
+        $output = parent::header();
+
+        // If the admin decided to suppress the login info in the footer,
+        // the 'failed login attempts' counter in the navbar will not be reset as this is only done by the
+        // user_count_login_failures() function from the login_info() function which is not called anymore in this case.
+        //
+        // The header() function calls the user_count_login_failures() function as well, but does not set the parameter
+        // to reset the failed login attempts counter (see issue #658 for details).
+        // So we call the user_count_login_failures() function here with the reset parameter set to true here to ensure that the
+        // failed login attempts counter is reset anyway when the footer is suppressed.
+        //
+        // As an alternative to this approach, we could have overwritten the header() function completely here, just changing
+        // the line calling the user_count_login_failures(). This would have resulted in a mainantenance overhead
+        // and would not have had any performance benefits as the original Moodle calls user_count_login_failures() twice as well.
+        $footersuppresslogininfosetting = get_config('theme_boost_union', 'footersuppresslogininfo');
+        if (isset($footersuppresslogininfosetting) && $footersuppresslogininfosetting == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            if (isset($SESSION->justloggedin) && !empty($CFG->displayloginfailures)) {
+                require_once($CFG->dirroot.'/user/lib.php');
+                user_count_login_failures($USER, true);
+            }
+        }
+
+        // Return the parent header() output.
         return $output;
     }
 

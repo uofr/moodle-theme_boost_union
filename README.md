@@ -164,6 +164,16 @@ With these settings, you can override the activity icon background color which i
 
 With this setting, you can modify the icons for activities and resources which are used by Moodle on the course pages and in the activity chooser. You can upload custom icons for all or only some activity modules installed in this Moodle instance.
 
+#### Tab "Calendar Branding"
+
+##### Calendar event types
+
+With these settings, you can override the main colors and border colors of individual calendar entry types.
+
+##### General calendar branding
+
+With these settings, you can set additional colors for the calendar views.
+
 #### Tab "Login page"
 
 ##### Login page background images
@@ -227,7 +237,7 @@ With this setting, you can enable a side entrance local login page. It is enable
 
 ###### Show course images
 
-With this setting, you can control whether the course image is visible inside the course overview block or not. It is possible to choose a different setting for Card view, Summary view, and List view. 
+With this setting, you can control whether the course image is visible inside the course overview block or not. It is possible to choose a different setting for Card view, Summary view, and List view.
 
 ###### Show course completion progress
 
@@ -375,9 +385,17 @@ With this setting, you can add a 'Set preferred language' setting to the languag
 
 ##### Navbar
 
+###### Display "Log in" link as button
+
+With this setting, you can have the "Log in" link in the top of the page shown as button. This can help your users to recognize the fact they they are not logged in already.
+
 ###### Show starred courses popover in the navbar
 
 With this setting, you can show a popover menu with links to starred courses next to the messages and notifications menus.
+
+###### Starred courses popover cog icon link target
+
+With this setting, you can set the link target of the cog icon in the starred courses popover. By default, the cog icon links to the 'My courses' page. However, you can also link to the 'Dashboard' page, especially if you have disabled the 'My courses' page in the primary navigation.
 
 ##### Breadcrumbs
 
@@ -607,7 +625,7 @@ In this tab, you can enable and configure multiple slides to be shown on site ho
 
 In this tab there are the following settings:
 
-##### Course related hints
+##### Course related hints for teachers
 
 ###### Show hint for switched role
 
@@ -621,13 +639,19 @@ With this setting a hint will not only appear in the course header but also in f
 
 With this setting a hint will appear in the course header as long as the visibility of the course is hidden.
 
-###### Show hint for guest access
-
-With this setting a hint will appear in the course header when a user is accessing it with the guest access feature.
-
 ###### Show hint for self enrolment without enrolment key
 
 With this setting a hint will appear in the course header if the course is visible and an enrolment without enrolment key is currently possible.
+
+###### Show hint for guest enrolment
+
+With this setting a hint will appear in the course header if the course is visible and guest enrolment is currently possible.
+
+##### Course related hints for students
+
+###### Show hint for guest access
+
+With this setting a hint will appear in the course header when a user is accessing it with the guest access feature.
 
 #### Tab "Administration"
 
@@ -642,6 +666,10 @@ By default, on the course management page, Moodle requires you to either open th
 ### Settings page "Flavours"
 
 Boost Union's flavours offer a possibility to override particular Moodle look & feel settings in particular contexts. On this page, you can create and manage flavours.
+
+### Settings page "CSS Snippets"
+
+Boost Union's CSS snippets offer a possibility to add small (or slightly larger) amounts of CSS to the Moodle site. This can be particularly handy for fixing small visual glitches in Moodle core or for adding eye candy to your Moodle site.
 
 ### Settings page "Smart menus"
 
@@ -660,6 +688,10 @@ This capability is used to control who is able to configure the theme as non-adm
 ### theme/boost_union:viewhintcourseselfenrol
 
 This capability is used to control who is able to see a hint for unrestricted self enrolment in a visible course (if this feature was enabled in the theme settings). By default, it is assigned to teachers, non-editing teachers and managers.
+
+### theme/boost_union:viewhintcourseguestenrol
+
+This capability is used to control who is able to see a hint for guest access in a visible course (if this feature was enabled in the theme settings). By default, it is assigned to teachers, non-editing teachers and managers.
 
 ### theme/boost_union:viewhintinhiddencourse
 
@@ -702,6 +734,21 @@ In addition to our mission to provide admin settings for each and every feature 
   During a custom SCSS design project, you might come into the situation that you have to link to an uploaded image or other asset which is served by Moodle's pluginfile.php script. Unfortunately, these URLs contain a theme revision parameter. To be able to use these URLs properly in custom SCSS and to avoid breaking Moodle's caching features, Boost Union provides the $themerev SCSS variable to be used in your custom SCSS.
 
 
+CLI tools
+---------
+
+This plugin provides the following CLI tools:
+
+### cli/repopulate_scss_snippets.php
+
+Normally, the built-in SCSS snippets are re-populated if the Boost Union version is raised. This is triggered in db/upgrade.php.
+This is perfectly fine as long as admins to not want to fiddle with the list of buit-in snippets manually.
+
+To ease such admin tasks as well as the crafting of SCSS Snippet PRs,
+this CLI script can be run and will re-populate the list of built-in SCSS snippets based on the list of snippets
+which exist on disk in the theme/boost_union/snippets/builtin directory.
+
+
 Exceptions to our main design principle
 ---------------------------------------
 
@@ -711,8 +758,8 @@ As you have read in the introduction, the main design principle of Boost Union i
   As soon as you click the footer button (questionmark icon) in the bottom right corner of the screen, a popover with several links appears. However, the content of this link list is far from being well-structured and looks more like a garage sale. When implementing the settings to individually suppress each of these popover links, we had to make some code re-arrangements which result in the fact that the popover links are slightly more well-structured even if you do not enable any setting in Boost Union.
 * Suppress footer outputs by plugin / core component:
   Due to the way how the settings `theme_boost_union | footersuppressstandardfooter_*` had to be built, it was not possible to quickly and reliably detect if Boost Union (or a Boost Union child theme) is the active theme. Thus, these settings are also applied if another theme than Boost Union is active. Please make sure to disable these settings if Boost Union is installed but should not be used.
-* Clickable header in the user's menu third level:
-  Due to the way how the smart menu was integrated into the user menu, as soon as at least one smart menu exists on the page, the header of the language menu in the user menu is now fully clickable - compared to Boost core where only the 'back' arrow in the language menu is clickable. This should be a neglectible difference to Boost core.
+* Clickable header and transition time in the user's menu third level:
+  Due to the way how the smart menu was integrated into the user menu, as soon as at least one smart menu exists on the page, the header of the language menu in the user menu is now fully clickable - compared to Boost core where only the 'back' arrow in the language menu is clickable - and the transition time to open the language menu is shortened. This should be a neglectible difference to Boost core.
 
 
 Companion plugin local_navbarplus
@@ -798,8 +845,10 @@ Having said that, here's the order how all the SCSS code is added to the SCSS st
    * Adds the Boost Union Post SCSS from disk\
      (which is located on `/theme/boost_union/scss/boost_union/post.scss`)
      This file holds all the Boost Union specific SCSS code which can be added to the stack without being dependent on specific configurations like configured colors or sizes.
-   * Add the Boost Union external SCSS\
+   * Adds the Boost Union external SCSS\
      (which is set on `/admin/settings.php?section=theme_boost_union_look#theme_boost_union_look_scss`)
+   * Adds the Boost Union SCSS snippets\
+     (which are enabled on `/theme/boost_union/snippets/overview.php`)
 
 5. `theme_boost` > `get_extra_scss()`:
    * Adds the Boost Union Post SCSS from the theme settings\
@@ -931,8 +980,9 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * Hochschule Hannover - University of Applied Sciences and Arts: Code, Funding, Ideating
 * Käferfreie Software, Nina Herrmann: Code
 * lern.link GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
-* lern.link GmbH, Lukas MuLu Müller: Code
 * lern.link GmbH, Beata Waloszczyk: Code
+* lern.link GmbH, Danou Nauck: Code
+* lern.link GmbH, Lukas MuLu Müller: Code
 * Lutheran University of Applied Sciences Nuremberg: Funding
 * Moodle.NRW / Ruhr University Bochum, Annika Lambert: Code
 * Moodle.NRW / Ruhr University Bochum, Matthias Buttgereit: Code, Ideating
@@ -943,6 +993,7 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * Ruhr University Bochum, Melanie Treitinger: Code, Ideating
 * RWTH Aachen, Amrita Deb Dutta: Code
 * RWTH Aachen, Josha Bartsch: Code
+* RWTH Aachen, Tim Schröder: Code
 * Solent University, Mark Sharp: Code
 * ssystems GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
 * Technische Universität Berlin, Lars Bonczek: Code

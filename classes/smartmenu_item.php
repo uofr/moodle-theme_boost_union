@@ -31,6 +31,7 @@ use stdClass;
 use cache;
 use core\output\html_writer;
 use core_course\external\course_summary_exporter;
+use context_course;
 
 require_once($CFG->dirroot.'/theme/boost_union/smartmenus/menulib.php');
 
@@ -59,10 +60,22 @@ class smartmenu_item {
     const TYPESTATIC = 1;
 
     /**
-     * Represents the type of a dynamic element.
+     * Represents the type of a dynamic courses element.
      * @var int
      */
     const TYPEDYNAMIC = 2;
+
+    /**
+     * Represents the type of a docs element.
+     * @var int
+     */
+    const TYPEDOCS = 3;
+
+    /**
+     * Represents the type of a divider element.
+     * @var int
+     */
+    const TYPEDIVIDER = 4;
 
     /**
      * Represents the completion status of an item where the status is 'enrolled'.
@@ -226,6 +239,31 @@ class smartmenu_item {
      * @var int
      */
     const LISTSORT_COURSEIDNUMBER_DESC = 7;
+
+    /**
+     * Display all courses including hidden courses, in the dynamic menu item.
+     *
+     * @var int
+     */
+    const DISPLAY_ALLCOURSES = 0;
+
+    /**
+     * Display only the visible courses in the dynamic menu item.
+     * @var int
+     */
+    const DISPLAY_VISIBLECOURSESONLY = 1;
+
+    /**
+     * Sort hidden and visible courses together, based on other sorting options for dynamic menu item.
+     * @var int
+     */
+    const HIDDENCOURSESORT_TOGETHER = 0;
+
+    /**
+     * Sort the hidden courses at the end of the list for dynamic menu item.
+     * @var int
+     */
+    const HIDDENCOURSESORT_END = 1;
 
     /**
      * The ID of the menu item.
@@ -625,6 +663,21 @@ class smartmenu_item {
     }
 
     /**
+     * Generate a node data for a divider item.
+     *
+     * @return array The node data.
+     */
+    protected function generate_divider() {
+        return $this->generate_node_data(
+            '', // Empty title (regardless of what's in the database).
+            '#', // URL.
+            null, // Default key.
+            '', // Empty tooltip (regardless of what's in the database).
+            'divider'
+        );
+    }
+
+    /**
      * Generate the item as static menu item, Send the custom URL to core\url to make this work with relative URL.
      *
      * @return string
@@ -657,10 +710,11 @@ class smartmenu_item {
         if ($this->item->mode == self::MODE_SUBMENU && $this->menu->type == smartmenu::TYPE_CARD) {
             return [];
         }
+
         $query = (object) [
             'select' => ['c.*'],
             'join' => [],
-            'where' => ["c.visible > 0"],
+            'where' => [],
             'params' => [],
         ];
 
@@ -678,6 +732,9 @@ class smartmenu_item {
 
         // Custom field based courses filter.
         $this->get_customfield_sql($query);
+
+        // Visibility based courses filter.
+        $this->get_visibility_sql($query);
 
         // Build the queries.
         $select = implode(',', array_filter($query->select));
@@ -701,9 +758,15 @@ class smartmenu_item {
             return [];
         }
 
+        $records = array_filter($records, [$this, 'filter_courses_list'], ARRAY_FILTER_USE_BOTH);
+
         $items = [];
         // Build the items data into nodes.
         foreach ($records as $record) {
+
+            $itemclasses = []; // Additional classes for the item.
+            $tooltip = null; // Tooltip for the item.
+
             $url = new \core\url('/course/view.php', ['id' => $record->id]);
             $rkey = 'item-'.$this->item->id.'-dynamic-'.$record->id;
             // Get the course image from overview files.
@@ -733,7 +796,19 @@ class smartmenu_item {
                     break;
             }
 
-            $items[] = $this->generate_node_data($coursename, $url, $rkey, null, 'link', false, [], $itemimage, $sortstring);
+            $sortdata = [
+                'string' => format_string($sortstring),
+                'visibility' => $record->visible,
+            ];
+
+            if (!$record->visible) {
+                $itemclasses[] = 'dimmed';
+                $itemclasses[] = 'muted';
+                $tooltip = get_string('hiddenfromstudents');
+            }
+
+            $items[] = $this->generate_node_data(
+                $coursename, $url, $rkey, $tooltip, 'link', false, [], $itemimage, $sortdata, $itemclasses);
         }
 
         // Sort the courses based on the configured setting.
@@ -745,14 +820,22 @@ class smartmenu_item {
                 case self::LISTSORT_COURSEID_ASC:
                 case self::LISTSORT_COURSEIDNUMBER_ASC:
                 default:
-                    return strnatcasecmp($course1['sortstring'], $course2['sortstring']);
+                    return strnatcasecmp($course1['sortdata']['string'], $course2['sortdata']['string']);
                 case self::LISTSORT_FULLNAME_DESC:
                 case self::LISTSORT_SHORTNAME_DESC:
                 case self::LISTSORT_COURSEID_DESC:
                 case self::LISTSORT_COURSEIDNUMBER_DESC:
-                    return strnatcasecmp($course2['sortstring'], $course1['sortstring']);
+                    return strnatcasecmp($course2['sortdata']['string'], $course1['sortdata']['string']);
             }
         });
+
+        // Sort the course items by visibility.
+        if (property_exists($this->item, 'hiddencoursesort') &&
+                $this->item->hiddencoursesort == self::HIDDENCOURSESORT_END) {
+            usort($items, function($course1, $course2) {
+                return $course2['sortdata']['visibility'] <=> $course1['sortdata']['visibility'];
+            });
+        }
 
         // Submenu only contains the title as separate node.
         if ($this->item->mode == self::MODE_SUBMENU) {
@@ -769,6 +852,38 @@ class smartmenu_item {
             return $submenu;
         }
         return $items;
+    }
+
+    /**
+     * Generate the item object for a docs item. Use get_docs_url to get the link and generate the data.
+     *
+     * This logic function is copied and modified from page_doc_link() in /lib/classes/output/core_renderer.php
+     *
+     * @return array|null The node data or null if the docs are disabled or the user does not have moodle/site:doclinks capability.
+     */
+    protected function generate_docs_item() {
+        global $PAGE;
+
+        // Get the docs URL.
+        $path = page_get_doc_link_path($PAGE);
+
+        // If the path is empty, docs are either disabled or the user does not have the moodle/site:doclinks capability
+        // in the given context.
+        // In this case, return directly to avoid creating the node.
+        if (empty($path)) {
+            return null;
+        }
+
+        // Get the docs URL.
+        $docurl = get_docs_url($path);
+
+        // Generate and return the node.
+        return $this->generate_node_data(
+            $this->item->title,
+            $docurl,
+            null,
+            $this->item->tooltip,
+        );
     }
 
     /**
@@ -819,7 +934,7 @@ class smartmenu_item {
             $likesql = implode(' OR ', $likesqlparts);
 
             // Add the categories filter to the query.
-            $query->where[] = "c.category $insql OR $likesql";
+            $query->where[] = "(c.category $insql OR $likesql)";
             $query->params += $inparams;
             $query->params += $likeparams;
 
@@ -1010,6 +1125,40 @@ class smartmenu_item {
     }
 
     /**
+     * Generates the SQL statement for the visibility condition.
+     *
+     * @param  stdclass $query The database query object.
+     * @return void
+     */
+    protected function get_visibility_sql(&$query) {
+
+        if (property_exists($this->item, 'displayhiddencourses') &&
+                $this->item->displayhiddencourses == self::DISPLAY_VISIBLECOURSESONLY) {
+            // Add condition to fetch only visible courses.
+            $query->where[] = 'c.visible = 1';
+        }
+    }
+
+    /**
+     * Filters the course list by the capability to view hidden courses.
+     *
+     * @param stdclass $record The course record.
+     * @param int $courseid The ID of the course.
+     * @return bool True if the course should be included, false otherwise.
+     */
+    protected function filter_courses_list($record, $courseid) {
+
+        // Filter by course visibility.
+        if (property_exists($this->item, 'displayhiddencourses') &&
+                $this->item->displayhiddencourses == self::DISPLAY_VISIBLECOURSESONLY) {
+            return true;
+        }
+
+        // Filter by course visibility or user capability to view hidden courses.
+        return $record->visible || has_capability('moodle/course:viewhiddencourses', context_course::instance($record->id));
+    }
+
+    /**
      * Defines a build method that generates the HTML markup for a menu item.
      *
      * First, it checks if the menu item is cached and returns it if found.
@@ -1057,7 +1206,14 @@ class smartmenu_item {
         $class[] = $this->get_textposition_class();
 
         // Add menu item class.
-        $types = [self::TYPESTATIC => 'static', self::TYPEDYNAMIC => 'dynamic', self::TYPEHEADING => 'heading'];
+        $types = [
+            self::TYPESTATIC => 'static',
+            self::TYPEDYNAMIC => 'dynamic',
+            self::TYPEHEADING => 'heading',
+            self::TYPEDOCS => 'docs',
+            self::TYPEDIVIDER => 'divider',
+        ];
+
         $class[] = 'menu-item-'.($types[$this->item->type] ?? '');
 
         // Add classes to item data.
@@ -1075,11 +1231,36 @@ class smartmenu_item {
                 $static = $this->generate_static_item();
                 $result = [$static]; // Return the result as recursive array for merge with dynamic items.
                 $type = 'static';
+                $cacheable = true;
+                break;
+
+            case self::TYPEDOCS:
+                $docs = $this->generate_docs_item();
+
+                // If the returned node is null, return directly as we do not have a docs node to build.
+                if ($docs === null) {
+                    return false;
+                }
+
+                $result = [$docs]; // Return the result as recursive array useful to merge with dynamic items.
+                $type = 'docs';
+
+                // Make this node non cacheable as its link will change throughout the individual Moodle pages.
+                $cacheable = false;
+
                 break;
 
             case self::TYPEDYNAMIC:
                 $result = $this->generate_dynamic_item();
                 $type = 'dynamic';
+                $cacheable = true;
+                break;
+
+            case self::TYPEDIVIDER:
+                $divider = $this->generate_divider();
+                $result = [$divider]; // Return the result as recursive array useful to merge with dynamic items.
+                $type = 'divider';
+                $cacheable = true;
                 break;
 
             case self::TYPEHEADING:
@@ -1087,11 +1268,14 @@ class smartmenu_item {
                 $heading = $this->generate_heading();
                 $result = [$heading]; // Return the result as recursive array useful to merge with dynamic items.
                 $type = 'heading';
+                $cacheable = true;
 
         endswitch;
 
-        // Save the items cache.
-        $this->cache->set($cachekey, $result);
+        // If cachable save the items cache.
+        if ($cacheable) {
+            $this->cache->set($cachekey, $result);
+        }
 
         return $result;
     }
@@ -1117,12 +1301,13 @@ class smartmenu_item {
      * @param int $haschildren Whether the item has children or not, defaults to 0.
      * @param array $children An array of child nodes, defaults to an empty array.
      * @param string $itemimage Card image url for item.
-     * @param string $sortstring The string to be used for sorting the items.
+     * @param array $sortdata The string to be used for sorting the items.
+     * @param array $itemclasses List of additional css classes for the menu item node.
      *
      * @return array An associative array of node data for the item.
      */
     public function generate_node_data($title, $url, $key = null, $tooltip = null,
-        $itemtype = 'link', $haschildren = 0, $children = [], $itemimage = '', $sortstring = '') {
+        $itemtype = 'link', $haschildren = 0, $children = [], $itemimage = '', $sortdata = [], $itemclasses = []) {
 
         global $OUTPUT;
 
@@ -1169,9 +1354,13 @@ class smartmenu_item {
             $imagealt = format_string($imagealt);
         }
 
+        // Include the additional item classes.
+        $itemdata = clone($this->item);
+        $itemdata->classes = array_merge($this->item->classes, $itemclasses);
+
         $data = [
-            'itemdata' => $this->item,
-            'menuclasses' => $this->item->classes, // If menu is inline, need to add the item custom class in dropdown.
+            'itemdata' => $itemdata,
+            'menuclasses' => $itemdata->classes, // If menu is inline, need to add the item custom class in dropdown.
             'location' => $this->menu->location,
             'url' => $url ?: 'javascript:void(0)',
             'key' => $key != null ? $key : 'item-'.$this->item->id,
@@ -1184,8 +1373,11 @@ class smartmenu_item {
             'itemtype' => 'link',
             'link' => 1,
             'sort' => uniqid(), // Support third level menu.
-            'sortstring' => format_string($sortstring),
+            'sortdata' => $sortdata,
             'imagealt' => $imagealt ?? $title,
+            'desktop' => $this->item->desktop,
+            'tablet' => $this->item->tablet,
+            'mobile' => $this->item->mobile,
         ];
 
         if ($haschildren && !empty($children)) {
@@ -1199,10 +1391,10 @@ class smartmenu_item {
             ], ];
         }
 
-        if (preg_match("/^#+$/", format_string($title))) {
-            // In main menu divider is separate property.
-            // For lang menu divider is mentioned in itemtype.
-            // Updated the item type in the build_user_menu in primary navigation class method.
+        // If the type is divider or if the title is a series of '#' characters, mark it as a divider.
+        // The series of '#' characters is just a fallback support dividers as they were created before #453 although these should
+        // not exist anymore after this patch.
+        if ($itemtype == 'divider' || preg_match("/^#+$/", format_string($title))) {
             $data['divider'] = true;
         }
         return $data;
@@ -1345,7 +1537,9 @@ class smartmenu_item {
         $types = [
                 self::TYPESTATIC => get_string('smartmenusmenuitemtypestatic', 'theme_boost_union'),
                 self::TYPEHEADING => get_string('smartmenusmenuitemtypeheading', 'theme_boost_union'),
+                self::TYPEDOCS => get_string('smartmenusmenuitemtypedocs', 'theme_boost_union'),
                 self::TYPEDYNAMIC => get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union'),
+                self::TYPEDIVIDER => get_string('smartmenusmenuitemtypedivider', 'theme_boost_union'),
         ];
 
         return ($type !== null && isset($types[$type])) ? $types[$type] : $types;
@@ -1483,6 +1677,18 @@ class smartmenu_item {
     }
 
     /**
+     * Return the options for the hidden courses sorting setting.
+     *
+     * @return array
+     */
+    public static function get_hiddencoursesorting_options() {
+        return [
+            self::HIDDENCOURSESORT_TOGETHER => get_string('smartmenusmenuitemhiddencoursesortingtogether', 'theme_boost_union'),
+            self::HIDDENCOURSESORT_END => get_string('smartmenusmenuitemhiddencoursesortingend', 'theme_boost_union'),
+        ];
+    }
+
+    /**
      * Insert or update the menu instance to DB. Convert the multiple options select elements to json.
      * setup menu path after insert/update.
      *
@@ -1550,6 +1756,11 @@ class smartmenu_item {
                 ]);
             }
 
+            // Reset the fontawesome mapping cache if an icon was newly set or changed.
+            if (!empty($record->menuicon) && $oldrecord->menuicon != $record->menuicon) {
+                theme_boost_union_reset_fontawesome_icon_map();
+            }
+
             // Delete the cached data of its menu. Menu will recreate with this item.
             $menucache->delete_menu($formdata->menu);
             // Purge the current item cache for all users.
@@ -1568,6 +1779,11 @@ class smartmenu_item {
             $DB->execute($sql, ['sortorder' => $record->sortorder, 'item' => $itemid, 'menuid' => $record->menu]);
             // Show the menu item inserted success notification.
             \core\notification::success(get_string('smartmenusmenuitemcreatesuccess', 'theme_boost_union'));
+
+            // Reset the fontawesome mapping cache if an icon was set.
+            if (!empty($record->menuicon)) {
+                theme_boost_union_reset_fontawesome_icon_map();
+            }
 
             // Delete the cached data of its menu. Menu will recreate with this item.
             $menucache->delete_menu($formdata->menu);
@@ -1605,4 +1821,29 @@ class smartmenu_item {
         ];
     }
 
+    /**
+     * Get a list of all icons which are currently set in the menu items.
+     *
+     * @return array An array of icon names.
+     */
+    public static function get_all_fa_icons() {
+        global $DB;
+
+        // Define the query to search for icons in the menu items table.
+        $sql = "SELECT DISTINCT menuicon
+                FROM {theme_boost_union_menuitems}
+                WHERE menuicon IS NOT NULL AND menuicon != '0'";
+
+        // Get the icons from the database.
+        $icons = $DB->get_fieldset_sql($sql);
+
+        // Drop non-FA icons.
+        $icons = array_filter($icons, function($icon) {
+            // Check if the icon is a Font Awesome icon.
+            return (strpos($icon, 'theme_boost_union:fa-') === 0);
+        });
+
+        // Return.
+        return $icons;
+    }
 }

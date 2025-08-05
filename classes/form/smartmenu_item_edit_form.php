@@ -79,17 +79,6 @@ class smartmenu_item_edit_form extends \moodleform {
                 get_string('smartmenusgeneralsectionheader', 'theme_boost_union'));
         $mform->setExpanded('generalsettingsheader');
 
-        // Add the title as input element.
-        $mform->addElement('text', 'title', get_string('smartmenusmenuitemtitle', 'theme_boost_union'));
-        $mform->setType('title', PARAM_TEXT);
-        $mform->addRule('title', get_string('required'), 'required');
-        $mform->addHelpButton('title', 'smartmenusmenuitemtitle', 'theme_boost_union');
-
-        // Add structure as header element.
-        $mform->addElement('header', 'structureheader',
-                get_string('smartmenusmenuitemstructureheader', 'theme_boost_union'));
-        $mform->setExpanded('structureheader');
-
         // Add the menu item type as select element.
         $typesoptions = smartmenu_item::get_types();
         $mform->addElement('select', 'type', get_string('smartmenusmenuitemtype', 'theme_boost_union'), $typesoptions);
@@ -97,6 +86,17 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->setType('type', PARAM_INT);
         $mform->addRule('type', get_string('required'), 'required');
         $mform->addHelpButton('type', 'smartmenusmenuitemtype', 'theme_boost_union');
+
+        // Add the title as input element.
+        $mform->addElement('text', 'title', get_string('smartmenusmenuitemtitle', 'theme_boost_union'));
+        $mform->setType('title', PARAM_TEXT);
+        $mform->hideIf('title', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
+        $mform->addHelpButton('title', 'smartmenusmenuitemtitle', 'theme_boost_union');
+
+        // Add structure as header element.
+        $mform->addElement('header', 'structureheader',
+                get_string('smartmenusmenuitemstructureheader', 'theme_boost_union'));
+        $mform->setExpanded('structureheader');
 
         // Add menu item URL (for the static menu item type) as input element.
         $mform->addElement('text', 'url', get_string('smartmenusmenuitemurl', 'theme_boost_union'));
@@ -170,21 +170,70 @@ class smartmenu_item_edit_form extends \moodleform {
                 get_string('smartmenusmenuitempresentationheader', 'theme_boost_union'));
         $mform->setExpanded('presentationheader');
 
-        // Add icon as input element.
-        // Build icon list.
-        $theme = \core\output\theme_config::load($PAGE->theme->name);
-        $faiconsystem = \core\output\icon_system_fontawesome::instance($theme->get_icon_system());
-        $iconlist = $faiconsystem->get_core_icon_map();
-        array_unshift($iconlist, '');
-        // Create element.
-        $iconwidget = $mform->addElement('select', 'menuicon',
-                get_string('smartmenusmenuitemicon', 'theme_boost_union'), $iconlist);
+        // Add icon as autocomplete element.
+        $iconmap = theme_boost_union_build_fa_icon_map();
+        $options = [
+            'multiple' => false,
+            'ajax' => 'theme_boost_union/fontawesome_icon_selector',
+            'noselectionstring' => get_string('smartmenusmenuitemicon_noicon', 'theme_boost_union'),
+            'placeholder' => get_string('smartmenusmenuitemicon_placeholder', 'theme_boost_union'),
+            'showsuggestions' => true,
+            // The valuehtmlcallback function is purely needed for formatting the element which is auto-selected after loading
+            // an existing menu item again.
+            // All other elements are formatted in JS in fontawesome_icon_selector.js.
+            // That's why we duplicate the formatting logic from JS here in PHP.
+            // And we just add this function if the menuicon is set in the custom data already. Otherwise, for an unknown reason,
+            // the layout of the autocomplete element breaks.
+            'valuehtmlcallback' => isset($this->_customdata['menuitem']) && !empty($this->_customdata['menuitem']->menuicon) ?
+                function($value) use ($iconmap) {
+                    global $OUTPUT;
+
+                    // If this is a Moodle core icon.
+                    if (isset($iconmap[$value]['source']) && $iconmap[$value]['source'] == 'core') {
+                        $icon = (object)[
+                            'class' => $iconmap[$value]['class'],
+                            'name' => $value,
+                            'source' => get_string('smartmenusmenuitemicon_sourcecore', 'theme_boost_union'),
+                            'sourcecolor' => 'bg-warning text-dark',
+                        ];
+
+                        // Otherwise, if this is a FontAwesome solid icon.
+                    } else if (isset($iconmap[$value]['source']) && $iconmap[$value]['source'] == 'fasolid') {
+                        $icon = (object)[
+                            'class' => 'fas '.$iconmap[$value]['class'],
+                            'name' => $iconmap[$value]['class'],
+                            'source' => get_string('smartmenusmenuitemicon_sourcefasolid', 'theme_boost_union'),
+                            'sourcecolor' => 'bg-success',
+                        ];
+
+                        // Otherwise, if this is a FontAwesome brands icon.
+                    } else if (isset($iconmap[$value]['source']) && $iconmap[$value]['source'] == 'fabrand') {
+                        $icon = (object)[
+                            'class' => 'fab '.$iconmap[$value]['class'],
+                            'name' => $iconmap[$value]['class'],
+                            'source' => get_string('smartmenusmenuitemicon_sourcefabrand', 'theme_boost_union'),
+                            'sourcecolor' => 'bg-success',
+                        ];
+
+                        // Otherwise, if this is the FontAwesome blank icon.
+                    } else if (isset($iconmap[$value]['source']) && $iconmap[$value]['source'] == 'fablank') {
+                        $icon = (object)[
+                            'class' => 'fab '.$iconmap[$value]['class'],
+                            'name' => $iconmap[$value]['class'],
+                            'source' => get_string('smartmenusmenuitemicon_sourcefablank', 'theme_boost_union'),
+                            'sourcecolor' => 'bg-success',
+                        ];
+                    }
+                    // All other icon sources (which should not appear) will be ignored.
+
+                    return $OUTPUT->render_from_template('theme_boost_union/form_autocomplete_fontawesome_icon', $icon);
+                } : null,
+        ];
+        $iconwidget = $mform->addElement('autocomplete', 'menuicon',
+                get_string('smartmenusmenuitemicon', 'theme_boost_union'), [], $options);
         $mform->setType('menuicon', PARAM_TEXT);
-        $iconwidget->setMultiple(false);
         $mform->addHelpButton('menuicon', 'smartmenusmenuitemicon', 'theme_boost_union');
-        // Include the fontawesome icon picker to the element.
-        $systemcontextid = \context_system::instance()->id;
-        $PAGE->requires->js_call_amd('theme_boost_union/fontawesome-popover', 'init', ['#id_menuicon', $systemcontextid]);
+        $mform->hideIf('menuicon', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
 
         // Add title presentation and select element.
         $displayoptions = smartmenu_item::get_display_options();
@@ -192,11 +241,13 @@ class smartmenu_item_edit_form extends \moodleform {
                 $displayoptions);
         $mform->setDefault('display', smartmenu_item::DISPLAY_SHOWTITLEICON);
         $mform->setType('display', PARAM_INT);
+        $mform->hideIf('display', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
         $mform->addHelpButton('display', 'smartmenusmenuitemdisplayoptions', 'theme_boost_union');
 
         // Add tooltip as input element.
         $mform->addElement('text', 'tooltip', get_string('smartmenusmenuitemtooltip', 'theme_boost_union'));
         $mform->setType('tooltip', PARAM_TEXT);
+        $mform->hideIf('tooltip', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
         $mform->addHelpButton('tooltip', 'smartmenusmenuitemtooltip', 'theme_boost_union');
 
         // Add link target as select element.
@@ -205,6 +256,7 @@ class smartmenu_item_edit_form extends \moodleform {
                 $targetoptions);
         $mform->setDefault('target', smartmenu_item::TARGET_SAME);
         $mform->setType('target', PARAM_INT);
+        $mform->hideIf('target', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
         $mform->addHelpButton('target', 'smartmenusmenuitemlinktarget', 'theme_boost_union');
 
         // Add responsive hiding as checkbox group.
@@ -220,6 +272,7 @@ class smartmenu_item_edit_form extends \moodleform {
                 get_string('smartmenusmenuitemresponsivemobile', 'theme_boost_union'), null, ['group' => 1]);
         $mform->addGroup($responsivegroup, 'responsive',
                 get_string('smartmenusmenuitemresponsive', 'theme_boost_union'), '', false);
+        $mform->hideIf('responsive', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
         $mform->addHelpButton('responsive', 'smartmenusmenuitemresponsive', 'theme_boost_union');
 
         // Add order as input element.
@@ -235,6 +288,7 @@ class smartmenu_item_edit_form extends \moodleform {
         // Add CSS class as input element.
         $mform->addElement('text', 'cssclass', get_string('smartmenusmenuitemcssclass', 'theme_boost_union'));
         $mform->setType('cssclass', PARAM_TEXT);
+        $mform->hideIf('cssclass', 'type', 'eq', smartmenu_item::TYPEDIVIDER);
         $mform->addHelpButton('cssclass', 'smartmenusmenuitemcssclass', 'theme_boost_union');
 
         // Add course list ordering (for the dynamic courses menu item type) as select element.
@@ -246,6 +300,28 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->setType('listsort', PARAM_INT);
         $mform->hideIf('listsort', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
         $mform->addHelpButton('listsort', 'smartmenusmenuitemlistsort', 'theme_boost_union');
+
+        // Add Display only visible courses as select element.
+        $displayoptions = [
+                smartmenu_item::DISPLAY_ALLCOURSES => get_string('smartmenusmenuitemdisplayallcourses', 'theme_boost_union'),
+                smartmenu_item::DISPLAY_VISIBLECOURSESONLY =>
+                        get_string('smartmenusmenuitemhidehiddencourses', 'theme_boost_union'),
+        ];
+        $mform->addElement('select', 'displayhiddencourses',
+                get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union').': '.
+                get_string('smartmenusmenuitemdisplayonlyvisiblecourses', 'theme_boost_union'), $displayoptions);
+        $mform->setType('displayhiddencourses', PARAM_BOOL);
+        $mform->addHelpButton('displayhiddencourses', 'smartmenusmenuitemdisplayonlyvisiblecourses', 'theme_boost_union');
+        $mform->hideIf('displayhiddencourses', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+
+        // Add Hidden courses sorting as select element.
+        $hiddencoursesortoptions = smartmenu_item::get_hiddencoursesorting_options();
+        $mform->addElement('select', 'hiddencoursesort',
+                get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union').': '.
+                get_string('smartmenusmenuitemhiddencoursessorting', 'theme_boost_union'), $hiddencoursesortoptions);
+        $mform->hideIf('hiddencoursesort', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->hideIf('hiddencoursesort', 'displayhiddencourses', 'eq', smartmenu_item::DISPLAY_VISIBLECOURSESONLY);
+        $mform->addHelpButton('hiddencoursesort', 'smartmenusmenuitemhiddencoursessorting', 'theme_boost_union');
 
         // Add course name presentation (for the dynamic courses menu item type) as select element.
         $displayfieldoptions = smartmenu_item::get_displayfield_options();
@@ -420,6 +496,45 @@ class smartmenu_item_edit_form extends \moodleform {
 
         // Add the action buttons.
         $this->add_action_buttons();
+
+        // Load the JavaScript module to dynamically hide/show headers based on the type (which is not possible with pure mform).
+        $config = new \stdClass();
+        $config->headerVisibility = [
+            [
+                'headerId' => 'structureheader',
+                'hideForTypes' => [
+                    smartmenu_item::TYPEHEADING,
+                    smartmenu_item::TYPEDOCS,
+                    smartmenu_item::TYPEDIVIDER,
+                ],
+            ],
+        ];
+        $PAGE->requires->js_call_amd('theme_boost_union/smartmenu_item_edit_form', 'init', [$config]);
+    }
+
+    /**
+     * Returns submitted form data.
+     * This method is overridden to ensure that title is empty for divider type items.
+     *
+     * @return stdClass|null
+     */
+    public function get_data() {
+        $data = parent::get_data();
+
+        if ($data) {
+            // Explicitly set title to empty for dividers.
+            if (isset($data->type) && $data->type == smartmenu_item::TYPEDIVIDER) {
+                $data->title = '';
+            }
+
+            // Explicitly clear the icon if no icon is contained in the data.
+            // This is necessary to clear previously set icons.
+            if (!property_exists($data, 'menuicon')) {
+                $data->menuicon = 0;
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -432,6 +547,14 @@ class smartmenu_item_edit_form extends \moodleform {
     public function validation($data, $files) {
         // Call parent form validation first.
         $errors = parent::validation($data, $files);
+
+        // If the menu item type is not a divider.
+        if ($data['type'] != smartmenu_item::TYPEDIVIDER) {
+            // Verify that the title field is not empty.
+            if (empty($data['title'])) {
+                $errors['title'] = get_string('required');
+            }
+        }
 
         // If the menu item type is static.
         if ($data['type'] == smartmenu_item::TYPESTATIC) {

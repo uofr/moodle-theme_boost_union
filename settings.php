@@ -22,9 +22,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+// Force auto-loading of some Boost Union classes to fix rare edge cases (during plugin updates) when the classes are
+// instantiated further below but the Moodle class autoloader has an outdated cache.
+require_once($CFG->dirroot . '/theme/boost_union/classes/admin_settingspage_tabs_with_tertiary.php');
+require_once($CFG->dirroot . '/theme/boost_union/classes/admin_settingspage_tabs_with_external_and_tertiary.php');
+require_once($CFG->dirroot . '/theme/boost_union/classes/admin_externalpage_in_tab.php');
+require_once($CFG->dirroot . '/theme/boost_union/classes/snippets.php');
+
 use theme_boost_union\admin_setting_configdatetime;
 use theme_boost_union\admin_setting_configstoredfilealwayscallback;
 use theme_boost_union\admin_setting_configtext_url;
+use theme_boost_union\admin_settingspage_tabs_with_tertiary;
+use theme_boost_union\admin_settingspage_tabs_with_external_and_tertiary;
+use theme_boost_union\admin_externalpage_in_tab;
+use theme_boost_union\snippets;
 use core\di;
 use core\hook\manager as hook_manager;
 
@@ -107,6 +120,14 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
                 'theme/boost_union:configure');
         $ADMIN->add('theme_boost_union', $flavourspage);
 
+        // Create SCSS snippets settings page as external page
+        // (and allow users with the theme/boost_union:configure capability to access it).
+        $snippetspage = new admin_externalpage('theme_boost_union_snippets_overview',
+                get_string('configtitlesnippets', 'theme_boost_union', null, true),
+                new core\url('/theme/boost_union/snippets/overview.php'),
+                'theme/boost_union:configure');
+        $ADMIN->add('theme_boost_union', $snippetspage);
+
         // Create Smart Menus settings page as external page.
         // (and allow users with the theme/boost_union:configure capability to access it).
         $smartmenuspage = new admin_externalpage('theme_boost_union_smartmenus',
@@ -137,12 +158,11 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // (with 2 or 3 digits) or a viewport width number (from 0 to 100). Additionally the field can be left blank.
         $smallwidthoremptyregex = '/^((\d{1,2}|100)%)|((\d{1,2}|100)vw)|(\d{2,3}px)|(^(?!.*\S))$/';
 
-        // Create Look settings page with tabs
+        // Create Look settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
-        $page = new theme_boost_admin_settingspage_tabs('theme_boost_union_look',
+        $page = new admin_settingspage_tabs_with_tertiary('theme_boost_union_look',
                 get_string('configtitlelook', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
-
 
         // Create general settings tab.
         $tab = new admin_settingpage('theme_boost_union_look_general', get_string('generalsettings', 'theme_boost', null, true));
@@ -702,6 +722,60 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->add($tab);
 
 
+        // Create calendar branding tab.
+        $tab = new admin_settingpage('theme_boost_union_look_calendarbranding',
+            get_string('calendarbrandingtab', 'theme_boost_union', null, true));
+
+        // Define supported calendar event types.
+        $calendareventtypes = ['category', 'course', 'group', 'user', 'site', 'other'];
+        // Iterate over all event types.
+        foreach ($calendareventtypes as $type) {
+            // Create Calendar event type heading.
+            $name = 'theme_boost_union/calendareventcolorsheading'.$type;
+            $title = get_string('calendareventcolorsheading', 'theme_boost_union',
+                    get_string('calendareventtype'.$type, 'theme_boost_union', null, true), true);
+            $setting = new admin_setting_heading($name, $title, null);
+            $tab->add($setting);
+
+            // Setting: Main color of the calendar event type.
+            $name = 'theme_boost_union/calendareventcolormain'.$type;
+            $title = get_string('calendareventcolormainsetting', 'theme_boost_union',
+                    get_string('calendareventtype'.$type, 'theme_boost_union', null, true), true);
+            $description = get_string('calendareventcolormainsetting_desc', 'theme_boost_union',
+                    get_string('calendareventtype'.$type, 'theme_boost_union', null, true), true);
+            $setting = new admin_setting_configcolourpicker($name, $title, $description, '');
+            $setting->set_updatedcallback('theme_reset_all_caches');
+            $tab->add($setting);
+
+            // Setting: Border color of the calendar event type.
+            $name = 'theme_boost_union/calendareventcolorborder'.$type;
+            $title = get_string('calendareventcolorbordersetting', 'theme_boost_union',
+                    get_string('calendareventtype'.$type, 'theme_boost_union', null, true), true);
+            $description = get_string('calendareventcolorbordersetting_desc', 'theme_boost_union',
+                    get_string('calendareventtype'.$type, 'theme_boost_union', null, true), true);
+            $setting = new admin_setting_configcolourpicker($name, $title, $description, '');
+            $setting->set_updatedcallback('theme_reset_all_caches');
+            $tab->add($setting);
+        }
+
+        // Create calendarbrandingheading heading.
+        $name = 'theme_boost_union/calendarbrandingheading';
+        $title = get_string('calendarbrandingheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Calendar icon colors.
+        $name = 'theme_boost_union/calendariconscolor';
+        $title = get_string('calendariconscolorsetting', 'theme_boost_union', null, true);
+        $description = get_string('calendariconscolorsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configcolourpicker($name, $title, $description, '');
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+
         // Create login page tab.
         $tab = new admin_settingpage('theme_boost_union_look_loginpage',
                 get_string('loginpagetab', 'theme_boost_union', null, true));
@@ -995,6 +1069,22 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->hide_if('theme_boost_union/courselistinghowprogress', 'theme_boost_union/courselistingpresentation', 'eq',
                 THEME_BOOST_UNION_SETTING_COURSELISTPRES_NOCHANGE);
 
+        // Setting: Course completion progress style.
+        $name = 'theme_boost_union/courselistingprogressstyle';
+        $title = get_string('courseistingprogressstyle', 'theme_boost_union', null, true);
+        $description = get_string('courseistingprogressstyle_desc', 'theme_boost_union', null, true);
+        $courseprogressstyleoptions = [
+                THEME_BOOST_UNION_SETTING_COURSEPROGRESSSTYLE_PERCENTAGE =>
+                        get_string('courseistingprogressstyle_percentage', 'theme_boost_union'),
+                THEME_BOOST_UNION_SETTING_COURSEPROGRESSSTYLE_BAR =>
+                        get_string('courseistingprogressstyle_bar', 'theme_boost_union'),
+        ];
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_COURSEPROGRESSSTYLE_PERCENTAGE, $courseprogressstyleoptions);
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/courselistingprogressstyle', 'theme_boost_union/courselistinghowprogress', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
+
         // Setting: Show course enrolment icons in the course listing.
         $name = 'theme_boost_union/courselistinghowenrolicons';
         $title = get_string('courselistinghowenrolicons', 'theme_boost_union');
@@ -1005,13 +1095,56 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
                 THEME_BOOST_UNION_SETTING_COURSELISTPRES_NOCHANGE);
 
         // Setting: Show course fields in the course listing.
-        $name = 'theme_boost_union/courselistinghowfields';
-        $title = get_string('courselistinghowfields', 'theme_boost_union');
-        $description = get_string('courselistinghowfields_desc', 'theme_boost_union');
+        $name = 'theme_boost_union/courselistingshowfields';
+        $title = get_string('courselistingshowfields', 'theme_boost_union');
+        $description = get_string('courselistingshowfields_desc', 'theme_boost_union');
         $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
         $tab->add($setting);
-        $page->hide_if('theme_boost_union/courselistinghowfields', 'theme_boost_union/courselistingpresentation', 'eq',
+        $page->hide_if('theme_boost_union/courselistingshowfields', 'theme_boost_union/courselistingpresentation', 'eq',
                 THEME_BOOST_UNION_SETTING_COURSELISTPRES_NOCHANGE);
+
+        // Setting: Select course fields to be shown in the course listing.
+        // Prepare course fields options.
+        $coursehandler = \core_course\customfield\course_handler::create();
+        $coursefields = $coursehandler->get_fields();
+        // If there are existing fields.
+        if (count($coursefields) > 0) {
+            // Get all field details.
+            $fieldsarray = [];
+            $fieldsdefault = [];
+            foreach ($coursefields as $field) {
+                $fieldid = $field->get('id');
+                $fieldsarray[$fieldid] = $field->get('name');
+                $fieldsdefault[$fieldid] = 1; // By default, all fields are selected.
+            }
+            // Build the setting.
+            $name = 'theme_boost_union/courselistingselectfields';
+            $title = get_string('courselistingselectfields', 'theme_boost_union', null, true);
+            $description = get_string('courselistingselectfields_desc', 'theme_boost_union', null, true);
+            $setting = new admin_setting_configmulticheckbox($name, $title, $description, $fieldsdefault, $fieldsarray);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/courselistingselectfields', 'theme_boost_union/courselistingpresentation', 'eq',
+                    THEME_BOOST_UNION_SETTING_COURSELISTPRES_NOCHANGE);
+            $page->hide_if('theme_boost_union/courselistingselectfields', 'theme_boost_union/courselistingshowfields', 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+            // Otherwise.
+        } else {
+            // Build an empty setting.
+            $customfieldurl = new \core\url('/course/customfield.php');
+            $customfieldlink = ['url' => $customfieldurl->out(),
+                    'linktitle' => get_string('course_customfield', 'admin', null, true),
+            ];
+            $name = 'theme_boost_union/courselistingselectfields';
+            $title = get_string('courselistingselectfields', 'theme_boost_union', null, true);
+            $description = get_string('courselistingselectfields_nofield', 'theme_boost_union', $customfieldlink, true);
+            $setting = new admin_setting_configempty($name, $title, $description);
+            $tab->add($setting);
+            $page->hide_if('theme_boost_union/courselistingselectfields', 'theme_boost_union/courselistingpresentation', 'eq',
+                    THEME_BOOST_UNION_SETTING_COURSELISTPRES_NOCHANGE);
+            $page->hide_if('theme_boost_union/courselistingselectfields', 'theme_boost_union/courselistingshowfields', 'neq',
+                    THEME_BOOST_UNION_SETTING_SELECT_YES);
+        }
 
         // Setting: Show goto button in the course listing.
         $name = 'theme_boost_union/courselistinghowgoto';
@@ -1589,9 +1722,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $ADMIN->add('theme_boost_union', $page);
 
 
-        // Create Feel settings page with tabs
+        // Create Feel settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
-        $page = new theme_boost_admin_settingspage_tabs('theme_boost_union_feel',
+        $page = new admin_settingspage_tabs_with_tertiary('theme_boost_union_feel',
                 get_string('configtitlefeel', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
 
@@ -1663,6 +1796,13 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $setting = new admin_setting_heading($name, $title, null);
         $tab->add($setting);
 
+        // Setting: Display login link as button.
+        $name = 'theme_boost_union/loginlinkbuttonenabled';
+        $title = get_string('loginlinkbuttonenabled', 'theme_boost_union', null, true);
+        $description = get_string('loginlinkbuttonenabled_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+
         // Setting: Show starred courses popover in the navbar.
         $name = 'theme_boost_union/shownavbarstarredcourses';
         $title = get_string('shownavbarstarredcoursessetting', 'theme_boost_union', null, true);
@@ -1670,6 +1810,20 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
         $setting->set_updatedcallback('theme_reset_all_caches');
         $tab->add($setting);
+
+        // Setting: Starred courses popover cog icon link target.
+        $name = 'theme_boost_union/starredcourseslinktarget';
+        $title = get_string('starredcourseslinktargetsetting', 'theme_boost_union', null, true);
+        $description = get_string('starredcourseslinktargetsetting_desc', 'theme_boost_union', null, true);
+        $starredcourseslinktargetoptions = [
+                THEME_BOOST_UNION_SETTING_STARREDCOURSES_LINKTARGET_MYCOURSES => get_string('mycourses', 'core', null, false),
+                THEME_BOOST_UNION_SETTING_STARREDCOURSES_LINKTARGET_DASHBOARD => get_string('myhome', 'core', null, false),
+        ];
+        $setting = new admin_setting_configselect($name, $title, $description,
+                THEME_BOOST_UNION_SETTING_STARREDCOURSES_LINKTARGET_MYCOURSES, $starredcourseslinktargetoptions);
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/starredcourseslinktarget', 'theme_boost_union/shownavbarstarredcourses', 'neq',
+                THEME_BOOST_UNION_SETTING_SELECT_YES);
 
         // Create breadcrumbs heading.
         $name = 'theme_boost_union/breadcrumbsheading';
@@ -1745,8 +1899,18 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Create block regions heading.
         $name = 'theme_boost_union/blockregionsheading';
         $title = get_string('blockregionsheading', 'theme_boost_union', null, true);
-        $description = get_string('blockregionsheading_desc', 'theme_boost_union', null, true);
+        $description = '';
         $setting = new admin_setting_heading($name, $title, $description);
+        $tab->add($setting);
+
+        // Show block regions intro.
+        $name = 'theme_boost_union/blockregionsintro';
+        $blockregionsintro = new \core\output\notification(
+                get_string('blockregionsheading_desc', 'theme_boost_union'), \core\output\notification::NOTIFY_INFO);
+        $blockregionsintro->set_show_closebutton(false);
+        $blockregionsintro->set_extra_classes(['alert-dark']);
+        $description = $OUTPUT->render($blockregionsintro);
+        $setting = new admin_setting_heading($name, '', $description);
         $tab->add($setting);
 
         // Add experimental warning.
@@ -2050,9 +2214,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $ADMIN->add('theme_boost_union', $page);
 
 
-        // Create Content settings page with tabs
+        // Create Content settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
-        $page = new theme_boost_admin_settingspage_tabs('theme_boost_union_content',
+        $page = new admin_settingspage_tabs_with_tertiary('theme_boost_union_content',
                 get_string('configtitlecontent', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
 
@@ -2923,9 +3087,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $ADMIN->add('theme_boost_union', $page);
 
 
-        // Create Functionality settings page with tabs
+        // Create Functionality settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
-        $page = new theme_boost_admin_settingspage_tabs('theme_boost_union_functionality',
+        $page = new admin_settingspage_tabs_with_tertiary('theme_boost_union_functionality',
                 get_string('configtitlefunctionality', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
 
@@ -2933,9 +3097,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab = new admin_settingpage('theme_boost_union_functionality_courses',
                 get_string('coursestab', 'theme_boost_union', null, true));
 
-        // Create course related hints heading.
-        $name = 'theme_boost_union/courserelatedhintsheading';
-        $title = get_string('courserelatedhintsheading', 'theme_boost_union', null, true);
+        // Create course related hints for teachers heading.
+        $name = 'theme_boost_union/courserelatedhintsforteachersheading';
+        $title = get_string('courserelatedhintsforteachersheading', 'theme_boost_union', null, true);
         $setting = new admin_setting_heading($name, $title, null);
         $tab->add($setting);
 
@@ -2963,17 +3127,40 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $page->hide_if('theme_boost_union/showhintforumnotifications', 'theme_boost_union/showhintcoursehidden', 'neq',
                 THEME_BOOST_UNION_SETTING_SELECT_YES);
 
-        // Setting: Show hint guest for access.
-        $name = 'theme_boost_union/showhintcourseguestaccess';
-        $title = get_string('showhintcoursguestaccesssetting', 'theme_boost_union', null, true);
-        $description = get_string('showhintcourseguestaccesssetting_desc', 'theme_boost_union', null, true);
-        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
-        $tab->add($setting);
-
         // Setting: Show hint for self enrolment without enrolment key.
         $name = 'theme_boost_union/showhintcourseselfenrol';
         $title = get_string('showhintcourseselfenrolsetting', 'theme_boost_union', null, true);
         $description = get_string('showhintcourseselfenrolsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+
+        // Setting: Show hint for guest enrolment.
+        $name = 'theme_boost_union/showhintcourseguestenrol';
+        $title = get_string('showhintcourseguestenrolsetting', 'theme_boost_union', null, true);
+        $description = get_string('showhintcourseguestenrolsetting_desc', 'theme_boost_union', null, true).'<br />'.
+                get_string('showhintcourseguestenrolsetting_note', 'theme_boost_union', null, true);
+        $guestaccessoptions = [
+                THEME_BOOST_UNION_SETTING_SELECT_NO =>
+                        get_string('no'),
+                THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_WITHOUTPASSWORD =>
+                        get_string('showhintcourseguestenrolsetting_withoutpassword', 'theme_boost_union', null, true),
+                THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_ALWAYS =>
+                        get_string('showhintcourseguestenrolsetting_always', 'theme_boost_union', null, true),
+        ];
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO,
+                $guestaccessoptions);
+        $tab->add($setting);
+
+        // Create course related hints for students heading.
+        $name = 'theme_boost_union/courserelatedhintsforstudentsheading';
+        $title = get_string('courserelatedhintsforstudentsheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Show hint guest for access.
+        $name = 'theme_boost_union/showhintcourseguestaccess';
+        $title = get_string('showhintcoursguestaccesssetting', 'theme_boost_union', null, true);
+        $description = get_string('showhintcourseguestaccesssetting_desc', 'theme_boost_union', null, true);
         $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
         $tab->add($setting);
 
@@ -3009,9 +3196,9 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $ADMIN->add('theme_boost_union', $page);
 
 
-        // Create Accessibility settings page with tabs
+        // Create Accessibility settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
-        $page = new theme_boost_admin_settingspage_tabs('theme_boost_union_accessibility',
+        $page = new admin_settingspage_tabs_with_tertiary('theme_boost_union_accessibility',
                 get_string('configtitleaccessibility', 'theme_boost_union', null, true),
                 'theme/boost_union:configure');
 
@@ -3232,6 +3419,83 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // Add settings page to the admin settings category.
         $ADMIN->add('theme_boost_union', $page);
 
+        // Create SCSS snippets settings page with tabs (and external pages).
+        // (and allow users with the theme/boost_union:configure capability to access it).
+        $page = new admin_settingspage_tabs_with_external_and_tertiary('theme_boost_union_snippets',
+                get_string('configtitlesnippets', 'theme_boost_union', null, true),
+                'theme/boost_union:configure');
+
+        // Create SCSS snippets overview tab
+        // (and allow users with the theme/boost_union:configure capability to access it).
+        $tab = new admin_externalpage_in_tab('theme_boost_union_snippets_overview',
+                get_string('snippetsoverview', 'theme_boost_union', null, true),
+                new core\url('/theme/boost_union/snippets/overview.php'),
+                'theme/boost_union:configure');
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+        // Create SCSS snippets settings tab.
+        $tab = new admin_settingpage('theme_boost_union_snippets_settings',
+                get_string('snippetssettings', 'theme_boost_union', null, true));
+
+        // Create built-in snippets heading.
+        $name = 'theme_boost_union/builtinsnippetsheading';
+        $title = get_string('snippetsbuiltinsnippetsheading', 'theme_boost_union', null, true);
+        $setting = new admin_setting_heading($name, $title, null);
+        $tab->add($setting);
+
+        // Setting: Enable built-in snippets.
+        $name = 'theme_boost_union/enablebuiltinsnippets';
+        $title = get_string('enablebuiltinsnippets', 'theme_boost_union', null, true);
+        $description = get_string('enablebuiltinsnippets_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Create uploaded snippets heading.
+        $name = 'theme_boost_union/uploadedsnippetsheading';
+        $title = get_string('snippetsuploadedsnippetsheading', 'theme_boost_union', null, true);
+        $notificationurl = 'https://github.com/moodle-an-hochschulen/moodle-theme_boost_union_snippets';
+        $notification = new \core\output\notification(
+                get_string('snippetsuploadedsnippetsheading_desc', 'theme_boost_union', $notificationurl),
+                \core\output\notification::NOTIFY_INFO);
+        $notification->set_show_closebutton(false);
+        $description = $OUTPUT->render($notification);
+        $setting = new admin_setting_heading($name, $title, $description);
+        $tab->add($setting);
+
+        // Setting: Enable uploaded snippets.
+        $name = 'theme_boost_union/enableuploadedsnippets';
+        $title = get_string('enableuploadedsnippets', 'theme_boost_union', null, true);
+        $description = get_string('enableuploadedsnippets_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Setting: Uploaded snippets.
+        $name = 'theme_boost_union/uploadedsnippets';
+        $title = get_string('uploadedsnippets', 'theme_boost_union', null, true);
+        $snippetrepourl = 'https://github.com/moodle-an-hochschulen/moodle-theme_boost_union_snippets';
+        $description = get_string('uploadedsnippets_desc', 'theme_boost_union', ['url' => $snippetrepourl], true);
+        $uploadedsnippetsextensions = array_map(function($item) {
+            return '.'.$item;
+        }, snippets::ALLOWED_PREVIEW_FILE_EXTENSIONS);;
+        $uploadedsnippetsextensions[] = '.scss';
+        $uploadedsnippetsextensions[] = '.zip';
+        $setting = new admin_setting_configstoredfilealwayscallback($name, $title, $description, 'uploadedsnippets', 0,
+                ['maxfiles' => -1, 'subdirs' => 0, 'accepted_types' => $uploadedsnippetsextensions]);
+        $setting->set_updatedcallback('theme_boost_union_parse_uploaded_sippets');
+
+        $tab->add($setting);
+        $page->hide_if('theme_boost_union/uploadedsnippets', 'theme_boost_union/enableuploadedsnippets', 'neq',
+        THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+        // Add tab to settings page.
+        $page->add($tab);
+
+        // Add settings page to the admin settings category.
+        $ADMIN->add('theme_boost_union', $page);
     }
 
     // Add JS to remember the active admin tab to the page.

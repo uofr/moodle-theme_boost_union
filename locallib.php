@@ -126,6 +126,63 @@ function theme_boost_union_get_course_related_hints() {
         $html .= $OUTPUT->render_from_template('theme_boost_union/course-hint-guestaccess', $templatecontext);
     }
 
+    // If the setting showhintcourseguestenrol is set, a hint for users is shown that the course allows guest access.
+    // This hint is only shown if the course is visible, the guest acess is enabled and if the user has the
+    // capability "theme/boost_union:viewhintcourseguestenrol".
+    $showhintcourseguestenrol = get_config('theme_boost_union', 'showhintcourseguestenrol');
+    if (($showhintcourseguestenrol == THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_WITHOUTPASSWORD ||
+         $showhintcourseguestenrol == THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_ALWAYS)
+            && has_capability('theme/boost_union:viewhintcourseguestenrol', \context_course::instance($COURSE->id))
+            && $PAGE->has_set_url()
+            && $PAGE->url->compare(new core\url('/course/view.php'), URL_MATCH_BASE)
+            && $COURSE->visible == true) {
+
+        // Get the active enrol instances for this course.
+        $enrolinstances = enrol_get_instances($COURSE->id, true);
+
+        // Iterate over the instances.
+        foreach ($enrolinstances as $instance) {
+            // Check if guest access is possible based on setting.
+            // If WITHOUTPASSWORD is set, only show hint when no password is set.
+            // If ALWAYS is set, show hint regardless of password.
+            if ($instance->enrol == 'guest' &&
+                ($showhintcourseguestenrol == THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_ALWAYS ||
+                 (empty($instance->password) &&
+                        $showhintcourseguestenrol == THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_WITHOUTPASSWORD))) {
+
+                // Prepare template context.
+                $templatecontext = ['courseid' => $COURSE->id];
+
+                // Add the flag if guest auth is enabled (and users without Moodle accounts can access the course as well).
+                if ($CFG->guestloginbutton == 1) {
+                    $templatecontext['guestauthenabled'] = true;
+                } else {
+                    $templatecontext['guestauthenabled'] = false;
+                }
+
+                // Add the flag if the guest access password is set.
+                if (!empty($instance->password)) {
+                    $templatecontext['guestpasswordset'] = true;
+                } else {
+                    $templatecontext['guestpasswordset'] = false;
+                }
+
+                // If the user has the capability to config guest enrolments, add the call for action to the template context.
+                if (has_capability('enrol/guest:config', \context_course::instance($COURSE->id))) {
+                    $templatecontext['showenrolsettingslink'] = true;
+                } else {
+                    $templatecontext['showenrolsettingslink'] = false;
+                }
+
+                // Render template and add it to HTML code.
+                $html .= $OUTPUT->render_from_template('theme_boost_union/course-hint-guestenrol', $templatecontext);
+
+                // Skip the rest of the loop.
+                break;
+            }
+        }
+    }
+
     // If the setting showhintcourseselfenrol is set, a hint for users is shown that the course allows unrestricted self
     // enrolment. This hint is only shown if the course is visible, the self enrolment is visible and if the user has the
     // capability "theme/boost_union:viewhintcourseselfenrol".
@@ -801,9 +858,11 @@ function theme_boost_union_get_additionalresources_templatecontext() {
         // Iterate over the files and fill the templatecontext of the file list.
         $filesforcontext = [];
         foreach ($files as $af) {
-            $urlpersistent = new core\url('/pluginfile.php/1/theme_boost_union/additionalresources/0/'.$af->get_filename());
-            $urlrevisioned = new core\url('/pluginfile.php/1/theme_boost_union/additionalresources/'.theme_get_revision().
-                    '/'.$af->get_filename());
+            $urlpersistent = new core\url('/pluginfile.php/' . $systemcontext->id .
+                '/theme_boost_union/additionalresources/0/' . $af->get_filename());
+                $urlrevisioned = new core\url('/pluginfile.php/' . $systemcontext->id .
+                '/theme_boost_union/additionalresources/' . theme_get_revision().
+                '/' . $af->get_filename());
             $filesforcontext[] = ['filename' => $af->get_filename(),
                                         'filetype' => $af->get_mimetype(),
                                         'filesize' => display_size($af->get_filesize()),
@@ -860,7 +919,8 @@ function theme_boost_union_get_customfonts_templatecontext() {
             }
 
             // Otherwise, fill the templatecontext of the file list.
-            $urlpersistent = new core\url('/pluginfile.php/1/theme_boost_union/customfonts/0/'.$filename);
+            $urlpersistent = new core\url('/pluginfile.php/'. $systemcontext->id .
+                '/theme_boost_union/customfonts/0/' . $filename);
             $filesforcontext[] = ['filename' => $filename,
                     'fileurlpersistent' => $urlpersistent->out(), ];
         }
@@ -1929,7 +1989,8 @@ function theme_boost_union_get_touchicons_html_for_page() {
             // If the file exists (i.e. it has been uploaded).
             if ($file->exists == true) {
                 // Build the file URL.
-                $fileurl = new core\url('/pluginfile.php/1/theme_boost_union/touchiconsios/' .
+                $systemcontext = \context_system::instance();
+                $fileurl = new core\url('/pluginfile.php/' . $systemcontext->id . '/theme_boost_union/touchiconsios/' .
                     theme_get_revision().'/'.$file->filename);
 
                 // Compose and append the HTML tag.
@@ -2052,8 +2113,29 @@ function theme_boost_union_get_navbar_starredcoursespopover() {
         });
     }
 
+    // Get the cog icon link target.
+    $cogiconlinktarget = get_config('theme_boost_union', 'starredcourseslinktarget');
+    switch($cogiconlinktarget) {
+        case THEME_BOOST_UNION_SETTING_STARREDCOURSES_LINKTARGET_DASHBOARD:
+            $cogiconlinktargeturl = new \core\url('/my/');
+            $cogiconlinktargettitle =
+                    get_string('shownavbarstarredcourses_config', 'theme_boost_union', get_string('myhome', 'core'));
+            break;
+        case THEME_BOOST_UNION_SETTING_STARREDCOURSES_LINKTARGET_MYCOURSES:
+        default:
+            $cogiconlinktargeturl = new \core\url('/my/courses.php');
+            $cogiconlinktargettitle =
+                    get_string('shownavbarstarredcourses_config', 'theme_boost_union', get_string('mycourses', 'core'));
+            break;
+    }
+
     // Compose the popover menu.
-    $html = $OUTPUT->render_from_template('theme_boost_union/popover-favourites', ['favourites' => $coursesfortemplate]);
+    $html = $OUTPUT->render_from_template('theme_boost_union/popover-favourites',
+            [
+                'favourites' => $coursesfortemplate,
+                'cogiconlinktargeturl' => $cogiconlinktargeturl,
+                'cogiconlinktargettitle' => $cogiconlinktargettitle,
+            ]);
 
     return $html;
 }
@@ -2082,12 +2164,18 @@ function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
     // Initialize HTML.
     $html = '';
 
-    // If a theme other than Boost Union or a child theme of it is active, return directly.
-    // This is necessary as the callback is called regardless of the active theme.
+    // Add some SCSS to the page to style the tertiary navigation.
+    $html .= \theme_boost_union\admin_settingspage_tabs_with_tertiary::get_tertiary_navigation_css_for_head();
+
+    // If a theme other than Boost Union or a child theme of it is active, return now.
+    // This is necessary as the callback is called regardless of the active theme and we must not add the Boost Union specific
+    // CSS then.
     if (theme_boost_union_is_active_theme() != true) {
         if ($hook != null) {
-            return;
+            // Add the HTML code to the hook.
+            $hook->add_html($html);
         } else {
+            // Return the HTML code.
             return $html;
         }
     }
@@ -2559,4 +2647,129 @@ function theme_boost_union_is_active_childtheme() {
     } else {
         return false;
     }
+}
+
+/**
+ * Helper function to build the map of FA icons to be used in the smart menu item icon autocomplete setting.
+ * It returns both the Moodle core icon mappings and all other available FontAwesome icons.
+ *
+ * @return array An array which holds the full icon map.
+ */
+function theme_boost_union_build_fa_icon_map() {
+    global $CFG;
+
+    // Check if we have the icon map in the cache.
+    $cache = \cache::make('theme_boost_union', 'fontawesomeicons');
+    $iconmap = $cache->get('iconmap');
+
+    // If the icon map is already in the cache, return it.
+    if ($iconmap !== false) {
+        return $iconmap;
+    }
+
+    // Initialize icon map if not in cache.
+    $iconmap = [];
+
+    // Step 1: Get all Moodle core icon mappings.
+
+    // Load the theme config.
+    $theme = \core\output\theme_config::load('boost_union');
+
+    // Get the FA system.
+    $faiconsystem = \core\output\icon_system_fontawesome::instance($theme->get_icon_system());
+
+    // Get the raw icon map.
+    $iconmapraw = $faiconsystem->get_core_icon_map();
+
+    // Iterate over the raw icon map.
+    foreach ($iconmapraw as $iconname => $faname) {
+        // Fill the icon into the icon list.
+        $iconmap[$iconname] = [
+            'class' => $faname,
+            'source' => 'core',
+        ];
+    }
+
+    // Define the FontAwesome variables file path first.
+    $variablesfile = $CFG->dirroot . '/theme/boost/scss/fontawesome/_variables.scss';
+
+    // If the variables file exists.
+    if (file_exists($variablesfile)) {
+        // Read the variables file content.
+        $content = file_get_contents($variablesfile);
+
+        // Step 2: Add all available FontAwesome solid icons from $fa-icons array.
+
+        // Extract the $fa-icons section using a quite simple approach.
+        // Find the beginning of $fa-icons array.
+        $faiconsstart = strpos($content, '$fa-icons:');
+        if ($faiconsstart !== false) {
+            // Find the end of $fa-icons array (right before $fa-brand-icons starts).
+            $fabrandstart = strpos($content, '$fa-brand-icons:', $faiconsstart);
+            if ($fabrandstart !== false) {
+                // Extract just the $fa-icons section.
+                $faiconsection = substr($content, $faiconsstart, $fabrandstart - $faiconsstart);
+
+                // Extract all icon names from the $fa-icons array with a simple pattern.
+                preg_match_all('/"([a-z0-9\-]+)"/', $faiconsection, $solidmatches);
+
+                // If we found any icon names.
+                if (!empty($solidmatches[1])) {
+                    // Process the icons.
+                    foreach ($solidmatches[1] as $iconname) {
+                        $fasolidclass = 'fa-'. $iconname;
+
+                        // Add icon to the icon map, ignoring the fact by purpose that the icon could already be there from core.
+                        $iconmap['theme_boost_union:fa-'.$iconname] = [
+                            'class' => $fasolidclass,
+                            'source' => 'fasolid',
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Step 3: Add all available FontAwesome brand icons from $fa-brand-icons array.
+
+        // Find the beginning of $fa-brand-icons array.
+        $fabrandstart = strpos($content, '$fa-brand-icons:');
+        if ($fabrandstart !== false) {
+            // Extract the $fa-brand-icons section.
+            $fabrandsection = substr($content, $fabrandstart);
+
+            // Extract all brand icon names from the $fa-brand-icons array with a simple pattern.
+            preg_match_all('/"([a-z0-9\-]+)"/', $fabrandsection, $brandmatches);
+
+            // If we found any brand icon names.
+            if (!empty($brandmatches[1])) {
+                // Process the brand icons.
+                foreach ($brandmatches[1] as $brandname) {
+                    $fabrandclass = 'fa-'. $brandname;
+
+                    // Add brand icon to the icon map.
+                    $iconmap['theme_boost_union:fa-'.$brandname] = [
+                        'class' => $fabrandclass,
+                        'source' => 'fabrand',
+                    ];
+                }
+            }
+        }
+    }
+
+    // Sort the icons array by key.
+    asort($iconmap);
+
+    // Step 4: Add the blank FontAwesome icon to the very beginning of the icon map.
+    // This icon is not contained in the FontAwesome variables file, but should be usable as smart menu item.
+    $blankicon = [
+        'class' => 'fa-fw',
+        'source' => 'fablank',
+    ];
+    $iconmap = ['theme_boost_union:fa-fw' => $blankicon] + $iconmap;
+
+    // Store the icon map in cache for future requests.
+    $cache->set('iconmap', $iconmap);
+
+    // Return icon map.
+    return $iconmap;
 }

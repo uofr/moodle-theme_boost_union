@@ -55,18 +55,18 @@ Feature: Configuring the theme_boost_union plugin for the "Footer" tab on the "C
     And I follow "Dashboard"
     And I change viewport size to "large"
     Then ".btn-footer-popover" "css_element" <desktopshouldornot> <visibleorexist>
-    And I change viewport size to "480x800"
+    And I change viewport size to "mobile"
     Then ".btn-footer-popover" "css_element" <mobileshouldornot> <visibleorexist>
     And I am on "Course 1" course homepage
     And I change viewport size to "large"
     Then ".btn-footer-popover" "css_element" <desktopshouldornot> <visibleorexist>
-    And I change viewport size to "480x800"
+    And I change viewport size to "mobile"
     Then ".btn-footer-popover" "css_element" <mobileshouldornot> <visibleorexist>
     And I log out
     And I follow "Log in"
     And I change viewport size to "large"
     Then ".btn-footer-popover" "css_element" <desktopshouldornot> <visibleorexist>
-    And I change viewport size to "480x800"
+    And I change viewport size to "mobile"
     Then ".btn-footer-popover" "css_element" <mobileshouldornot> <visibleorexist>
 
     Examples:
@@ -171,6 +171,32 @@ Feature: Configuring the theme_boost_union plugin for the "Footer" tab on the "C
       | value | shouldornot |
       | no    | should      |
       | yes   | should not  |
+
+  @javascript
+  Scenario Outline: Setting: Footer - Suppress Login info - Make sure that the failed login attempts counter in the navbar is still reset
+    Given the following config values are set as admin:
+      | config                  | value   | plugin            |
+      | footersuppresslogininfo | <value> | theme_boost_union |
+    And the following config values are set as admin:
+      | config               | value |
+      | displayloginfailures | 1     |
+    And all caches are purged
+    When I am on login page
+    And I set the field "Username" to "admin"
+    And I set the field "Password" to "wrongpass"
+    And I press "Log in"
+    And I should see "Invalid login, please try again"
+    And I set the field "Username" to "admin"
+    And I set the field "Password" to "admin"
+    And I press "Log in"
+    Then I should see "1 failed logins since your last login" in the ".navbar" "css_element"
+    And I reload the page
+    And I should not see "1 failed logins since your last login" in the ".navbar" "css_element"
+
+    Examples:
+      | value |
+      | no    |
+      | yes   |
 
   @javascript
   Scenario Outline: Setting: Footer - Suppress 'Reset user tour on this page' link

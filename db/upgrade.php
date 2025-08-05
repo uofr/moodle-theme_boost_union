@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use theme_boost_union\snippets;
+
 /**
  * Function to upgrade theme_boost_union
  * @param int $oldversion the version we are upgrading from
@@ -525,6 +527,137 @@ function xmldb_theme_boost_union_upgrade($oldversion) {
         // Boost_union savepoint reached.
         upgrade_plugin_savepoint(true, 2024100716, 'theme', 'boost_union');
     }
+
+    if ($oldversion < 2024100736) {
+
+        // Define table theme_boost_union_menus to be altered.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+
+        // Define field display hidden courses to be added to theme_boost_union_menuitems.
+        $field = new xmldb_field('displayhiddencourses', XMLDB_TYPE_INTEGER, '9', null, null, null, null, 'listsort');
+
+        // Conditionally launch add field listsort.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field hiddencoursesort to be added to theme_boost_union_menuitems.
+        $field = new xmldb_field('hiddencoursesort', XMLDB_TYPE_INTEGER, '9', null, null, null, null, 'displayhiddencourses');
+
+        // Conditionally launch add field listsort.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100736, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100739) {
+
+        // Get the current showhintcourseguestenrol setting.
+        $oldsetting = get_config('theme_boost_union', 'showhintcourseguestenrol');
+
+        // If the setting was set to THEME_BOOST_UNION_SETTING_SELECT_YES.
+        if ($oldsetting === THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            // Update it to THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_WITHOUTPASSWORD.
+            set_config('showhintcourseguestenrol', THEME_BOOST_UNION_SETTING_GUESTACCESSHINT_WITHOUTPASSWORD, 'theme_boost_union');
+
+            // Show an upgrade notice about this change.
+            $message = get_string('upgradenotice_2025041410', 'theme_boost_union');
+            echo $OUTPUT->notification($message, 'info');
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100739, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100742) {
+
+        // Get the current courselistinghowfields setting.
+        $oldsetting = get_config('theme_boost_union', 'courselistinghowfields');
+
+        // If the old setting exists, migrate it to the new setting name.
+        if ($oldsetting !== false) {
+            // Set the new config.
+            set_config('courselistingshowfields', $oldsetting, 'theme_boost_union');
+
+            // Delete the old config.
+            unset_config('courselistinghowfields', 'theme_boost_union');
+
+            // Show an upgrade notice about this change.
+            $message = get_string('upgradenotice_2025041413', 'theme_boost_union');
+            echo $OUTPUT->notification($message, 'info');
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100742, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100744) {
+
+        // Define table theme_boost_union_snippets to be created.
+        $table = new xmldb_table('theme_boost_union_snippets');
+
+        // Adding fields to table theme_boost_union_snippets.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, '18', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('source', XMLDB_TYPE_CHAR, '255', null, null, null, 'theme_boost_union');
+        $table->add_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table theme_boost_union_snippets.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for theme_boost_union_snippets.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Boost_union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100744, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100745) {
+        // Convert existing hash-based dividers to real dividers.
+        // These were created by using TYPEHEADING with a title of "###".
+        $dividers = $DB->get_records_sql(
+            "SELECT * FROM {theme_boost_union_menuitems}
+                WHERE type = :type AND title LIKE :title",
+            ['type' => \theme_boost_union\smartmenu_item::TYPEHEADING, 'title' => '###%']
+        );
+
+        // Update each divider to use the new divider type.
+        foreach ($dividers as $divider) {
+            $divider->type = \theme_boost_union\smartmenu_item::TYPEDIVIDER;
+            $divider->title = ''; // Empty title to clear the existing hashes in the title.
+            $DB->update_record('theme_boost_union_menuitems', $divider);
+        }
+
+        // Show an upgrade notice about this change.
+        $message = get_string('upgradenotice_2025041416', 'theme_boost_union');
+        echo $OUTPUT->notification($message, 'info');
+
+        // Savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100745, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100747) {
+
+        // The old smart menu item icon picker stored the value '0' for no icon.
+        // We need to update these to an empty string to match the new icon picker behavior.
+        // Find all menu items where menuicon is '0' and update them to have an empty string.
+        $DB->execute("UPDATE {theme_boost_union_menuitems}
+                SET menuicon = ''
+                WHERE menuicon = '0'");
+
+        // Savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100747, 'theme', 'boost_union');
+    }
+
+    // Load the builtin SCSS snippets into the database.
+    // This is done with every plugin update, regardless of the plugin version.
+    snippets::add_builtin_snippets();
 
     return true;
 }

@@ -105,15 +105,20 @@ $table->define_baseurl($PAGE->url);
 
 // Start page output.
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('smartmenus', 'theme_boost_union'));
+echo \theme_boost_union\admin_settingspage_tabs_with_tertiary::get_tertiary_navigation_for_externalpage();
 
-// Show smart menus description.
-echo get_string('smartmenus_desc', 'theme_boost_union');
+// Show smart menus intro.
+$intro = new \core\output\notification(
+        get_string('smartmenus_desc', 'theme_boost_union'), \core\output\notification::NOTIFY_INFO);
+$intro->set_show_closebutton(false);
+$intro->set_extra_classes(['alert-dark']);
+echo $OUTPUT->render($intro);
 
 // Add experimental warning.
 $experimentalnotification = new \core\output\notification(get_string('smartmenusexperimental', 'theme_boost_union'),
         \core\output\notification::NOTIFY_WARNING);
 $experimentalnotification->set_show_closebutton(false);
+$experimentalnotification->set_extra_classes(['mb-5']);
 echo $OUTPUT->render($experimentalnotification);
 
 // Prepare 'Create menu' button.

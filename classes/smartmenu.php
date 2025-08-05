@@ -679,6 +679,28 @@ class smartmenu {
                 // Setup the childrens to parent menu node.
                 $nodes->haschildren = (count($builditems) > 0) ? true : false;
                 $nodes->children = $builditems;
+
+                // Set the visibility of the menu node for mobile, tablet, and desktop based on its child items.
+                foreach ($builditems as $key => $item) {
+                    // If any of the items are visible on the desktop, the menu node should also be visible on the desktop.
+                    if (!isset($item['desktop']) || empty($item['desktop'])) {
+                        $hidemenudesktop = 0;
+                    }
+                    // If any of the items are visible on the tablet, the menu node should also be visible on the tablet.
+                    if (!isset($item['tablet']) || empty($item['tablet'])) {
+                        $hidemenutablet = 0;
+                    }
+                    // If any of the items are visible on the mobile, the menu node should also be visible on the mobile.
+                    if (!isset($item['mobile']) || empty($item['mobile'])) {
+                        $hidemenumobile = 0;
+                    }
+                }
+
+                // Include the menu node visibility based on its child items.
+                $nodes->desktop = $hidemenudesktop ?? true;
+                $nodes->tablet = $hidemenutablet ?? true;
+                $nodes->mobile = $hidemenumobile ?? true;
+
             } else {
                 // If menu is inline mode, then it items are displayed directly in menus.
                 // Set the menuitems as separate menu node in cache.
@@ -1096,12 +1118,12 @@ class smartmenu {
      * @return array An array of SmartMenu nodes.
      */
     public static function build_smartmenu() {
-        global $USER;
+        global $SESSION, $USER;
 
         $nodes = [];
 
-        // Verify the language changes in user session, if changed than purge the menus and items cache for the user session.
-        self::verify_lang_session_changes();
+        // Detect language changes in user session - if changed then purge the menus and items cache for the user session.
+        self::detect_lang_session_change();
 
         $cache = cache::make('theme_boost_union', 'smartmenus');
         // Fetch the list of menus from cache.
@@ -1118,7 +1140,19 @@ class smartmenu {
         }
 
         // Test the flag to purge the cache is set for this user.
-        $removecache = (get_user_preferences('theme_boost_union_menu_purgesessioncache', false) == true);
+        // If the user is a guest.
+        if (!isloggedin() || isguestuser()) {
+            if (isset ($SESSION->theme_boost_union_menu_purgesessioncache) &&
+                    $SESSION->theme_boost_union_menu_purgesessioncache == true) {
+                $removecache = true;
+            } else {
+                $removecache = false;
+            }
+
+            // Otherwise.
+        } else {
+            $removecache = (get_user_preferences('theme_boost_union_menu_purgesessioncache', false) == true);
+        }
 
         foreach ($topmenus as $menu) {
             // Need to purge the menus for user, remove the cache before build.
@@ -1145,20 +1179,24 @@ class smartmenu {
 
     /**
      * Verifies and handles changes in the session language.
-     * Clears cached smart menus and items when the user changes the language using the language menu.
+     * Clears cached smart menus and items especially when the user changes the language using the language menu or if the language
+     * gets changed by a forced language in a course.
      *
      * @return void
      */
-    protected static function verify_lang_session_changes() {
+    protected static function detect_lang_session_change() {
         global $SESSION, $USER;
-        // Make sure the lang is updated for the session.
-        if ($lang = optional_param('lang', '', PARAM_SAFEDIR)) {
-            // Confirm the cache is not already purged for this language change. To avoid multiple purge.
-            if (!isset($SESSION->prevlang) || $SESSION->prevlang != $lang) {
-                // Set the purge cache preference for this session user. Cache will purged in the build_smartmenu method.
-                smartmenu_helper::set_user_purgecache($USER->id);
-                $SESSION->prevlang = $lang; // Save this lang for verification.
-            }
+
+        // Get the current language.
+        $lang = current_language();
+
+        // If the language does not match the language of the previous smart menu build or if we did not have a previous build yet.
+        if (!isset($SESSION->theme_boost_union_prevlang) || $SESSION->theme_boost_union_prevlang != $lang) {
+            // Set the purge cache preference for this session user. Cache will purged in the build_smartmenu method.
+            smartmenu_helper::set_user_purgecache($USER->id);
+
+            // And save this language for verification in the next build.
+            $SESSION->theme_boost_union_prevlang = $lang;
         }
     }
 }
