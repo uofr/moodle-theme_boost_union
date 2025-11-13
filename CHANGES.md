@@ -4,7 +4,34 @@ moodle-theme_boost_union
 Changes
 -------
 
-### Unreleased
+### v4.5-r28
+
+* 2025-11-07 - Upstream change: Adopt changes from MDL-85774 into loginform.mustache, resolves #1093
+* 2025-11-04 - Bugfix: When upgrading a Boost Union installation from the ancient pre-smart-menu-era to a recent version, Boost Union tried to access a table which does not exist yet, resolves #1085
+* 2025-11-03 - Glitch: upgrade.php did not match install.xml regarding the theme_boost_union_snippets table, resolves #1062
+* 2025-11-03 - Improvement: Use human-understandable values in the background position settings, resolves #1086
+* 2025-10-23 - Feature: Add a type for smart menu item to use mailto links, resolves #702
+
+### v4.5-r27
+
+* 2025-10-22 - Bugfix: Solve possible performance issues due to hook override cache being invalidated by CLI scripts, resolves #1076
+* 2025-10-15 - Make codechecker happy again
+* 2025-10-15 - Tests: Switch Github actions workflows to reusable workflows by Moodle an Hochschulen e.V.
+* 2025-10-20 - Tests: Add tests for Boost Union features which might but must not affect other active themes, resolves #761
+* 2025-10-16 - Feature: Add Bootstrap alert to Boost Union settings if Boost Union (or Boost Union Child) is not the active theme, resolves #773.
+* 2025-10-15 - Improvement: On course cards, display the course fields as Bootstrap badges, resolves #1070
+
+### v4.5-r26
+
+* 2025-10-07 - Upstream change: Adopt changes from MDL-81702 to remove site home link from drawers, resolves #1065
+* 2025-10-07 - Upstream change: Adopt changes from MDL-81455 to fix the welcome message heading on the dashboard, resolves #1066
+
+### v4.5-r25
+
+* 2025-10-06 - Bugfix: Block titles were missing after changes in Moodle core in MDL-86541, resolves #1061.
+* 2025-08-01 - Bugfix: Smart menu: menu bar was displayed although there were no items to display, resolves #849.
+
+### v4.5-r24
 
 * 2025-08-01 - Bugfix: Smart menu: menu bar was displayed although there were no items to display, resolves #849.
 * 2025-07-31 - Bugfix: Uninitialized $overflow might have caused the smart menu item icon picker to fail, resolves #1035

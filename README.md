@@ -451,43 +451,9 @@ Please note:
 
 Outside regions can not only be enabled with the layout settings above, their appearance can also be customized.
 
-###### Block region width for 'Outside (left)' region
-
-With this setting, you can set the width of the 'Outside (left)' block region which is shown on the left hand side of the main content area.
-
-###### Block region width for 'Outside (right)' region
-
-With this setting, you can set the width of the 'Outside (right)' block region which is shown on the right hand side of the main content area.
-
-###### Block region width for 'Outside (top)' region
-
-With this setting, you can set the width of the 'Outside (top)' block region which is shown at the very top of the page.
-
-###### Block region width for 'Outside (bottom)' region
-
-With this setting, you can set the width of the 'Outside (bottom)' block region which is shown below the main content.
-
-###### Block region width for 'Footer' region
-
-With this setting, you can set the width of the 'Footer' block region.
-
-###### Outside regions horizontal placement
-
-With this setting, you can control if, on larger screens, the 'Outside (left)' and 'Outside (right)' block regions should be placed near the main content area or rather near the window edges.
-
 ##### Site home right-hand block drawer
 
-###### Show right-hand block drawer of site home on visit
-
-With this setting, the right-hand block drawer of site home will be displayed in its expanded state by default. This only applies to users who are not logged in and does not overwrite the toggle state of each individual user.
-
-###### Show right-hand block drawer of site home on first login
-
-With this setting, the right-hand block drawer of site home will be displayed in its expanded state by default. This only applies to users who log in for the very first time and does not overwrite the toggle state of each individual user.
-
-###### Show right-hand block drawer of site home on guest login
-
-With this setting, the right-hand block drawer of site home will be displayed in its expanded state by default. This only applies to users who log in as a guest.
+With these settings, the right-hand block drawer of site home will be displayed in its expanded state by default.
 
 #### Tab "Links"
 
@@ -973,6 +939,7 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * bdecent GmbH, Stefan Scholz: Code, Ideating, Funding
 * Bern University of Applied Sciences (BFH), Luca Bösch: Code, Peer Review, Ideating
 * Carinthia University of Applied Sciences, Mario Wehr: Code
+* Catalyst IT Australia, Brendan Heywood: Code
 * Catalyst IT Europe, Mark Johnson: Code
 * Catalyst IT Europe, Simon Thornett: Code
 * ELAN e.V., Farbod Zamani: Code
@@ -996,6 +963,7 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * RWTH Aachen, Tim Schröder: Code
 * Solent University, Mark Sharp: Code
 * ssystems GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
+* ssystems GmbH, Sangyul Cha: Code
 * Technische Universität Berlin, Lars Bonczek: Code
 * University of Bayreuth, Nikolai Jahreis: Code
 * University of California, San Francisco, Stefan Topfstedt: Code

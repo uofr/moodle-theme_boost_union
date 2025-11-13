@@ -33,6 +33,7 @@ $string['pluginname'] = 'Boost Union';
 $string['choosereadme'] = 'Theme Boost Union is an enhanced child theme of Boost which is intended, on the one hand, to make Boost simply more configurable and, on the other hand, to provide helpful additional features for the daily Moodle operation of admins, teachers and students. Boost Union is maintained by Moodle an Hochschulen e.V., in cooperation with ssystems GmbH, together with bdecent GmbH and lern.link GmbH';
 $string['configtitle'] = 'Boost Union';
 $string['githubissueslink'] = '<a href="https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/issues">Github issues</a>';
+$string['warningboostunioninactive'] = 'Boost Union (or a child theme of Boost Union) is currently <em>not</em> the active theme. Settings on these pages will not have any effect if you do not <a href="{$a->url}">make Boost Union the active theme</a> or allow Boost Union to be used as category / course / user / cohort theme.';
 
 // General select options.
 $string['never'] = 'Never';
@@ -40,6 +41,17 @@ $string['always'] = 'Always';
 $string['auto'] = 'Automatically';
 $string['nochange'] = 'No change';
 $string['forguestsonly'] = 'Only for guests and non-logged-in users';
+$string['showastext'] = 'Show as text';
+$string['showasbadge'] = 'Show as badge';
+$string['imageposition_center_center'] = 'Center horizontally and vertically';
+$string['imageposition_center_top'] = 'Center horizontally, top vertically';
+$string['imageposition_center_bottom'] = 'Center horizontally, bottom vertically';
+$string['imageposition_left_top'] = 'Left horizontally, top vertically';
+$string['imageposition_left_center'] = 'Left horizontally, center vertically';
+$string['imageposition_left_bottom'] = 'Left horizontally, bottom vertically';
+$string['imageposition_right_top'] = 'Right horizontally, top vertically';
+$string['imageposition_right_center'] = 'Right horizontally, center vertically';
+$string['imageposition_right_bottom'] = 'Right horizontally, bottom vertically';
 
 // Settings: General strings.
 $string['dontchange'] = 'Do not change anything';
@@ -400,6 +412,9 @@ $string['courselistingshowfields_desc'] = 'With this setting, you control if the
 $string['courselistingselectfields'] = 'Select course fields to be shown in the course listing';
 $string['courselistingselectfields_desc'] = 'With this setting, you can select which specific custom course fields are shown in the course listing. If none are selected, no fields will be shown.';
 $string['courselistingselectfields_nofield'] = 'With this setting, you can select which specific custom course fields are shown in the course listing. There isn\'t any usable custom course field yet. Please go the <a href="{$a->url}">{$a->linktitle}</a> and create a custom course field first.';
+// ... ... Setting: Style course fields in the course listing.
+$string['courselistingstylefields'] = 'Style course fields in the course listing';
+$string['courselistingstylefields_desc'] = 'With this setting, you can control how the custom course fields are displayed in the course listing. You can choose between showing them as text (showing the field value together with the field name as label) or as badge (showing just the field value).';
 // ... ... Setting: Show goto button in the course listing.
 $string['courselistinghowgoto'] = 'Show goto button in the course listing';
 $string['courselistinghowgoto_desc'] = 'With this setting, you control if a \'Go to course\' button is shown in the course listing or not. If this setting is disabled, the user is still able to go to the course by clicking on the course title or course image.';
@@ -693,6 +708,9 @@ $string['outsideregionswidthherowidth'] = 'Hero width';
 // ... ... Setting: Block region width for Outside (bottom) region.
 $string['blockregionoutsidebottomwidth'] = 'Block region width for \'Outside (bottom)\' region';
 $string['blockregionoutsidebottomwidth_desc'] = 'With this setting, you can set the width of the \'Outside (bottom)\' block region which is shown below the main content. You can choose between full width, course content width and hero width.';
+// ... Section: Footer regions.
+$string['footerregionsheading'] = 'Footer regions';
+$string['footerregionsheading_desc'] = 'Footer regions can not only be enabled with the layout settings above, their appearance can also be customized.';
 // ... ... Setting: Block region width for Footer region.
 $string['blockregionfooterwidth'] = 'Block region width for \'Footer\' region';
 $string['blockregionfooterwidth_desc'] = 'With this setting, you can set the width of the \'Footer\' block region. You can choose between full width, course content width and hero width.';
@@ -1497,6 +1515,9 @@ $string['smartmenusmenuitemcssclass_help'] = 'Enter a CSS class for the menu ite
 $string['smartmenusmenuitemdeleteconfirm'] = 'Are you sure you want to delete this menu item from the smart menu?';
 $string['smartmenusmenuitemdeletesuccess'] = 'Smart menu item deleted successfully';
 $string['smartmenusmenuitemdisplayallcourses'] = 'Show hidden courses';
+$string['smartmenusmenuitememail'] = 'Recipient\'s email address';
+$string['smartmenusmenuitememail_help'] = 'The recipient\'s email address for the menu item. This will be used to build a mailto link that opens when the menu item is clicked.';
+$string['smartmenusmenuitememail_required'] = 'Required – Please enter a valid email address without the \'mailto:\' prefix.';
 $string['smartmenusmenuitemhidehiddencourses'] = 'Hide hidden courses';
 $string['smartmenusmenuitemhiddencoursessorting_help'] = 'Choose how hidden courses should be sorted in the course list of the dynamic courses menu items.';
 $string['smartmenusmenuitemhiddencoursessorting'] = 'Hidden courses sorting';
@@ -1566,11 +1587,12 @@ $string['smartmenusmenuitemtitle_help'] = 'The title of the menu. This will be u
 $string['smartmenusmenuitemtooltip'] = 'Tooltip';
 $string['smartmenusmenuitemtooltip_help'] = 'The tooltip which will be displayed when the user hovers over the menu item.';
 $string['smartmenusmenuitemtype'] = 'Menu item type';
-$string['smartmenusmenuitemtype_help'] = '<p>Select the type of menu item you want to create, choosing between static, heading, moodle documentation, dynamic courses, and divider.</p><ul><li>Static: A static menu item is simply a link to a fixed URL that does not change.</li><li>Heading: A heading menu item is used to group related menu items together under a common heading. It does not have a link and is not clickable.</li><li>Separator: A dividerenu item displays a horizontal line in the menu to visually separate groups of menu items.</li><li>Moodle documentation: A moodle documenation menu item is used to link to the corresponding MoodleDocs article, similar to the MoodleDocs link which is located in the Moodle footer (questionmark icon).</li><li>Dynamic courses: A dynamic courses menu item is used to display a list of courses based on certain criteria, such as course category, course enrolment role, course completion status or date range. The content displayed in a dynamic courses menu item will update automatically as the criteria changes.</li></ul>';
+$string['smartmenusmenuitemtype_help'] = '<p>Select the type of menu item you want to create, choosing between static, mailto, heading, moodle documentation, dynamic courses, and divider.</p><ul><li>Static: A static menu item is simply a link to a fixed URL that does not change.</li><li>Mailto: A mailto menu item opens the user\'s default email client to compose a message to the specified email address.</li><li>Heading: A heading menu item is used to group related menu items together under a common heading. It does not have a link and is not clickable.</li><li>Separator: A dividerenu item displays a horizontal line in the menu to visually separate groups of menu items.</li><li>Moodle documentation: A moodle documenation menu item is used to link to the corresponding MoodleDocs article, similar to the MoodleDocs link which is located in the Moodle footer (questionmark icon).</li><li>Dynamic courses: A dynamic courses menu item is used to display a list of courses based on certain criteria, such as course category, course enrolment role, course completion status or date range. The content displayed in a dynamic courses menu item will update automatically as the criteria changes.</li></ul>';
 $string['smartmenusmenuitemtypedocs'] = 'Moodle documentation';
 $string['smartmenusmenuitemtypedynamiccourses'] = 'Dynamic courses';
 $string['smartmenusmenuitemtypeheading'] = 'Heading';
 $string['smartmenusmenuitemtypedivider'] = 'Divider';
+$string['smartmenusmenuitemtypemailto'] = 'Mailto';
 $string['smartmenusmenuitemtypestatic'] = 'Static';
 $string['smartmenusmenuitemurl'] = 'Menu item URL';
 $string['smartmenusmenuitemurl_help'] = 'The static URL for the menu item. This is the link that will be followed when the menu item is clicked.';
