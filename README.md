@@ -142,6 +142,10 @@ With these settings, you can overwrite the Bootstrap colors which are used withi
 
 If the logo for the navbar on the top left is too wide or has a special aspect ratio, you can limit the logo's maximum width. Use css definition to limit the max-width.
 
+###### Maximal width of sitename in navbar
+
+If you have a very long sitename and want to prevent it from breaking the navbar layout (especially the edit button widget) on medium-width screens, you can set the maximal width of the sitename in the navbar here. If the sitename exceeds this width, it will be truncated with an ellipsis (...). Use css definition to limit the max-width.
+
 ###### Navbar color
 
 With this setting, you can change the navbar color from the default light navbar to a dark one or a colored one.
@@ -209,23 +213,27 @@ With this setting, you can optimize the login form to fit to a greater variety o
 
 With this setting, you can make the login form slightly transparent to let the background image shine through even more.
 
-##### Login providers
+###### Login container width
 
-###### Local login
+With this setting, you can control the width of the login container. By default, the login container width is set to 500px.
 
-With this setting, you control if the local login form is shown on the login page or not. By default, the local login form is shown and users can login into the site as normal. If you disable this setting, the local login form is hidden. This allows you to just provide login buttons for external identity providers like OAuth2 or OIDC.
+##### Login layout
 
-###### Local login intro
+###### Login layout
 
-With this setting, you control if a 'Login with your Moodle account' intro is shown above the local login form or not. By default, the intro is not shown. But if you enable it, this intro may help users to understand which credentials to use in the local login form, especially if you provide more than one login method or if you have changed the order of the login methods.
+With this setting, you can choose how the login providers are displayed on the login page.
 
-###### IDP login intro
+###### Login background layout
 
-With this setting, you control if the 'Log in using your account on' intro is shown above the IDP login buttons or not. By default, the intro is shown and users will be quickly informed what the IDP buttons are about. If you disable this setting, the IDP intro is hidden. This allows you to provide a clean user login interface if you just use external identity providers like OAuth2 or OIDC.
+With this setting, you can choose the background layout for the login page.
 
 ##### Login order
 
-With these settings, you control the order of the login methods in the login form. The presented order will be defined from lowest to highest ordinal number, skipping all login methods and login form elements which are disabled in Moodle.
+With these settings, you control the order of the login providers in the login form. The presented order will be defined from lowest to highest ordinal number, skipping all login providers and login form elements which are disabled in Boost Union.
+
+##### Login providers
+
+In these section, you control if and how particilar login providers are presented on the login page.
 
 ##### Side entrance login
 
@@ -242,6 +250,12 @@ With this setting, you can control whether the course image is visible inside th
 ###### Show course completion progress
 
 With this setting, you can control whether the course completion progress is visible inside the course overview block or not.
+
+##### Course overview images
+
+###### Course overview image source
+
+With this setting, you control the source of the image which is shown in the course overview block, on the category index pages and on the course list on site home. The main source for this image is the course image which is uploaded in the particular course's settings. If this image is not available, you can choose if you want to show a generated geometric pattern or a fallback course overview image.
 
 #### Tab "Category index / Site home"
 
@@ -720,10 +734,16 @@ Exceptions to our main design principle
 
 As you have read in the introduction, the main design principle of Boost Union is not to change anything in the GUI until Boost Union is set as active theme and a particular feature is enabled in the theme settings. However, due to the way how Moodle core and Boost in Moodle core is built, this main design principle sometimes could not be fully satisfied:
 
+* Logo:
+  Boost Union has its own logo upload and does not use the logo from Moodle core\'s logo setting.
+  Boost Union especially allows you to upload more image formats that Moodle core allows and allows you to override the uploaded logos within its flavours.
+  Against this background, if you switch from Boost to Boost Union and had a logo shown in Boost before, this logo won't be shown until you upload it again in Boost Union directly.
+* Favicon:
+  Boost Union has its own favison upload and does not use the favicon from Moodle core\'s logo setting.
+  Boost Union especially allows you to override the uploaded favicon within its flavours.
+  Against this background, if you switch from Boost to Boost Union and had a favicon shown in Boost before, this favicon won't be shown until you upload it again in Boost Union directly.
 * Footer popover:
   As soon as you click the footer button (questionmark icon) in the bottom right corner of the screen, a popover with several links appears. However, the content of this link list is far from being well-structured and looks more like a garage sale. When implementing the settings to individually suppress each of these popover links, we had to make some code re-arrangements which result in the fact that the popover links are slightly more well-structured even if you do not enable any setting in Boost Union.
-* Suppress footer outputs by plugin / core component:
-  Due to the way how the settings `theme_boost_union | footersuppressstandardfooter_*` had to be built, it was not possible to quickly and reliably detect if Boost Union (or a Boost Union child theme) is the active theme. Thus, these settings are also applied if another theme than Boost Union is active. Please make sure to disable these settings if Boost Union is installed but should not be used.
 * Clickable header and transition time in the user's menu third level:
   Due to the way how the smart menu was integrated into the user menu, as soon as at least one smart menu exists on the page, the header of the language menu in the user menu is now fully clickable - compared to Boost core where only the 'back' arrow in the language menu is clickable - and the transition time to open the language menu is shortened. This should be a neglectible difference to Boost core.
 
@@ -734,15 +754,19 @@ Companion plugin local_navbarplus
 With the footersuppressusertour setting, you can disable the possibility to reset a user tour in the footer popover. If you have enabled this setting, you might want to have a look at our plugin local_navbarplus as a companion plugin which allows you, among other things, to add a "Reset user tour" link to the navigation bar instead. local_navbarplus is published on https://moodle.org/plugins/local_navbarplus and on https://github.com/moodle-an-hochschulen/moodle-local_navbarplus.
 
 
-Interference with forced settings in config.php
------------------------------------------------
+Expert settings for config.php
+------------------------------
 
-Due to the way how some Boost Union features had to be built, you have to be aware of the following interferences if you force settings in config.php:
+There are expert settings without GUI setting which can be defined in config.php to customize Boost Union in expert scenarios.
 
-* $CFG->hooks_callback_overrides:
-  With this setting, you can override hook definitions in config.php - see https://moodledev.io/docs/4.4/apis/core/hooks#hooks-overview-page.
-  However, if you use the `theme_boost_union | footersuppressstandardfooter_*` settings, this forced setting will be set as well during each page load.
-  Using the Boost Union settings and overriding hooks manually in config.php at the same time should work, but is not officially supported and tested by Boost Union.
+* `$CFG->theme_boost_union_githubapiurl`:\
+  With this setting, you can override the default GitHub API URL which is used to fetch external SCSS code from private GitHub repositories.
+  This is necessary if you want to use a GitHub Enterprise server instead of the public GitHub server.
+  The setting must contain the base URL of the GitHub API without a trailing slash, for example 'https://github.example.com/api/v3'.
+  If this setting is not set, Boost Union will use the default GitHub API URL 'https://api.github.com'.
+
+Please note that these expert settings might not be covered by Boost Union's automated tests and upstrade tests.
+If you encounter any problem with one of these expert settings, please raise an issue on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/issues.
 
 
 Support for other companion plugins
@@ -940,10 +964,13 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * Bern University of Applied Sciences (BFH), Luca Bösch: Code, Peer Review, Ideating
 * Carinthia University of Applied Sciences, Mario Wehr: Code
 * Catalyst IT Australia, Brendan Heywood: Code
+* Catalyst IT Canada, Karl Michael Reyes: Code
 * Catalyst IT Europe, Mark Johnson: Code
 * Catalyst IT Europe, Simon Thornett: Code
 * ELAN e.V., Farbod Zamani: Code
+* ETH Zürich, nexterday: Code
 * FernUniversität in Hagen, Daniel Poggenpohl: Code, Ideating
+* Friedrich Schiller University Jena: Funding, Ideating
 * Hochschule Hannover - University of Applied Sciences and Arts: Code, Funding, Ideating
 * Käferfreie Software, Nina Herrmann: Code
 * lern.link GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
@@ -961,9 +988,11 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * RWTH Aachen, Amrita Deb Dutta: Code
 * RWTH Aachen, Josha Bartsch: Code
 * RWTH Aachen, Tim Schröder: Code
+* Self-employed: Alberto Lara Hernández: Code
 * Solent University, Mark Sharp: Code
 * ssystems GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
 * ssystems GmbH, Sangyul Cha: Code
+* ssystems GmbH, berthob98: Code
 * Technische Universität Berlin, Lars Bonczek: Code
 * University of Bayreuth, Nikolai Jahreis: Code
 * University of California, San Francisco, Stefan Topfstedt: Code

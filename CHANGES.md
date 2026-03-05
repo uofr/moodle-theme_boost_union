@@ -4,6 +4,53 @@ moodle-theme_boost_union
 Changes
 -------
 
+### Unreleased
+
+* 2026-03-05 - Documentation: Add a note to README that the behaviour of logos and favicons deviates from Boost Union's main principle to not change anything at all after being activated.
+* 2026-03-05 - Bugfix: Fix edge cases of the new login form layouts on smaller screens, resolves #1169
+* 2026-03-05 - Bugfix: Require FooterPopover only if footer button present, resolves #1177
+
+### v4.5-r34
+
+* 2026-02-28 - Bugfix: SCSS changes in flavours were not reflected in theme designer mode, resolves #625
+* 2026-02-28 - Bugfix: Smart Menu sometimes repeated menus, resolves #800
+* 2026-02-27 - Tests: Remove the temporary fixes for MDL-81892, resolves #1153
+* 2026-02-27 - Tests: theme_boost_union_is_active_theme() triggered "theme already set up" exception during PHPUnit tests, resolves #1165
+
+### v4.5-r33
+
+* 2026-02-26 - Bugfix: Smart menu creation was not possible if a custom field which hid itself from the course settings form was present, resolves #1164
+* 2026-02-24 - Feature: Add new login layouts and other login settings, resolves #1055
+* 2026-02-24 - Improvement: Hide the "Calendar" navigation item for guests as well, resolves #1167
+* 2026-02-12 - SCSS snippet: Aligned course section borders, resolves #1132
+
+### v4.5-r32
+
+* 2025-02-07 - Improvement: Allow the admin to restrict the maximum width of the sitename to avoid that the edit button widget breaks with really long site names, resolves #256.
+* 2026-02-06 - Improvement: Prevent that the loginbackgroundimagetext setting is shown in the Moodle upgrade wizard after the initial installation, resolves #1151
+* 2026-02-06 - Bugfix: The initial Moodle installation failed if Boost Union was set as theme in config.php, resolves #1143.
+* 2026-02-06 - Update: Adopt changes to navbar.mustache from MDL-86436
+* 2026-02-03 - Bugfix: Site support form success message was shown below blocks or advert tiles on frontpage, resolves #488
+* 2026-02-01 - Bug: Changing the activity icon purpose of LTI activities did not have an effect in the activity chooser, resolves #690
+
+### v4.5-r31
+
+* 2026-01-31 - Feature: Allow the admin to upload a course overview fallback image to be used on the myoverview page instead of the geometric pattern, resolves #171
+* 2026-01-31 - Admin: courselistingprogressstyle was not hidden again if courselistingpresentation was disabled after courselistinghowprogress was enabled, resolves #1135
+* 2026-01-28 - Bugfix: The installation of Boost Union crashed on latest moodle main after MOD_PURPOSE_INTERFACE was removed in Moodle 5.2dev, resolves #1126.
+* 2026-01-27 - Tests: The "Allow admins to use the tertiary navigation to navigate between the individual Boost Union admin pages" scenario failed on 5.0 and 5.1, resolves #1123
+
+### v4.5-r30
+
+* 2026-01-21 - Bugfix: On brand-new Moodle installations, Boost Union tried to access the mdl_files table before it was created, resolves #1058
+* 2026-01-21 - Bugfix: Moodle core unittest was failing due to a missing fallback svg icon, resolves #1113
+
+### v4.5-r29
+
+* 2025-11-19 - Backport: Replace Boost Union's hook manipulation with a more downstream solution to suppress hook output, resolves #1101.
+* 2025-11-19 - Bugfix: additionalhtmlfooter is now rendered even if the footer is hidden entirely, resolves #1042
+* 2025-11-15 - Improvement: Add config.php parameter to support GitHub Enterprise servers for external SCSS, resolves #1041.
+
 ### v4.5-r28
 
 * 2025-11-07 - Upstream change: Adopt changes from MDL-85774 into loginform.mustache, resolves #1093

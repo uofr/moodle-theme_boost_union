@@ -581,7 +581,7 @@ class core_renderer extends \theme_boost\output\core_renderer {
      * @return string
      */
     public function render_login(\core_auth\output\login $form) {
-        global $CFG, $SITE;
+        global $SITE;
 
         $context = $form->export_for_template($this);
 
@@ -597,31 +597,263 @@ class core_renderer extends \theme_boost\output\core_renderer {
             ['context' => context_course::instance(SITEID), "escape" => false]
         );
 
-        // Check if the local login form is enabled.
+        // Compute show* flags for all four login types (theme setting + Moodle core).
+        // Visibility is controlled in the template via these show* parameters.
+
+        // Local login: theme setting only.
         $loginlocalloginsetting = get_config('theme_boost_union', 'loginlocalloginenable');
-        $showlocallogin = ($loginlocalloginsetting != false) ? $loginlocalloginsetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
-        if ($showlocallogin == THEME_BOOST_UNION_SETTING_SELECT_YES) {
-            // Add marker to show the local login form to template context.
-            $context->showlocallogin = true;
+        $showlocalloginenabled = ($loginlocalloginsetting != false)
+            ? $loginlocalloginsetting
+            : THEME_BOOST_UNION_SETTING_SELECT_YES;
+        $context->showlocallogin = ($showlocalloginenabled == THEME_BOOST_UNION_SETTING_SELECT_YES);
+
+        // IDP login: theme setting AND core has identity providers.
+        $loginidploginenablesetting = get_config('theme_boost_union', 'loginidploginenable');
+        $showidploginenabled = ($loginidploginenablesetting != false)
+            ? $loginidploginenablesetting
+            : THEME_BOOST_UNION_SETTING_SELECT_YES;
+        $context->showidplogin = ($showidploginenabled == THEME_BOOST_UNION_SETTING_SELECT_YES) &&
+            !empty($context->hasidentityproviders) &&
+            !empty($context->identityproviders);
+
+        // Guest login: theme setting AND Moodle core guest login button enabled.
+        $loginguestloginenablesetting = get_config('theme_boost_union', 'loginguestloginenable');
+        $showguestloginenabled = ($loginguestloginenablesetting != false) ?
+            $loginguestloginenablesetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
+        $coreguestloginbutton = !empty(get_config('core', 'guestloginbutton'));
+        $context->showguestlogin = ($showguestloginenabled == THEME_BOOST_UNION_SETTING_SELECT_YES) &&
+            $coreguestloginbutton &&
+            !empty($context->canloginasguest);
+
+        // Self registration: theme setting AND Moodle core registerauth configured.
+        $loginselfregistrationenablesetting = get_config('theme_boost_union', 'loginselfregistrationenable');
+        $showselfregistrationenabled = ($loginselfregistrationenablesetting != false) ?
+            $loginselfregistrationenablesetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
+        $coreregisterauth = !empty(get_config('core', 'registerauth'));
+        $context->showselfregistration = ($showselfregistrationenabled == THEME_BOOST_UNION_SETTING_SELECT_YES)
+            && $coreregisterauth
+            && (!empty($context->cansignup) || !empty($context->hasinstructions));
+
+        // Compute intro settings, but only when the corresponding login type is shown.
+
+        // Local login.
+        if ($context->showlocallogin) {
+            $loginlocalshowintrosetting = get_config('theme_boost_union', 'loginlocalshowintro');
+            $showlocalloginintro = ($loginlocalshowintrosetting != false) ?
+                $loginlocalshowintrosetting : THEME_BOOST_UNION_SETTING_SELECT_NO;
+            if ($showlocalloginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                $context->showlocalloginintro = true;
+                $loginlocalintrotext = get_config('theme_boost_union', 'loginlocalintrotext');
+                if (!empty($loginlocalintrotext)) {
+                    $context->localloginintrotext = format_string($loginlocalintrotext);
+                }
+            }
         }
 
-        // Check if the local login intro is enabled.
-        $loginlocalshowintrosetting = get_config('theme_boost_union', 'loginlocalshowintro');
-        $showlocalloginintro = ($loginlocalshowintrosetting != false) ?
-            $loginlocalshowintrosetting : THEME_BOOST_UNION_SETTING_SELECT_NO;
-        if ($showlocalloginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
-            // Add marker to show the local login intro to template context.
-            $context->showlocalloginintro = true;
-        }
-
-        // Check if the IDP login intro is enabled.
-        $loginidpshowintrosetting = get_config('theme_boost_union', 'loginidpshowintro');
-        $showidploginintro = ($loginidpshowintrosetting != false) ?
+        // IDP login.
+        if ($context->showidplogin) {
+            $loginidpshowintrosetting = get_config('theme_boost_union', 'loginidpshowintro');
+            $showidploginintro = ($loginidpshowintrosetting != false) ?
                 $loginidpshowintrosetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
-        if ($showidploginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
-            // Add marker to show the IDP login intro to template context.
-            $context->showidploginintro = true;
+            if ($showidploginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                $context->showidploginintro = true;
+                $loginidpintrotext = get_config('theme_boost_union', 'loginidpintrotext');
+                if (!empty($loginidpintrotext)) {
+                    $context->idploginintrotext = format_string($loginidpintrotext);
+                }
+            }
         }
+
+        // Guest login.
+        if ($context->showguestlogin) {
+            $loginguestshowintrosetting = get_config('theme_boost_union', 'loginguestshowintro');
+            $showguestloginintro = ($loginguestshowintrosetting != false) ?
+                $loginguestshowintrosetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
+            if ($showguestloginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                $context->showguestloginintro = true;
+                $loginguestintrotext = get_config('theme_boost_union', 'loginguestintrotext');
+                if (!empty($loginguestintrotext)) {
+                    $context->guestloginintrotext = format_string($loginguestintrotext);
+                }
+            }
+        }
+
+        // Self registration.
+        if ($context->showselfregistration) {
+            $loginselfregistrationshowintrosetting = get_config('theme_boost_union', 'loginselfregistrationshowintro');
+            $showselfregistrationloginintro = ($loginselfregistrationshowintrosetting != false) ?
+                $loginselfregistrationshowintrosetting : THEME_BOOST_UNION_SETTING_SELECT_YES;
+            if ($showselfregistrationloginintro == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                $context->showselfregistrationloginintro = true;
+                $loginselfregistrationintrotext = get_config('theme_boost_union', 'loginselfregistrationintrotext');
+                if (!empty($loginselfregistrationintrotext)) {
+                    $context->selfregistrationloginintrotext = format_string($loginselfregistrationintrotext);
+                }
+            }
+        }
+
+        // Get and use login layout setting.
+        $loginlayoutsetting = get_config('theme_boost_union', 'loginlayout');
+        $loginlayout = ($loginlayoutsetting != false) ? $loginlayoutsetting : THEME_BOOST_UNION_SETTING_LOGINLAYOUT_VERTICAL;
+        $context->loginlayout = $loginlayout;
+
+        // Set template marker for each layout type.
+        $context->loginlayoutaccordion = ($loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_ACCORDION) ? true : false;
+        $context->loginlayouttabs = ($loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_TABS) ? true : false;
+        $context->loginlayoutvertical = ($loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_VERTICAL) ? true : false;
+
+        // Create sorted login methods array.
+        // This ensures the DOM order matches the visual order, so CSS :first-of-type and :last-of-type work correctly.
+        // Note: The template uses the same loop structure for all layouts, with conditionals for tabs vs vertical/accordion.
+        $loginmethods = [];
+
+        // Local login.
+        if ($context->showlocallogin) {
+            $order = get_config('theme_boost_union', 'loginorderlocal');
+            if ($order === false) {
+                $order = 1; // Default order.
+            }
+            $loginmethods[] = (object)[
+                'id' => 'login-method-local',
+                'name' => 'local',
+                'order' => $order,
+                'type' => 'local',
+                'islocal' => true,
+                'isidp' => false,
+                'isfirsttimesignup' => false,
+                'isguest' => false,
+                'isfirst' => false,
+            ];
+        }
+
+        // IDP login.
+        if ($context->showidplogin) {
+            $order = get_config('theme_boost_union', 'loginorderidp');
+            if ($order === false) {
+                $order = 2; // Default order.
+            }
+            $loginmethods[] = (object)[
+                'id' => 'login-method-idp',
+                'name' => 'idp',
+                'order' => $order,
+                'type' => 'idp',
+                'islocal' => false,
+                'isidp' => true,
+                'isfirsttimesignup' => false,
+                'isguest' => false,
+                'isfirst' => false,
+            ];
+        }
+
+        // Self registration.
+        if ($context->showselfregistration) {
+            $order = get_config('theme_boost_union', 'loginorderfirsttimesignup');
+            if ($order === false) {
+                $order = 3; // Default order.
+            }
+            $loginmethods[] = (object)[
+                'id' => 'login-method-firsttimesignup',
+                'name' => 'firsttimesignup',
+                'order' => $order,
+                'type' => 'firsttimesignup',
+                'islocal' => false,
+                'isidp' => false,
+                'isfirsttimesignup' => true,
+                'isguest' => false,
+                'isfirst' => false,
+            ];
+        }
+
+        // Guest login.
+        if ($context->showguestlogin) {
+            $order = get_config('theme_boost_union', 'loginorderguest');
+            if ($order === false) {
+                $order = 4; // Default order.
+            }
+            $loginmethods[] = (object)[
+                'id' => 'login-method-guest',
+                'name' => 'guest',
+                'order' => $order,
+                'type' => 'guest',
+                'islocal' => false,
+                'isidp' => false,
+                'isfirsttimesignup' => false,
+                'isguest' => true,
+                'isfirst' => false,
+            ];
+        }
+
+        // Sort login methods by order setting.
+        usort($loginmethods, function ($a, $b) {
+            return $a->order <=> $b->order;
+        });
+
+        // Mark the first method in the sorted array.
+        if (!empty($loginmethods)) {
+            $loginmethods[0]->isfirst = true;
+        }
+
+        // For tabs and accordion layouts, add label information to each login method.
+        if (
+            $loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_TABS ||
+                $loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_ACCORDION
+        ) {
+            $logintablabelconfigs = [
+                'local' => [
+                    'config' => 'loginlocalloginlabel',
+                    'default' => 'loginlocalloginlabelsetting_default',
+                ],
+                'idp' => [
+                    'config' => 'loginidploginlabel',
+                    'default' => 'loginidploginlabelsetting_default',
+                ],
+                'firsttimesignup' => [
+                    'config' => 'loginselfregistrationloginlabel',
+                    'default' => 'loginselfregistrationloginlabelsetting_default',
+                ],
+                'guest' => [
+                    'config' => 'loginguestloginlabel',
+                    'default' => 'loginguestloginlabelsetting_default',
+                ],
+            ];
+            foreach ($loginmethods as $method) {
+                $labelconfig = $logintablabelconfigs[$method->name] ?? null;
+                if ($labelconfig !== null) {
+                    $label = get_config('theme_boost_union', $labelconfig['config']);
+                    if ($label === false || $label === '') {
+                        $label = get_string($labelconfig['default'], 'theme_boost_union');
+                    }
+                } else {
+                    $label = '';
+                }
+                $method->label = $label;
+            }
+        }
+
+        // Determine the active/primary login method.
+        $primarylogin = get_config('theme_boost_union', 'primarylogin');
+        if ($primarylogin === false) {
+            $primarylogin = 'none';
+        }
+        // Set active method based on layout type.
+        // For tabs: primarylogin match, or first if primarylogin is 'none'.
+        // For accordion: primarylogin match only (no default to first).
+        // For vertical: no active flags.
+        foreach ($loginmethods as $method) {
+            if ($loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_TABS) {
+                // Tabs: Default to first method when primarylogin is 'none'.
+                $method->active = ($primarylogin === $method->name) || ($primarylogin === 'none' && $method->isfirst);
+            } else if ($loginlayout == THEME_BOOST_UNION_SETTING_LOGINLAYOUT_ACCORDION) {
+                // Accordion: Only set active if matched, no default to first.
+                $method->active = ($primarylogin === $method->name);
+            } else {
+                // Vertical layout: no active flags.
+                $method->active = false;
+            }
+        }
+
+        // Add the loginmethods to the template context.
+        $context->loginmethods = $loginmethods;
 
         return $this->render_from_template('core/loginform', $context);
     }
@@ -653,37 +885,94 @@ class core_renderer extends \theme_boost\output\core_renderer {
             return '';
         }
 
-        // Process the hooks as defined by Moodle core.
-        // If Boost Union is configured to suppress a particular footer element, the hook has been disabled by
-        // theme_boost_union_manipulate_books().
-        $hook = new before_standard_footer_html_generation($this);
-        di::get(hook_manager::class)->dispatch($hook);
+        // Require own locallib.php.
+        require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
 
-        // Give plugins an opportunity to add any footer elements (for legacy plugins).
-        // Originally, this is realized with $hook->process_legacy_callbacks();
-        // However, we duplicate the code here and use the logic from Boost Union which has been used there up to v4.3.
-        // Get the array of plugins with the standard_footer_html() function which can be suppressed by Boost Union.
-        $pluginswithfunction = get_plugins_with_function(function: 'standard_footer_html', migratedtohook: true);
-        // Iterate over all plugins.
-        foreach ($pluginswithfunction as $plugintype => $plugins) {
-            foreach ($plugins as $pluginname => $function) {
-                // If the given plugin's output is suppressed by Boost Union's settings.
-                $suppresssetting = get_config('theme_boost_union', 'footersuppressstandardfooter_' . $plugintype . '_' .
-                        $pluginname);
-                if (isset($suppresssetting) && $suppresssetting == THEME_BOOST_UNION_SETTING_SELECT_YES) {
-                    // Skip the plugin.
-                    continue;
+        // Check if there are any footersuppressstandardfooter_ settings set to YES.
+        // If not, we can use the standard Moodle core hook dispatch mechanism for better performance.
+        // We cache this check in the application cache to avoid iterating over hundreds of Boost Union settings on every page load.
+        $cache = \cache::make('theme_boost_union', 'hooksuppress');
+        $cachedhashooksuppresssettings = $cache->get('hashooksuppresssettings');
 
-                    // Otherwise.
-                } else {
-                    // Add the output.
-                    $hook->add_html($function());
-                }
-            }
+        // If the cache is empty, call the helper function to check all settings and cache the result.
+        if ($cachedhashooksuppresssettings === false) {
+            $hashooksuppresssettings = theme_boost_union_reset_hooksuppress_cache();
+        } else {
+            // Convert cached integer back to boolean.
+            $hashooksuppresssettings = (bool)$cachedhashooksuppresssettings;
         }
 
-        // Gather the output.
-        $output = $hook->get_output();
+        // If there are no suppressed footer settings, use the standard Moodle core renderer mechanism.
+        if (!$hashooksuppresssettings) {
+            // Create the hook and dispatch it normally.
+            $hook = new before_standard_footer_html_generation($this);
+            $hook->process_legacy_callbacks();
+            di::get(hook_manager::class)->dispatch($hook);
+
+            // Gather the output.
+            $output = $hook->get_output();
+
+            // Otherwise, we need to suppress specific plugin outputs.
+        } else {
+            // Process the hooks as defined by Moodle core.
+            // But, instead of letting Moodle core dispatch the hook and call all callbacks,
+            // we create an empty hook and manually call only the callbacks which are not suppressed by Boost Union
+            // or by $CFG->hooks_callback_overrides. This is the only way to suppress specific plugin outputs in the footer
+            // without modifying the plugins themselves.
+            $hook = new before_standard_footer_html_generation($this);
+
+            // Get all callbacks for this hook.
+            $callbacks = di::get(hook_manager::class)->get_callbacks_for_hook(
+                'core\\hook\\output\\before_standard_footer_html_generation'
+            );
+
+            // Iterate over all callbacks and call only those which are not suppressed.
+            foreach ($callbacks as $callback) {
+                // Check if the callback is disabled via $CFG->hooks_callback_overrides.
+                if (theme_boost_union_is_callback_disabled_in_config($callback['callback'])) {
+                    // Skip this callback as it's disabled in config.php.
+                    continue;
+                }
+
+                // Extract the pluginname.
+                $pluginname = theme_boost_union_get_pluginname_from_callbackname($callback);
+
+                // Check if the given plugin's output is suppressed by Boost Union's settings.
+                $suppresssetting = get_config('theme_boost_union', 'footersuppressstandardfooter_' . $pluginname);
+
+                // If the plugin's output is NOT suppressed by Boost Union.
+                if (!isset($suppresssetting) || $suppresssetting != THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                    // Call the callback manually.
+                    call_user_func($callback['callback'], $hook);
+                }
+            }
+
+            // Give plugins an opportunity to add any footer elements (for legacy plugins).
+            // Originally, this is realized with $hook->process_legacy_callbacks();
+            // However, we duplicate the code here and use the logic from Boost Union which has been used there up to v4.3.
+            // Get the array of plugins with the standard_footer_html() function which can be suppressed by Boost Union.
+            $pluginswithfunction = get_plugins_with_function(function: 'standard_footer_html', migratedtohook: true);
+            // Iterate over all plugins.
+            foreach ($pluginswithfunction as $plugintype => $plugins) {
+                foreach ($plugins as $pluginname => $function) {
+                    // If the given plugin's output is suppressed by Boost Union's settings.
+                    $suppresssetting = get_config('theme_boost_union', 'footersuppressstandardfooter_' . $plugintype . '_' .
+                            $pluginname);
+                    if (isset($suppresssetting) && $suppresssetting == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+                        // Skip the plugin.
+                        continue;
+
+                        // Otherwise.
+                    } else {
+                        // Add the output.
+                        $hook->add_html($function());
+                    }
+                }
+            }
+
+            // Gather the output.
+            $output = $hook->get_output();
+        }
 
         // If the theme switcher links are not suppressed by Boost Union's settings.
         $suppressthemeswitchsetting = get_config('theme_boost_union', 'footersuppressthemeswitch');
@@ -697,6 +986,82 @@ class core_renderer extends \theme_boost\output\core_renderer {
             $output .= $this->theme_switch_links();
         }
 
+        return $output;
+    }
+
+    /**
+     * Returns course-specific information to be output immediately above content on any course page
+     * (for the current course)
+     *
+     * This renderer function is copied and modified from /lib/classes/output/core_renderer.php
+     *
+     * It is based on the standard_end_of_body_html() function but was split into two parts
+     * (for the additionalhtmlfooter and the unique endtoken) to be requested individually in footer.mustache
+     * in Boost Union.
+     *
+     * @param bool $onlyifnotcalledbefore output content only if it has not been output before
+     * @return string
+     */
+    public function course_content_header_notifications($onlyifnotcalledbefore = false) {
+        static $functioncalled = false;
+        if ($functioncalled && $onlyifnotcalledbefore) {
+            // We have already output the notifications.
+            return '';
+        }
+
+        // Output any session notification.
+        $notifications = \core\notification::fetch();
+
+        $bodynotifications = '';
+        foreach ($notifications as $notification) {
+            $bodynotifications .= $this->render_from_template(
+                $notification->get_template_name(),
+                $notification->export_for_template($this)
+            );
+        }
+
+        $output = html_writer::span($bodynotifications, 'notifications', ['id' => 'user-notifications']);
+
+        $functioncalled = true;
+
+        return $output;
+    }
+
+    /**
+     * Returns course-specific information to be output immediately above content on any course page
+     * (for the current course)
+     *
+     * This renderer function is copied and modified from /lib/classes/output/core_renderer.php
+     *
+     * It is based on the standard_end_of_body_html() function but was split into two parts
+     * (for the additionalhtmlfooter and the unique endtoken) to be requested individually in footer.mustache
+     * in Boost Union.
+     *
+     * @param bool $onlyifnotcalledbefore output content only if it has not been output before
+     * @return string
+     */
+    public function course_content_header_coursecontent($onlyifnotcalledbefore = false) {
+        global $CFG;
+
+        static $functioncalled = false;
+        if ($functioncalled && $onlyifnotcalledbefore) {
+            // We have already output the course content header.
+            return '';
+        }
+
+        $output = '';
+
+        if ($this->page->course->id == SITEID) {
+            // Return immediately and do not include /course/lib.php if not necessary.
+            return $output;
+        }
+
+        require_once($CFG->dirroot . '/course/lib.php');
+        $functioncalled = true;
+        $courseformat = course_get_format($this->page->course);
+        if (($obj = $courseformat->course_content_header()) !== null) {
+            $output .= html_writer::div($courseformat->get_renderer($this->page)->render($obj), 'course-content-header');
+        }
         return $output;
     }
 
@@ -788,6 +1153,49 @@ class core_renderer extends \theme_boost\output\core_renderer {
 
         // Return the parent header() output.
         return $output;
+    }
+
+    /**
+     * Get the course pattern datauri to show on a course card.
+     *
+     * This renderer function is copied and modified from /lib/classes/output/core_renderer.php
+     *
+     * @param int $id Id to use when generating the pattern
+     * @return string datauri or URL to fallback image
+     */
+    public function get_generated_image_for_id($id) {
+        // Get the course overview image source setting.
+        $imagesource = get_config('theme_boost_union', 'courseoverviewimagesource');
+
+        // If not set, use the default (course image with pattern fallback).
+        if (!$imagesource) {
+            $imagesource = THEME_BOOST_UNION_SETTING_COURSEOVERVIEWIMAGESOURCE_COURSEPLUSPATTERN;
+        }
+
+        // Handle the different image source options.
+        switch ($imagesource) {
+            // Option 1: Course image with pattern fallback (default Moodle behavior).
+            case THEME_BOOST_UNION_SETTING_COURSEOVERVIEWIMAGESOURCE_COURSEPLUSPATTERN:
+                return parent::get_generated_image_for_id($id);
+
+            // Option 2: Course image with fallback image.
+            case THEME_BOOST_UNION_SETTING_COURSEOVERVIEWIMAGESOURCE_COURSEPLUSFALLBACK:
+                // This function is called only if there is no course image and the caller is requesting
+                // the course pattern image as fallback. We do not need to check for the course image here,
+                // just return the fallback image instead of the pattern.
+
+                // Try to get and return the fallback image.
+                $fallbackimageurl = theme_boost_union_get_course_overview_fallback_image_url();
+                if ($fallbackimageurl !== null) {
+                    return $fallbackimageurl->out();
+                }
+                // If no fallback image is configured, use the pattern.
+                return parent::get_generated_image_for_id($id);
+
+            // Default fallback.
+            default:
+                return parent::get_generated_image_for_id($id);
+        }
     }
 
     /**
