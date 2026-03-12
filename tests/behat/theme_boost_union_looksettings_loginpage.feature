@@ -156,21 +156,6 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | yes     | should contain     |
       | no      | should not contain |
 
-  @javascript
-  Scenario Outline: Setting: Login container width
-    Given the following config values are set as admin:
-      | config              | value     | plugin            |
-      | logincontainerwidth | <setting> | theme_boost_union |
-    And the theme cache is purged and the theme is reloaded
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
-    Then DOM element ".login-container" should have computed style "width" "<cssvalue>"
-
-    Examples:
-      | setting | cssvalue |
-      | 600px   | 600px    |
-      |         | 500px    |
-
   Scenario Outline: Setting: Login layout
     Given the following config values are set as admin:
       | config      | value     | plugin            |
@@ -186,6 +171,57 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | vertical  | should not      | should not           |
       | tabs      | should          | should not           |
       | accordion | should not      | should               |
+
+  @javascript
+  Scenario Outline: Setting: Login container width
+    Given the following config values are set as admin:
+      | config              | value     | plugin            |
+      | logincontainerwidth | <setting> | theme_boost_union |
+    And the theme cache is purged and the theme is reloaded
+    When I am on site homepage
+    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    Then DOM element ".login-container" should have computed style "width" "<cssvalue>"
+
+    Examples:
+      | setting | cssvalue |
+      | 600px   | 600px    |
+      |         | 500px    |
+
+  @javascript
+  Scenario Outline: Setting: Enhanced tabs layout behaviour: Load the javascript module
+    Given the following config values are set as admin:
+      | config                  | value     | plugin            |
+      | loginlayout             | tabs      | theme_boost_union |
+      | loginenhancedtabslayout | <setting> | theme_boost_union |
+    And the theme cache is purged and the theme is reloaded
+    When I am on site homepage
+    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    Then "#login-layout-tabs" "css_element" should exist
+    And "[data-bu-login-spacer='top']" "css_element" <spacershouldornot> exist
+    And "[data-bu-login-spacer='bottom']" "css_element" <spacershouldornot> exist
+
+    Examples:
+      | setting | spacershouldornot |
+      | yes     | should            |
+      | no      | should not        |
+
+  # Unfortunately, this can't be reliably tested with Behat yet
+  # Scenario: Setting: Enhanced tabs layout behaviour: Adapt the width of the login-headings and login-instructions to the wider tab width
+
+  # Unfortunately, this can't be reliably tested with Behat yet
+  # Scenario: Setting: Enhanced tabs layout behaviour: Lock the vertical position of the tabs when switching tabs
+
+  Scenario: Setting: Login instructions
+    Given the following config values are set as admin:
+      | config                 | value                   | plugin            |
+      | logininstructionsabove | Above instructions text | theme_boost_union |
+      | logininstructionsbelow | Below instructions text | theme_boost_union |
+    When I am on site homepage
+    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    Then I should see "Above instructions text" in the ".login-instructions-above" "css_element"
+    And ".login-instructions-above" "css_element" should appear before ".theme_boost_union-loginmethod  " "css_element"
+    And I should see "Below instructions text" in the ".login-instructions-below" "css_element"
+    And ".login-instructions-below" "css_element" should appear after ".theme_boost_union-loginmethod  " "css_element"
 
   Scenario Outline: Setting: Login order
     Given the following config values are set as admin:
@@ -322,6 +358,8 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | auth             | manual,email,oauth2 |
       | registerauth     | email               |
       | guestloginbutton | 1                   |
+    And the "multilang" filter is "on"
+    And the "multilang" filter applies to "content and headings"
     And I log in as "admin"
     And I navigate to "Server > OAuth 2 services" in site administration
     And I press "Google"
@@ -338,11 +376,97 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I should see "<idpexpected>" in the "#login-method-idp h2.login-heading" "css_element"
     And I should see "<selfregexpected>" in the "#login-method-firsttimesignup h2.login-heading" "css_element"
     And I should see "<guestexpected>" in the "#login-method-guest h2.login-heading" "css_element"
+    And I should not see "multilang"
 
     Examples:
-      | localtext | idptext | selfregtext | guesttext | localexpected                  | idpexpected                   | selfregexpected               | guestexpected                       |
-      |           |         |             |           | Login with your Moodle account | Log in using your account on: | Is this your first time here? | Some courses may allow guest access |
-      | Local A   | IDP A   | Selfreg A   | Guest A   | Local A                        | IDP A                         | Selfreg A                     | Guest A                             |
+      | localtext                                                                                            | idptext                                                                                              | selfregtext                                                                                        | guesttext                                                                                             | localexpected                  | idpexpected                   | selfregexpected               | guestexpected                       |
+      |                                                                                                      |                                                                                                      |                                                                                                    |                                                                                                       | Login with your Moodle account | Log in using your account on: | Is this your first time here? | Some courses may allow guest access |
+      | Local <span class="multilang" lang="en">account</span><span class="multilang" lang="de">Konto</span> |                                                                                                      |                                                                                                    |                                                                                                       | Local account                  | Log in using your account on: | Is this your first time here? | Some courses may allow guest access |
+      |                                                                                                      | IDP <span class="multilang" lang="en">login</span><span class="multilang" lang="de">Anmeldung</span> |                                                                                                    |                                                                                                       | Login with your Moodle account | IDP login                     | Is this your first time here? | Some courses may allow guest access |
+      |                                                                                                      |                                                                                                      | Selfreg <span class="multilang" lang="en">text</span><span class="multilang" lang="de">Text</span> |                                                                                                       | Login with your Moodle account | Log in using your account on: | Selfreg text                  | Some courses may allow guest access |
+      |                                                                                                      |                                                                                                      |                                                                                                    | Guest <span class="multilang" lang="en">access</span><span class="multilang" lang="de">Zugriff</span> | Login with your Moodle account | Log in using your account on: | Is this your first time here? | Guest access                        |
+      | Local A                                                                                              | IDP A                                                                                                | Selfreg A                                                                                          | Guest A                                                                                               | Local A                        | IDP A                         | Selfreg A                     | Guest A                             |
+
+  Scenario Outline: Setting: Login instruction
+    Given the following config values are set as admin:
+      | config                  | value             | plugin            |
+      | login<provider>enable   | yes               | theme_boost_union |
+      | <showinstructionconfig> | yes               | theme_boost_union |
+      | <instructioncontent>    | <instructiontext> | theme_boost_union |
+      | <instructionposition>   | <position>        | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And the "multilang" filter is "on"
+    And the "multilang" filter applies to "content and headings"
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Testing service   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on site homepage
+    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    Then I should see "<instructionrender>" in the "<instructionselector>" "css_element"
+    And I should not see "multilang"
+
+    Examples:
+      | provider         | showinstructionconfig                | instructioncontent                      | instructionposition                      | instructiontext                                                                                                             | instructionrender      | position | instructionselector                                                    |
+      | locallogin       | loginlocalshowinstruction            | loginlocalinstructioncontent            | loginlocalinstructionposition            | Local instructions                                                                                                          | Local instructions     | between  | #login-method-local .login-instructions-local.mb-3                     |
+      | locallogin       | loginlocalshowinstruction            | loginlocalinstructioncontent            | loginlocalinstructionposition            | Local instructions                                                                                                          | Local instructions     | below    | #login-method-local .login-instructions-local.mt-3                     |
+      | locallogin       | loginlocalshowinstruction            | loginlocalinstructioncontent            | loginlocalinstructionposition            | <span class='multilang' lang='en'>Local instructions</span><span class='multilang' lang='de'>Lokale Anweisungen</span>      | Local instructions     | between  | #login-method-local .login-instructions-local.mb-3                     |
+      | idplogin         | loginidpshowinstruction              | loginidpinstructioncontent              | loginidpinstructionposition              | IDP instructions                                                                                                            | IDP instructions       | between  | #login-method-idp .login-instructions-idp.mb-3                         |
+      | idplogin         | loginidpshowinstruction              | loginidpinstructioncontent              | loginidpinstructionposition              | IDP instructions                                                                                                            | IDP instructions       | below    | #login-method-idp .login-instructions-idp.mt-3                         |
+      | idplogin         | loginidpshowinstruction              | loginidpinstructioncontent              | loginidpinstructionposition              | <span class='multilang' lang='en'>IDP instructions</span><span class='multilang' lang='de'>IDP Anweisungen</span>           | IDP instructions       | between  | #login-method-idp .login-instructions-idp.mb-3                         |
+      | selfregistration | loginselfregistrationshowinstruction | loginselfregistrationinstructioncontent | loginselfregistrationinstructionposition | Self registration text                                                                                                      | Self registration text | between  | #login-method-firsttimesignup .login-instructions-firsttimesignup.mb-3 |
+      | selfregistration | loginselfregistrationshowinstruction | loginselfregistrationinstructioncontent | loginselfregistrationinstructionposition | Self registration text                                                                                                      | Self registration text | below    | #login-method-firsttimesignup .login-instructions-firsttimesignup.mt-3 |
+      | selfregistration | loginselfregistrationshowinstruction | loginselfregistrationinstructioncontent | loginselfregistrationinstructionposition | <span class='multilang' lang='en'>Self registration text</span><span class='multilang' lang='de'>Selbstregistrierung</span> | Self registration text | between  | #login-method-firsttimesignup .login-instructions-firsttimesignup.mb-3 |
+      | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | loginguestinstructionposition            | Guest instructions                                                                                                          | Guest instructions     | between  | #login-method-guest .login-instructions-guest.mb-3                     |
+      | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | loginguestinstructionposition            | Guest instructions                                                                                                          | Guest instructions     | below    | #login-method-guest .login-instructions-guest.mt-3                     |
+      | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | loginguestinstructionposition            | <span class='multilang' lang='en'>Guest instructions</span><span class='multilang' lang='de'>Gast Anweisungen</span>        | Guest instructions     | between  | #login-method-guest .login-instructions-guest.mb-3                     |
+
+  Scenario Outline: Setting: Login instruction (Countercheck)
+    Given the following config values are set as admin:
+      | config                  | value             | plugin            |
+      | login<provider>enable   | yes               | theme_boost_union |
+      | <showinstructionconfig> | <show>            | theme_boost_union |
+      | <instructioncontent>    | <instructiontext> | theme_boost_union |
+      | <instructionposition>   | between           | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Testing service   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on site homepage
+    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    Then "<instructionselector>" "css_element" should not exist
+
+    Examples:
+      | provider         | showinstructionconfig                | instructioncontent                      | show | instructiontext        | instructionselector                                                    |
+      | locallogin       | loginlocalshowinstruction            | loginlocalinstructioncontent            | no   | Local instructions     | #login-method-local .login-instructions-local.mb-3                     |
+      | locallogin       | loginlocalshowinstruction            | loginlocalinstructioncontent            | yes  |                        | #login-method-local .login-instructions-local.mb-3                     |
+      | idplogin         | loginidpshowinstruction              | loginidpinstructioncontent              | no   | IDP instructions       | #login-method-idp .login-instructions-idp.mb-3                         |
+      | idplogin         | loginidpshowinstruction              | loginidpinstructioncontent              | yes  |                        | #login-method-idp .login-instructions-idp.mb-3                         |
+      | selfregistration | loginselfregistrationshowinstruction | loginselfregistrationinstructioncontent | no   | Self registration text | #login-method-firsttimesignup .login-instructions-firsttimesignup.mb-3 |
+      | selfregistration | loginselfregistrationshowinstruction | loginselfregistrationinstructioncontent | yes  |                        | #login-method-firsttimesignup .login-instructions-firsttimesignup.mb-3 |
+      | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | no   | Guest instructions     | #login-method-guest .login-instructions-guest.mb-3                     |
+      | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | yes  |                        | #login-method-guest .login-instructions-guest.mb-3                     |
 
   @javascript
   Scenario Outline: Setting: Login layout tabs - Verify tabs structure and primarylogin functionality
@@ -372,6 +496,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And the "role" attribute of "#login-layout-tabs" "css_element" should contain "tablist"
     # Verify that tab links exist.
     And "#login-method-local-tab" "css_element" should exist
+    And I should not see "multilang"
     And "#login-method-idp-tab" "css_element" should exist
     And "#login-method-firsttimesignup-tab" "css_element" should exist
     And "#login-method-guest-tab" "css_element" should exist
@@ -474,6 +599,8 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | auth             | manual,email,oauth2 |
       | registerauth     | email               |
       | guestloginbutton | 1                   |
+    And the "multilang" filter is "on"
+    And the "multilang" filter applies to "content and headings"
     And I log in as "admin"
     And I navigate to "Server > OAuth 2 services" in site administration
     And I press "Google"
@@ -490,13 +617,14 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I should see "<idpexpected>" in the "<idpselector>" "css_element"
     And I should see "<selfregexpected>" in the "<selfregselector>" "css_element"
     And I should see "<guestexpected>" in the "<guestselector>" "css_element"
+    And I should not see "multilang"
 
     Examples:
-      | layout    | local   | idp   | selfreg   | guest   | localexpected  | idpexpected | selfregexpected   | guestexpected | localselector                                       | idpselector                                       | selfregselector                                               | guestselector                                       |
-      | tabs      |         |       |           |         | Moodle account | IDP login   | Self registration | Guest login   | #login-method-local-tab                             | #login-method-idp-tab                             | #login-method-firsttimesignup-tab                             | #login-method-guest-tab                             |
-      | tabs      | Local A | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-tab                             | #login-method-idp-tab                             | #login-method-firsttimesignup-tab                             | #login-method-guest-tab                             |
-      | accordion |         |       |           |         | Moodle account | IDP login   | Self registration | Guest login   | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
-      | accordion | Local A | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
+      | layout    | local                                                                                                 | idp   | selfreg   | guest   | localexpected  | idpexpected | selfregexpected   | guestexpected | localselector                                       | idpselector                                       | selfregselector                                               | guestselector                                       |
+      | tabs      | Moodle <span class="multilang" lang="en">account</span><span class="multilang" lang="de">Konto</span> |       |           |         | Moodle account | IDP login   | Self registration | Guest login   | #login-method-local-tab                             | #login-method-idp-tab                             | #login-method-firsttimesignup-tab                             | #login-method-guest-tab                             |
+      | tabs      | Local A                                                                                               | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-tab                             | #login-method-idp-tab                             | #login-method-firsttimesignup-tab                             | #login-method-guest-tab                             |
+      | accordion | Moodle <span class="multilang" lang="en">account</span><span class="multilang" lang="de">Konto</span> |       |           |         | Moodle account | IDP login   | Self registration | Guest login   | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
+      | accordion | Local A                                                                                               | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
 
   Scenario Outline: Setting: Enable side entrance login - View the side entrance login page
     Given the following config values are set as admin:

@@ -39,6 +39,7 @@ $string['warningboostunioninactive'] = 'Boost Union (or a child theme of Boost U
 $string['never'] = 'Never';
 $string['always'] = 'Always';
 $string['auto'] = 'Automatically';
+$string['bycapability'] = 'Controlled by capability';
 $string['nochange'] = 'No change';
 $string['forguestsonly'] = 'Only for guests and non-logged-in users';
 $string['showastext'] = 'Show as text';
@@ -52,6 +53,8 @@ $string['imageposition_left_bottom'] = 'Left horizontally, bottom vertically';
 $string['imageposition_right_top'] = 'Right horizontally, top vertically';
 $string['imageposition_right_center'] = 'Right horizontally, center vertically';
 $string['imageposition_right_bottom'] = 'Right horizontally, bottom vertically';
+$string['logininstructionposition_between'] = 'Between the intro and the login provider widget';
+$string['logininstructionposition_below'] = 'Below the login provider widget';
 
 // Settings: General strings.
 $string['dontchange'] = 'Do not change anything';
@@ -328,10 +331,6 @@ $string['loginformpositionsetting_right'] = 'Right-aligned';
 // ... ... Setting: login form transparency.
 $string['loginformtransparencysetting'] = 'Login form transparency';
 $string['loginformtransparencysetting_desc'] = 'With this setting, you can make the login form slightly transparent to let the background image shine through even more.';
-// ... ... Setting: Login container width.
-$string['logincontainerwidthsetting'] = 'Login container width';
-$string['logincontainerwidthsetting_desc'] = 'With this setting, you can override Moodle\'s fixed login container width of 500px. By default, Moodle uses a login container width of 500px on medium and larger screens. You can enter other pixel-based values like 600px, but you can also enter a percentage-based value like 90% or a viewport-width value like 50vw.';
-$string['logincontainerwidthsetting_note'] = 'Please note: If you use the tabs login layout, the login container might become wider than the defined width if you have many login providers enabled or if you have long login tab texts. In this case, the login container will try to expand horizontally to fit all login provider tabs next to each other.';
 // ... Section: Login layout.
 $string['loginlayoutheading'] = 'Login layout';
 // ... ... Setting: Login layout.
@@ -340,13 +339,27 @@ $string['loginlayoutsetting_desc'] = 'With this setting, you control how the log
 $string['loginlayoutvertical'] = 'Vertical (one below the other)';
 $string['loginlayouttabs'] = 'Tabs (next to each other)';
 $string['loginlayoutaccordion'] = 'Accordion (collapsed, expandable)';
+// ... ... Setting: Login container width.
+$string['logincontainerwidthsetting'] = 'Login container width';
+$string['logincontainerwidthsetting_desc'] = 'With this setting, you can override Moodle\'s fixed login container width of 500px. By default, Moodle uses a login container width of 500px on medium and larger screens. You can enter other pixel-based values like 600px, but you can also enter a percentage-based value like 90% or a viewport-width value like 50vw.';
+$string['logincontainerwidthsetting_note'] = 'Please note: If you use the tabs login layout, the login container might become wider than the defined width if you have many login providers enabled or if you have long login tab texts. In this case, the login container will try to expand horizontally to fit all login provider tabs next to each other.';
+// ... ... Setting: Enhanced tabs layout behaviour.
+$string['loginenhancedtabslayoutsetting'] = 'Enhanced tabs layout behaviour';
+$string['loginenhancedtabslayoutsetting_desc'] = 'The tabs layout generally respects the configured login container width, as described in the login container width setting. And the login container of the tabs layout is displayed vertically centered just like the other login layouts. However, there might be configurations when this is not enough. Maybe the height of the particular tab panes differ too much so that the tabs jump vertically when the active tab is changed. Or maybe really long tab labels widen the login container width, but multiline login instruction texts do not adapt accordingly. These are edge cases which cannot be solved cleanly with CSS and for such cases, you can add a JavaScript module which, after the login page has loaded, tries to ensure that all the login content is still presented and positioned as appropriately as possible.';
+// ... Section: Login instructions.
+$string['logininstructionsheading'] = 'Login instructions';
+$string['logininstructionsheading_desc'] = 'Please note: Boost Union has its own login instructions settings and does not output the content from <a href="{$a}">Moodle core\'s authentication instruction setting</a>.';
+$string['logininstructionsabove'] = 'Instructions above login provider list';
+$string['logininstructionsabove_desc'] = 'With this setting, you can add instructions that will be shown above the list of login providers on the login page. This is a good place to add general information that applies to all login methods.';
+$string['logininstructionsbelow'] = 'Instructions below login provider list';
+$string['logininstructionsbelow_desc'] = 'With this setting, you can add instructions that will be shown below the list of login providers on the login page. This is a good place to add additional information or support contacts that apply to all login methods.';
 // ... Section: Login order.
 $string['loginorderheading'] = 'Login order';
 $string['loginorderheading_desc'] = 'With these settings, you control the order of the login providers in the login form. The presented order will be defined from lowest to highest ordinal number, skipping all login providers and login form elements which are disabled in Boost Union.';
 // ... ... Settings: Login order.
 $string['loginorderlocalsetting'] = 'Local login';
 $string['loginorderidpsetting'] = 'IDP login';
-$string['loginorderfirsttimesignupsetting'] = 'Information for first time visitors & Self registration';
+$string['loginorderfirsttimesignupsetting'] = 'Self registration';
 $string['loginorderguestsetting'] = 'Guest login';
 // ... ... Setting: Primary login provider.
 $string['primaryloginsetting'] = 'Primary login provider';
@@ -371,6 +384,13 @@ $string['loginlocalintrotextsetting_desc'] = 'With this setting, you can overrid
 $string['loginlocalloginlabelsetting'] = 'Local login label';
 $string['loginlocalloginlabelsetting_desc'] = 'With this setting, you can customize the label for local login to be used in the tab and accordion layout.';
 $string['loginlocalloginlabelsetting_default'] = 'Moodle account';
+// ... ... Setting: Local login instruction.
+$string['loginlocalshowinstruction'] = 'Local login instruction';
+$string['loginlocalshowinstruction_desc'] = 'With this setting, you can enable instructions for the local login provider.';
+$string['loginlocalinstructioncontent'] = 'Local login instruction content';
+$string['loginlocalinstructioncontent_desc'] = 'With this setting, you can specify custom instructions for the local login provider. This allows you to provide users with additional information about how to log in locally.';
+$string['loginlocalinstructionposition'] = 'Local login instruction position';
+$string['loginlocalinstructionposition_desc'] = 'With this setting, you can specify where the local login instructions should be shown relative to the login form.';
 // ... Section: Login provider: IDP.
 $string['loginprovideridpheading'] = 'Login provider: IDP';
 // ... ... Setting: IDP login.
@@ -387,6 +407,13 @@ $string['loginidpintrotextsetting_desc'] = 'With this setting, you can override 
 $string['loginidploginlabelsetting'] = 'IDP login label';
 $string['loginidploginlabelsetting_desc'] = 'With this setting, you can customize the label for IDP login to be used in the tab and accordion layout.';
 $string['loginidploginlabelsetting_default'] = 'IDP login';
+// ... ... Setting: IDP login instruction.
+$string['loginidpshowinstruction'] = 'IDP login instruction';
+$string['loginidpshowinstruction_desc'] = 'With this setting, you can enable instructions for the IDP login provider.';
+$string['loginidpinstructioncontent'] = 'IDP login instruction content';
+$string['loginidpinstructioncontent_desc'] = 'With this setting, you can specify custom instructions for the IDP login provider. This allows you to provide users with additional information about how to log in via identity providers.';
+$string['loginidpinstructionposition'] = 'IDP login instruction position';
+$string['loginidpinstructionposition_desc'] = 'With this setting, you can specify where the IDP login instructions should be shown relative to the login buttons.';
 // ... Section: Login provider: Self registration.
 $string['loginproviderselfregistrationheading'] = 'Login provider: Self registration';
 // ... ... Setting: Self registration.
@@ -403,6 +430,13 @@ $string['loginselfregistrationintrotextsetting_desc'] = 'With this setting, you 
 $string['loginselfregistrationloginlabelsetting'] = 'Self registration label';
 $string['loginselfregistrationloginlabelsetting_desc'] = 'With this setting, you can customize the label for self registration to be used in the tab and accordion layout.';
 $string['loginselfregistrationloginlabelsetting_default'] = 'Self registration';
+// ... ... Setting: Self registration login instruction.
+$string['loginselfregistrationshowinstruction'] = 'Self registration instruction';
+$string['loginselfregistrationshowinstruction_desc'] = 'With this setting, you can enable instructions for the self registration provider.';
+$string['loginselfregistrationinstructioncontent'] = 'Self registration instruction content';
+$string['loginselfregistrationinstructioncontent_desc'] = 'With this setting, you can specify custom instructions for the self registration provider. This allows you to provide users with additional information about how to create a new account.';
+$string['loginselfregistrationinstructionposition'] = 'Self registration instruction position';
+$string['loginselfregistrationinstructionposition_desc'] = 'With this setting, you can specify where the self registration instruction should be shown relative to the signup button.';
 // ... Section: Login provider: Guest.
 $string['loginproviderguestheading'] = 'Login provider: Guest';
 // ... ... Setting: Guest login.
@@ -419,6 +453,13 @@ $string['loginguestintrotextsetting_desc'] = 'With this setting, you can overrid
 $string['loginguestloginlabelsetting'] = 'Guest login label';
 $string['loginguestloginlabelsetting_desc'] = 'With this setting, you can customize the label for guest login to be used in the tab and accordion layout.';
 $string['loginguestloginlabelsetting_default'] = 'Guest login';
+// ... ... Setting: Guest login instruction.
+$string['loginguestshowinstruction'] = 'Guest login instruction';
+$string['loginguestshowinstruction_desc'] = 'With this setting, you can enable instructions for the guest login provider.';
+$string['loginguestinstructioncontent'] = 'Guest login instruction content';
+$string['loginguestinstructioncontent_desc'] = 'With this setting, you can specify custom instructions for the guest login provider. This allows you to provide users with additional information about guest access.';
+$string['loginguestinstructionposition'] = 'Guest login instruction position';
+$string['loginguestinstructionposition_desc'] = 'With this setting, you can specify where the guest login instruction should be shown relative to the login button.';
 // ... Section: Side entrance login.
 $string['sideentranceloginheading'] = 'Side entrance login';
 // ... ... Setting: Endable side entrance login.
@@ -769,6 +810,7 @@ $string['openoffcanvas'] = 'Open Off-canvas drawer';
 // ... ... Setting: Block regions for 'x' layout.
 $string['blockregionsforlayout'] = 'Additional block regions for \'{$a}\' layout';
 $string['blockregionsforlayout_desc'] = 'With this setting, you can enable additional block regions for the \'{$a}\' layout.';
+$string['blockregionsstickyonly'] = 'Please note: This page layout is limited by Moodle core in such a way that blocks cannot be added directly on the page. However, as soon as you enable a block region here, <a href="{$a}" target="_blank">site-wide sticky blocks</a> will still be displayed on this page layout.';
 // ... Section: Outside regions.
 $string['outsideregionsheading'] = 'Outside regions';
 $string['outsideregionsheading_desc'] = 'Outside regions can not only be enabled with the layout settings above, their appearance can also be customized.';

@@ -176,6 +176,14 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         // (with 2 or 3 digits) or a viewport width number (from 0 to 100). Additionally the field can be left blank.
         $smallwidthoremptyregex = '/^((\d{1,2}|100)%)|((\d{1,2}|100)vw)|(\d{2,3}px)|(^(?!.*\S))$/';
 
+        // Prepare login instruction position options.
+        $logininstructionpositionoptions = [
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN =>
+                    get_string('logininstructionposition_between', 'theme_boost_union'),
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BELOW =>
+                    get_string('logininstructionposition_below', 'theme_boost_union'),
+        ];
+
         // Create Look settings page with tabs and tertiary navigation
         // (and allow users with the theme/boost_union:configure capability to access it).
         $page = new admin_settingspage_tabs_with_tertiary(
@@ -1015,15 +1023,6 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
         $tab->add($setting);
 
-        // Setting: Login container width.
-        $name = 'theme_boost_union/logincontainerwidth';
-        $title = get_string('logincontainerwidthsetting', 'theme_boost_union', null, true);
-        $description = get_string('logincontainerwidthsetting_desc', 'theme_boost_union', null, true);
-        $default = '500px';
-        $setting = new admin_setting_configtext($name, $title, $description, $default, $widthregex, 6);
-        $setting->set_updatedcallback('theme_reset_all_caches');
-        $tab->add($setting);
-
         // Heading: Login layout.
         $name = 'theme_boost_union/loginlayoutheading';
         $title = get_string('loginlayoutheading', 'theme_boost_union', null, true);
@@ -1041,6 +1040,56 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         ];
         $setting = new admin_setting_configselect($name, $title, $description, 'vertical', $loginlayoutoptions);
         $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Setting: Login container width.
+        $name = 'theme_boost_union/logincontainerwidth';
+        $title = get_string('logincontainerwidthsetting', 'theme_boost_union', null, true);
+        $description = get_string('logincontainerwidthsetting_desc', 'theme_boost_union', null, true) . '<br />' .
+                 get_string('logincontainerwidthsetting_note', 'theme_boost_union', null, true);
+        $default = '500px';
+        $setting = new admin_setting_configtext($name, $title, $description, $default, $widthregex, 6);
+        $setting->set_updatedcallback('theme_reset_all_caches');
+        $tab->add($setting);
+
+        // Setting: Enhanced tabs layout behaviour.
+        $name = 'theme_boost_union/loginenhancedtabslayout';
+        $title = get_string('loginenhancedtabslayoutsetting', 'theme_boost_union', null, true);
+        $description = get_string('loginenhancedtabslayoutsetting_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginenhancedtabslayout',
+            'theme_boost_union/loginlayout',
+            'neq',
+            THEME_BOOST_UNION_SETTING_LOGINLAYOUT_TABS
+        );
+
+        // Heading: Login instructions.
+        $name = 'theme_boost_union/logininstructionsheading';
+        $title = get_string('logininstructionsheading', 'theme_boost_union', null, true);
+        $notificationurl = new core\url('/admin/search.php', ['query' => 'auth_instructions']);
+        $notification = new \core\output\notification(
+            get_string('logininstructionsheading_desc', 'theme_boost_union', $notificationurl->out()),
+            \core\output\notification::NOTIFY_INFO
+        );
+        $notification->set_show_closebutton(false);
+        $description = $OUTPUT->render($notification);
+        $setting = new admin_setting_heading($name, $title, $description);
+        $tab->add($setting);
+
+        // Setting: Instructions above login provider list.
+        $name = 'theme_boost_union/logininstructionsabove';
+        $title = get_string('logininstructionsabove', 'theme_boost_union', null, true);
+        $description = get_string('logininstructionsabove_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+        $tab->add($setting);
+
+        // Setting: Instructions below login provider list.
+        $name = 'theme_boost_union/logininstructionsbelow';
+        $title = get_string('logininstructionsbelow', 'theme_boost_union', null, true);
+        $description = get_string('logininstructionsbelow_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
         $tab->add($setting);
 
         // Heading: Login order.
@@ -1145,6 +1194,12 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab->add($setting);
         $page->hide_if(
             'theme_boost_union/loginlocalintrotext',
+            'theme_boost_union/loginlocalloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginlocalintrotext',
             'theme_boost_union/loginlocalshowintro',
             'neq',
             THEME_BOOST_UNION_SETTING_SELECT_YES
@@ -1162,6 +1217,63 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             'theme_boost_union/loginlayout',
             'eq',
             'vertical'
+        );
+
+        // Setting: Local login instruction.
+        $name = 'theme_boost_union/loginlocalshowinstruction';
+        $title = get_string('loginlocalshowinstruction', 'theme_boost_union', null, true);
+        $description = get_string('loginlocalshowinstruction_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginlocalshowinstruction',
+            'theme_boost_union/loginlocalloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Local login instruction content.
+        $name = 'theme_boost_union/loginlocalinstructioncontent';
+        $title = get_string('loginlocalinstructioncontent', 'theme_boost_union', null, true);
+        $description = get_string('loginlocalinstructioncontent_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginlocalinstructioncontent',
+            'theme_boost_union/loginlocalloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginlocalinstructioncontent',
+            'theme_boost_union/loginlocalshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Local login instruction position.
+        $name = 'theme_boost_union/loginlocalinstructionposition';
+        $title = get_string('loginlocalinstructionposition', 'theme_boost_union', null, true);
+        $description = get_string('loginlocalinstructionposition_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect(
+            $name,
+            $title,
+            $description,
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN,
+            $logininstructionpositionoptions
+        );
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginlocalinstructionposition',
+            'theme_boost_union/loginlocalloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginlocalinstructionposition',
+            'theme_boost_union/loginlocalshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
         );
 
         // Heading: Login provider: IDP.
@@ -1218,6 +1330,12 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab->add($setting);
         $page->hide_if(
             'theme_boost_union/loginidpintrotext',
+            'theme_boost_union/loginidploginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginidpintrotext',
             'theme_boost_union/loginidpshowintro',
             'neq',
             THEME_BOOST_UNION_SETTING_SELECT_YES
@@ -1235,6 +1353,63 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             'theme_boost_union/loginlayout',
             'eq',
             'vertical'
+        );
+
+        // Setting: IDP login instruction.
+        $name = 'theme_boost_union/loginidpshowinstruction';
+        $title = get_string('loginidpshowinstruction', 'theme_boost_union', null, true);
+        $description = get_string('loginidpshowinstruction_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginidpshowinstruction',
+            'theme_boost_union/loginidploginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: IDP login instruction content.
+        $name = 'theme_boost_union/loginidpinstructioncontent';
+        $title = get_string('loginidpinstructioncontent', 'theme_boost_union', null, true);
+        $description = get_string('loginidpinstructioncontent_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginidpinstructioncontent',
+            'theme_boost_union/loginidploginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginidpinstructioncontent',
+            'theme_boost_union/loginidpshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: IDP login instruction position.
+        $name = 'theme_boost_union/loginidpinstructionposition';
+        $title = get_string('loginidpinstructionposition', 'theme_boost_union', null, true);
+        $description = get_string('loginidpinstructionposition_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect(
+            $name,
+            $title,
+            $description,
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN,
+            $logininstructionpositionoptions
+        );
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginidpinstructionposition',
+            'theme_boost_union/loginidploginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginidpinstructionposition',
+            'theme_boost_union/loginidpshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
         );
 
         // Heading: Login provider: Self registration.
@@ -1297,6 +1472,12 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab->add($setting);
         $page->hide_if(
             'theme_boost_union/loginselfregistrationintrotext',
+            'theme_boost_union/loginselfregistrationenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationintrotext',
             'theme_boost_union/loginselfregistrationshowintro',
             'neq',
             THEME_BOOST_UNION_SETTING_SELECT_YES
@@ -1314,6 +1495,63 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             'theme_boost_union/loginlayout',
             'eq',
             'vertical'
+        );
+
+        // Setting: Self registration instruction.
+        $name = 'theme_boost_union/loginselfregistrationshowinstruction';
+        $title = get_string('loginselfregistrationshowinstruction', 'theme_boost_union', null, true);
+        $description = get_string('loginselfregistrationshowinstruction_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationshowinstruction',
+            'theme_boost_union/loginselfregistrationenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Self registration instruction content.
+        $name = 'theme_boost_union/loginselfregistrationinstructioncontent';
+        $title = get_string('loginselfregistrationinstructioncontent', 'theme_boost_union', null, true);
+        $description = get_string('loginselfregistrationinstructioncontent_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationinstructioncontent',
+            'theme_boost_union/loginselfregistrationenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationinstructioncontent',
+            'theme_boost_union/loginselfregistrationshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Self registration instruction position.
+        $name = 'theme_boost_union/loginselfregistrationinstructionposition';
+        $title = get_string('loginselfregistrationinstructionposition', 'theme_boost_union', null, true);
+        $description = get_string('loginselfregistrationinstructionposition_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect(
+            $name,
+            $title,
+            $description,
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN,
+            $logininstructionpositionoptions
+        );
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationinstructionposition',
+            'theme_boost_union/loginselfregistrationenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginselfregistrationinstructionposition',
+            'theme_boost_union/loginselfregistrationshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
         );
 
         // Heading: Login provider: Guest.
@@ -1370,6 +1608,12 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $tab->add($setting);
         $page->hide_if(
             'theme_boost_union/loginguestintrotext',
+            'theme_boost_union/loginguestloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginguestintrotext',
             'theme_boost_union/loginguestshowintro',
             'neq',
             THEME_BOOST_UNION_SETTING_SELECT_YES
@@ -1387,6 +1631,63 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             'theme_boost_union/loginlayout',
             'eq',
             'vertical'
+        );
+
+        // Setting: Guest login instruction.
+        $name = 'theme_boost_union/loginguestshowinstruction';
+        $title = get_string('loginguestshowinstruction', 'theme_boost_union', null, true);
+        $description = get_string('loginguestshowinstruction_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect($name, $title, $description, THEME_BOOST_UNION_SETTING_SELECT_NO, $yesnooption);
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginguestshowinstruction',
+            'theme_boost_union/loginguestloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Guest login instruction content.
+        $name = 'theme_boost_union/loginguestinstructioncontent';
+        $title = get_string('loginguestinstructioncontent', 'theme_boost_union', null, true);
+        $description = get_string('loginguestinstructioncontent_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_confightmleditor($name, $title, $description, '');
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginguestinstructioncontent',
+            'theme_boost_union/loginguestloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginguestinstructioncontent',
+            'theme_boost_union/loginguestshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+
+        // Setting: Guest login instruction position.
+        $name = 'theme_boost_union/loginguestinstructionposition';
+        $title = get_string('loginguestinstructionposition', 'theme_boost_union', null, true);
+        $description = get_string('loginguestinstructionposition_desc', 'theme_boost_union', null, true);
+        $setting = new admin_setting_configselect(
+            $name,
+            $title,
+            $description,
+            THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN,
+            $logininstructionpositionoptions
+        );
+        $tab->add($setting);
+        $page->hide_if(
+            'theme_boost_union/loginguestinstructionposition',
+            'theme_boost_union/loginguestloginenable',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
+        );
+        $page->hide_if(
+            'theme_boost_union/loginguestinstructionposition',
+            'theme_boost_union/loginguestshowinstruction',
+            'neq',
+            THEME_BOOST_UNION_SETTING_SELECT_YES
         );
 
         // Heading: Side entrance login.
@@ -2736,6 +3037,8 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
             'offcanvas-right' => $regionstr['region-offcanvas-right'],
             'offcanvas-center' => $regionstr['region-offcanvas-center'],
         ];
+        // Prepare list of layouts which only support sticky blocks.
+        $stickyonlylayouts = [];
         // Build list of page layouts and map the regions to each page layout.
         $pagelayouts = [
             'standard' => $partialregions,
@@ -2751,11 +3054,25 @@ if ($hassiteconfig || has_capability('theme/boost_union:configure', context_syst
         $pagelayouts['mydashboard'] = array_filter($allavailableregions, function ($key) {
             return ($key != 'content-upper' && $key != 'content-lower') ? true : false;
         }, ARRAY_FILTER_USE_KEY);
+        // For the mycourses layout, use all available regions as well,
+        // but add it to the list of layouts which only support sticky blocks as well.
+        $pagelayouts['mycourses'] = $allavailableregions;
+        $stickyonlylayouts[] = 'mycourses';
         // Create admin setting for each page layout.
         foreach ($pagelayouts as $layout => $regions) {
             $name = 'theme_boost_union/blockregionsfor' . $layout;
             $title = get_string('blockregionsforlayout', 'theme_boost_union', $layout, true);
             $description = get_string('blockregionsforlayout_desc', 'theme_boost_union', $layout, true);
+            // If this layout only supports sticky blocks, add a notification to the description.
+            if (in_array($layout, $stickyonlylayouts)) {
+                $notificationurl = 'https://docs.moodle.org/en/Block_settings#Making_a_block_sticky_throughout_the_whole_site';
+                $notification = new \core\output\notification(
+                    get_string('blockregionsstickyonly', 'theme_boost_union', $notificationurl),
+                    \core\output\notification::NOTIFY_INFO
+                );
+                $notification->set_show_closebutton(false);
+                $description .= '<br />' . $OUTPUT->render($notification);
+            }
             $setting = new admin_setting_configmulticheckbox($name, $title, $description, [], $regions);
             $tab->add($setting);
         }
