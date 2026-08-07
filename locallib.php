@@ -23,9 +23,9 @@
  */
 
 /**
- * Get all activity purposes which are available in the current Moodle version.
- * This function returns all activity purposes, but excludes MOD_PURPOSE_INTERFACE for Moodle 5.2+
- * where this constant has been removed.
+ * Get all activity purposes which are supported by Boost Union.
+ * This function is the single source of truth for the activity purposes which Boost Union offers in its settings and for which
+ * it composes SCSS code.
  *
  * @param bool $includeother Whether to include MOD_PURPOSE_OTHER in the returned array.
  * @return array Array of activity purpose constants.
@@ -37,10 +37,6 @@ function theme_boost_union_get_activity_purposes($includeother = false) {
             MOD_PURPOSE_COMMUNICATION,
             MOD_PURPOSE_CONTENT,
             MOD_PURPOSE_INTERACTIVECONTENT];
-    // Add MOD_PURPOSE_INTERFACE only if it exists (removed in Moodle 5.2+).
-    if (defined('MOD_PURPOSE_INTERFACE')) {
-        $purposes[] = MOD_PURPOSE_INTERFACE;
-    }
     // Add MOD_PURPOSE_OTHER if requested.
     if ($includeother) {
         $purposes[] = MOD_PURPOSE_OTHER;
@@ -224,6 +220,7 @@ function theme_boost_union_get_course_related_hints() {
     ) {
         // Get the active enrol instances for this course.
         $enrolinstances = enrol_get_instances($COURSE->id, true);
+        $selfenrolplugin = enrol_get_plugin('self');
 
         // Prepare to remember when self enrolment is / will be possible.
         $selfenrolmentpossiblecurrently = false;
@@ -239,12 +236,7 @@ function theme_boost_union_get_course_related_hints() {
                 $instanceobject = new stdClass();
 
                 // Remember instance name.
-                if (empty($instance->name)) {
-                    $instanceobject->name = get_string('pluginname', 'enrol_self') .
-                            " (" . get_string('defaultcoursestudent', 'core') . ")";
-                } else {
-                    $instanceobject->name = $instance->name;
-                }
+                $instanceobject->name = $selfenrolplugin->get_instance_name($instance);
 
                 // Remember type of unrestrictedness.
                 if (empty($instance->enrolenddate) && empty($instance->enrolstartdate)) {
@@ -665,11 +657,8 @@ function theme_boost_union_get_random_loginbackgroundimage_number() {
     static $number = null;
 
     if ($number == null) {
-        // Get all files for loginbackgroundimages.
-        $files = theme_boost_union_get_loginbackgroundimage_files();
-
-        // Get count of array elements.
-        $filecount = count($files);
+        // Get the count of loginbackgroundimage files.
+        $filecount = theme_boost_union_get_loginbackgroundimage_filecount();
 
         // We only return a number if images are uploaded to the loginbackgroundimage file area.
         if ($filecount > 0) {
@@ -705,9 +694,46 @@ function theme_boost_union_get_random_loginbackgroundimage_class() {
 }
 
 /**
+ * Return the count of files in the loginbackgroundimage file area.
+ *
+ * This is a performant alternative to loading all file records when only the count is needed
+ * (e.g., for random number generation at login time). It supports an unlimited number of images.
+ *
+ * @return int
+ * @throws dml_exception
+ */
+function theme_boost_union_get_loginbackgroundimage_filecount() {
+    global $DB;
+
+    // Static variable to remember the count for subsequent calls of this function.
+    static $count = null;
+
+    if ($count === null) {
+        // Get the system context.
+        $systemcontext = \context_system::instance();
+
+        // Count only actual files (excluding directory entries) in the filearea.
+        $count = $DB->count_records_select(
+            'files',
+            'contextid = :contextid AND component = :component AND filearea = :filearea AND filename != :dot',
+            [
+                'contextid' => $systemcontext->id,
+                'component' => 'theme_boost_union',
+                'filearea' => 'loginbackgroundimage',
+                'dot' => '.',
+            ]
+        );
+    }
+
+    return $count;
+}
+
+/**
  * Return the files from the loginbackgroundimage file area.
- * This function always loads the files from the filearea which is not really performant.
- * However, we accept this at the moment as it is only invoked on the login page.
+ *
+ * This function loads all files from the filearea and is intended for use during theme compilation
+ * (SCSS generation), where all files are needed. For per-request use (e.g., random image selection),
+ * prefer theme_boost_union_get_loginbackgroundimage_filecount() to avoid loading all file records.
  *
  * @return array|null
  * @throws coding_exception
@@ -892,50 +918,74 @@ function theme_boost_union_get_loginbackgroundimage_scss() {
 /**
  * Get the text that should be displayed for the randomly displayed background image on the login page.
  *
+ * This function fetches only the single selected file record from the database instead of all files,
+ * which keeps it efficient even with a large number of uploaded login background images.
+ *
  * @return array (of two strings, holding the text and the text color)
  * @throws coding_exception
  * @throws dml_exception
  */
 function theme_boost_union_get_loginbackgroundimage_text() {
+    global $DB;
+
     // Get the random number.
     $number = theme_boost_union_get_random_loginbackgroundimage_number();
 
     // Only search for the text if there's a background image.
     if ($number != null) {
-        // Get the files from the filearea loginbackgroundimage.
-        $files = theme_boost_union_get_loginbackgroundimage_files();
-        // Get the file for the selected random number.
-        $file = array_slice($files, ($number - 1), 1, false);
-        // Get the filename.
-        $filename = array_pop($file)->get_filename();
+        // Get the system context.
+        $systemcontext = \context_system::instance();
 
-        // Get the config for loginbackgroundimagetext and make an array out of the lines.
-        $lines = explode("\n", get_config('theme_boost_union', 'loginbackgroundimagetext'));
+        // Fetch only the single file record at position $number using the same ordering as
+        // theme_boost_union_get_loginbackgroundimage_files() (i.e., sorted by itemid).
+        $sql = "SELECT f.filename
+                  FROM {files} f
+                 WHERE f.contextid = :contextid
+                       AND f.component = :component
+                       AND f.filearea = :filearea
+                       AND f.filename != :dot
+                 ORDER BY f.itemid";
+        $params = [
+            'contextid' => $systemcontext->id,
+            'component' => 'theme_boost_union',
+            'filearea' => 'loginbackgroundimage',
+            'dot' => '.',
+        ];
+        $filerecords = $DB->get_records_sql($sql, $params, $number - 1, 1);
+        $filerecord = reset($filerecords);
 
-        // Process the lines.
-        foreach ($lines as $line) {
-            $settings = explode("|", $line);
-            // If the line does not have three items, skip it.
-            if (count($settings) != 3) {
-                continue;
-            }
-            // Compare the filenames for a match.
-            if (strcmp($filename, trim($settings[0])) == 0) {
-                // Trim the second parameter as we need it more than once.
-                $settings[2] = trim($settings[2]);
+        // Only proceed if we got a file record.
+        if ($filerecord) {
+            $filename = $filerecord->filename;
 
-                // If the color value is not acceptable, replace it with dark.
-                if ($settings[2] != 'dark' && $settings[2] != 'light') {
-                    $settings[2] = 'dark';
+            // Get the config for loginbackgroundimagetext and make an array out of the lines.
+            $lines = explode("\n", get_config('theme_boost_union', 'loginbackgroundimagetext'));
+
+            // Process the lines.
+            foreach ($lines as $line) {
+                $settings = explode("|", $line);
+                // If the line does not have three items, skip it.
+                if (count($settings) != 3) {
+                    continue;
                 }
+                // Compare the filenames for a match.
+                if (strcmp($filename, trim($settings[0])) == 0) {
+                    // Trim the second parameter as we need it more than once.
+                    $settings[2] = trim($settings[2]);
 
-                // Return the text + text color that belongs to the randomly selected image.
-                return [format_string(trim($settings[1])), $settings[2]];
+                    // If the color value is not acceptable, replace it with dark.
+                    if ($settings[2] != 'dark' && $settings[2] != 'light') {
+                        $settings[2] = 'dark';
+                    }
+
+                    // Return the text + text color that belongs to the randomly selected image.
+                    return [format_string(trim($settings[1])), $settings[2]];
+                }
             }
         }
     }
 
-    return '';
+    return ['', ''];
 }
 
 /**
@@ -1618,6 +1668,10 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
     // Get installed activity modules.
     $installedactivities = get_module_types_names();
 
+    // Get the activity purposes which are supported by Boost Union (including the 'other' purpose as an activity can be
+    // configured to be not branded at all).
+    $supportedpurposes = theme_boost_union_get_activity_purposes(true);
+
     // Iterate over all existing activities.
     foreach ($installedactivities as $modname => $modinfo) {
         // Get default purpose of activity module.
@@ -1652,6 +1706,14 @@ function theme_boost_union_get_scss_for_activity_icon_purpose($theme) {
         // If the activity purpose setting is set and differs from the activity's default purpose.
         $activitypurpose = get_config('theme_boost_union', 'activitypurpose' . $modname);
         if ($activitypurpose && $activitypurpose != $defaultpurpose) {
+            // If the configured purpose is not supported (anymore) by Boost Union, we must not compose any SCSS code for it.
+            // Otherwise, the $activity-icon-colors SCSS map would not hold a color for this purpose and the recolor-icon-important
+            // mixin would be called with a null color which would break the whole SCSS compilation.
+            if (!in_array($activitypurpose, $supportedpurposes)) {
+                // Skip this activity.
+                continue;
+            }
+
             // Add CSS to modify the activity purpose color in the activity chooser and the activity icon.
             $scss .= '.activity.modtype_' . $modname . ' .activityiconcontainer.courseicon img,';
             // If the activity is mod_lti, we have to check the whole class name for the activity chooser as Moodle
@@ -1927,9 +1989,10 @@ function theme_boost_union_get_scss_courseoverview_block($theme) {
  * Returns the SCSS code to be used in the navbar.
  *
  * @param theme_config $theme The theme config object.
+ * @param int|null $flavourid The ID of the flavour to apply, or null for global settings.
  * @return string
  */
-function theme_boost_union_get_scss_navbar($theme) {
+function theme_boost_union_get_scss_navbar($theme, $flavourid = null) {
     // Initialize SCSS snippet.
     $scss = '';
 
@@ -1949,6 +2012,97 @@ function theme_boost_union_get_scss_navbar($theme) {
                 @extend .text-truncate;
                 max-width: ' . get_config('theme_boost_union', 'maxsitenamewidth') . ';
             }
+        }' . PHP_EOL;
+    }
+
+    // Set styles based on the navbartint setting (only effective for colored navbar variants).
+    $navbarcolorsetting = get_config('theme_boost_union', 'navbarcolor');
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_navbarcolor')
+        ) {
+            // Get the potentially branding-overridden value for navbarcolor.
+            $navbarcolorsetting = \local_boost_union_mwp\local\branding::get_overridden_navbarcolor($navbarcolorsetting);
+        }
+    }
+
+    // If a flavour applies.
+    if ($flavourid != null) {
+        $navbarcolorflavour = theme_boost_union_get_flavour_config_item_for_flavourid($flavourid, 'look_navbarcolor');
+        if (!empty($navbarcolorflavour) && $navbarcolorflavour != THEME_BOOST_UNION_SETTING_SELECT_NOCHANGE) {
+            $navbarcolorsetting = $navbarcolorflavour;
+        }
+    }
+    if (
+        $navbarcolorsetting == THEME_BOOST_UNION_SETTING_NAVBARCOLOR_COLOREDLIGHT ||
+        $navbarcolorsetting == THEME_BOOST_UNION_SETTING_NAVBARCOLOR_COLOREDDARK
+    ) {
+        // Resolve the effective tint: flavour overrides global setting.
+        $navbartintsetting = get_config('theme_boost_union', 'navbartint');
+
+        // If we are on MWP.
+        if (\theme_boost_union\local\mwp::extension_present() == true) {
+            // Call the BU MWP class method only if the class and method exist.
+            if (
+                class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                    method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_navbartint')
+            ) {
+                // Get the potentially branding-overridden value for navbartint.
+                $navbartintsetting = \local_boost_union_mwp\local\branding::get_overridden_navbartint($navbartintsetting);
+            }
+        }
+
+        // If a flavour applies.
+        if ($flavourid != null) {
+            $navbartintflavour = theme_boost_union_get_flavour_config_item_for_flavourid($flavourid, 'look_navbartint');
+            if (!empty($navbartintflavour)) {
+                $navbartintsetting = $navbartintflavour;
+            }
+        }
+        // Fall back to the primary brand color if no tint is set.
+        if (empty($navbartintsetting)) {
+            $navbartintsetting = get_config('theme_boost_union', 'brandcolor');
+        }
+        // If a color is now available (either tint or brand color), override the navbar background.
+        if (!empty($navbartintsetting)) {
+            $scss .= '.navbar.bg-primary {
+                background-color: ' . $navbartintsetting . ' !important;
+            }' . PHP_EOL;
+        }
+    }
+
+    return $scss;
+}
+
+/**
+ * Returns the SCSS code to be used on the login page.
+ *
+ * @return string
+ */
+function theme_boost_union_get_scss_loginpage() {
+    // Initialize SCSS snippet.
+    $scss = '';
+
+    // Get the login branding settings.
+    $loginlogomaxwidth = get_config('theme_boost_union', 'loginlogomaxwidth');
+    $loginlogomaxheight = get_config('theme_boost_union', 'loginlogomaxheight');
+
+    // If at least one of the width and height settings is set.
+    if (!empty($loginlogomaxwidth) || !empty($loginlogomaxheight)) {
+        // Set styles for the login logo to limit the max width and height and keep the aspect ratio.
+        $scss .= '#page-login-index #logoimage {' . PHP_EOL;
+        if (!empty($loginlogomaxwidth)) {
+            $scss .= '    max-width: ' . $loginlogomaxwidth . ';' . PHP_EOL;
+        }
+        if (!empty($loginlogomaxheight)) {
+            $scss .= '    max-height: ' . $loginlogomaxheight . ';' . PHP_EOL;
+        }
+        $scss .= 'width: auto;
+            height: auto;
         }' . PHP_EOL;
     }
 
@@ -2013,8 +2167,14 @@ function theme_boost_union_touchicons_for_ios_checkin() {
     // Create cache for touch icon files.
     $cache = cache::make('theme_boost_union', 'touchiconsios');
 
-    // Purge the existing cache values as we will refill the cache now.
-    $cache->purge();
+    // Note:
+    // We deliberately do not purge the cache here before refilling it.
+    // This function always rewrites the complete set of cache values ('filelist' and 'checkedin') with $cache->set()
+    // further down, and these are the only keys which this cache ever holds. A purge is therefore redundant.
+    // What's more, purging here is actively harmful when the cache is backed by a file store with asynchronous
+    // deletion enabled: purge() would only queue a deletion task for cron which, when it eventually runs, wipes the
+    // whole store - including the values which were set() right after the purge. This leaves the cache empty again,
+    // triggers the on-the-fly refill on the next page load and thus creates an endless purge / refill loop.
 
     // Get list of possible touch icons for iOS.
     $touchiconsios = theme_boost_union_get_touchicons_for_ios();
@@ -2171,7 +2331,10 @@ function theme_boost_union_yesno_to_boolstring($var) {
  * @return string HTML to display in the navbar.
  */
 function theme_boost_union_get_navbar_starredcoursespopover() {
-    global $USER, $OUTPUT;
+    global $CFG, $USER, $OUTPUT;
+
+    // Require library.
+    require_once($CFG->dirroot . '/theme/boost_union/lib.php');
 
     // If a theme other than Boost Union or a child theme of it is active, return directly.
     // This is necessary as the callback is called regardless of the active theme.
@@ -2247,7 +2410,7 @@ function theme_boost_union_get_navbar_starredcoursespopover() {
         if ($course->visible || $canviewhiddencourses) {
             $coursesfortemplate[] = [
                 'url' => new \core\url('/course/view.php', ['id' => $course->id]),
-                'fullname' => $course->fullname,
+                'fullname' => format_string($course->fullname, true, ['context' => $context, 'escape' => false]),
                 'visible' => $course->visible == 1,
             ];
         }
@@ -2311,8 +2474,8 @@ function theme_boost_union_get_navbar_starredcoursespopover() {
 function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
     global $CFG;
 
-    // Require local library.
-    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
+    // Require library.
+    require_once($CFG->dirroot . '/theme/boost_union/lib.php');
 
     // Initialize HTML.
     $html = '';
@@ -2333,6 +2496,9 @@ function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
             return $html;
         }
     }
+
+    // Require local library.
+    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
 
     // Add the touch icons to the page.
     $html .= theme_boost_union_get_touchicons_html_for_page();
@@ -2364,8 +2530,8 @@ function theme_boost_union_callbackimpl_before_standard_html(&$hook = null) {
 function theme_boost_union_callbackimpl_before_standard_top_of_body_html(&$hook = null) {
     global $CFG, $PAGE;
 
-    // Require local library.
-    require_once($CFG->dirroot . '/theme/boost_union/locallib.php');
+    // Require library.
+    require_once($CFG->dirroot . '/theme/boost_union/lib.php');
 
     // Initialize HTML.
     $html = '';
@@ -2660,36 +2826,16 @@ function theme_boost_union_reset_hooksuppress_cache() {
 }
 
 /**
- * Helper function to check if Boost Union or a child theme of Boost Union is active.
- * This is needed at multiple locations to avoid that callbacks in Boost Union affect other active themes.
- *
- * @return bool
- */
-function theme_boost_union_is_active_theme() {
-    global $CFG, $PAGE;
-
-    // During PHPUnit tests or when $PAGE theme is not yet initialised,
-    // fall back to check $CFG->theme to avoid triggering theme initialisation.
-    // This will not recognize Boost Union child themes as active, but this is acceptable in this case.
-    if ((defined('PHPUNIT_TEST') && PHPUNIT_TEST) || !$PAGE->has_set_url()) {
-        return ($CFG->theme === 'boost_union');
-    }
-
-    if ($PAGE->theme->name == 'boost_union' || in_array('boost_union', $PAGE->theme->parents)) {
-        return true;
-    }
-
-    return false;
-}
-
-/**
  * Helper function to generate HTML for an alert when Boost Union is not the active theme,
  * but someone tries to access Boost Union's settings.
  *
  * @return string HTML for the alert.
  */
 function theme_boost_union_is_not_active_alert() {
-    global $OUTPUT;
+    global $CFG, $OUTPUT;
+
+    // Require library.
+    require_once($CFG->dirroot . '/theme/boost_union/lib.php');
 
     // Check if Boost Union or a child theme of it is active.
     if (theme_boost_union_is_active_theme()) {
@@ -2704,30 +2850,48 @@ function theme_boost_union_is_not_active_alert() {
         get_string('warningboostunioninactive', 'theme_boost_union', [
             'url' => $notificationurl->out(),
         ]),
-        core\output\notification::NOTIFY_WARNING
+        core\output\notification::NOTIFY_WARNING,
+        false
     );
-
-    // Do not show a close button.
-    $notification->set_show_closebutton(false);
 
     // Return the HTML for the alert.
     return $OUTPUT->render($notification);
 }
 
 /**
- * Helper function to check if a child theme of Boost Union (and _not_ Boost Union itself) is active.
- * This is needed at multiple locations to improve child theme support in Boost Union already.
+ * Helper function to generate HTML for an alert when recommendations need attention.
  *
- * @return bool
+ * @return string HTML for the alert.
  */
-function theme_boost_union_is_active_childtheme() {
-    global $PAGE;
+function theme_boost_union_recommendations_alert() {
+    global $OUTPUT;
 
-    if ($PAGE->theme->name != 'boost_union') {
-        return true;
-    } else {
-        return false;
+    // If Boost Union or a child theme of it is not active, return directly (as the alert would not be relevant then).
+    if (theme_boost_union_is_active_theme() == false) {
+        return '';
     }
+
+    // Check if a recommendation needs attention. If not, return directly.
+    if (!\theme_boost_union\recommendation\manager::has_recommendations_needing_attention()) {
+        return '';
+    }
+
+    // Get the URL of the recommendations overview page for use in the alert.
+    $notificationurl = new core\url('/theme/boost_union/recommendations/overview.php');
+
+    // Create the notification object.
+    $notification = new core\output\notification(
+        get_string(
+            'recommendationsattentionalert',
+            'theme_boost_union',
+            ['url' => $notificationurl->out()]
+        ),
+        core\output\notification::NOTIFY_INFO,
+        false
+    );
+
+    // Return the HTML for the alert.
+    return $OUTPUT->render($notification);
 }
 
 /**
@@ -2853,4 +3017,197 @@ function theme_boost_union_build_fa_icon_map() {
 
     // Return icon map.
     return $iconmap;
+}
+
+/**
+ * Helper function to build a notification about possible setting overrides.
+ *
+ * @param int $mwp If 0, the notification will make clear that the setting override is relevant for Moodle LMS only.
+ *                 If 1, the notification will make clear that the setting override is relevant for MWP as well.
+ *                 If 2, the notification will make clear that the setting override is relevant for MWP only.
+ * @param bool $supplement If yes, the 'supplement' version of the string is used instead of the 'override' version.
+ * @return string The HTML for the notification.
+ */
+function theme_boost_union_render_setting_override_notification(int $mwp = 0, bool $supplement = false): string {
+    global $OUTPUT, $PAGE;
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        $ismwpinstance = true;
+
+        // Otherwise.
+    } else {
+        $ismwpinstance = false;
+    }
+
+    // Early return for mode 2 on Moodle LMS.
+    if ($mwp == 2 && !$ismwpinstance) {
+        return '';
+    }
+
+    // Determine language string and URL placeholders based on mwp mode.
+    switch ($mwp) {
+        case 2:
+            // Pick the notification details for MWP.
+            if ($supplement) {
+                $langstring = get_string('settingsupplementmwp', 'theme_boost_union');
+            } else {
+                $langstring = get_string('settingoverridemwp', 'theme_boost_union');
+            }
+
+            // Pick the modal details for MWP.
+            $modaltitle = get_string('settingoverridenotificationtitle', 'theme_boost_union');
+            $modalbody = get_string('settingoverridemodalmwp', 'theme_boost_union');
+
+            // Flag the possible actions.
+            $flavoursaction = false;
+            $mwpaction = true;
+
+            break;
+        case 1:
+            // If we are on MWP.
+            if ($ismwpinstance) {
+                // Pick the notification details for MWP.
+                if ($supplement) {
+                    $langstring = get_string('settingsupplementlmsmwp', 'theme_boost_union');
+                } else {
+                    $langstring = get_string('settingoverridelmsmwp', 'theme_boost_union');
+                }
+
+                // Pick the modal details for MWP.
+                $modaltitle = get_string('settingoverridenotificationtitle', 'theme_boost_union');
+                $modalbody = get_string('settingoverridemodallms', 'theme_boost_union');
+                $modalbody .= '<br /><br />' . get_string('settingoverridemodalmwp', 'theme_boost_union');
+                $modalbody .= '<br /><br />' . get_string('settingoverridemodallmsmwp', 'theme_boost_union');
+
+                // Flag the possible actions.
+                $flavoursaction = true;
+                $mwpaction = true;
+
+                break;
+            }
+
+            // If we are on Moodle LMS, fall through to the next case.
+        case 0:
+        default:
+            // Pick the notification details for Moodle LMS.
+            if ($supplement) {
+                $langstring = get_string('settingsupplementlms', 'theme_boost_union');
+            } else {
+                $langstring = get_string('settingoverridelms', 'theme_boost_union');
+            }
+
+            // Pick the modal details for Moodle LMS.
+            $modaltitle = get_string('settingoverridenotificationtitle', 'theme_boost_union');
+            $modalbody = get_string('settingoverridemodallms', 'theme_boost_union');
+
+            // Flag the possible actions.
+            $flavoursaction = true;
+            $mwpaction = false;
+
+            break;
+    }
+
+    // Initialize actions.
+    $actions = [];
+
+    // Info.
+    $actions[] = [
+        'url' => '#',
+        'icon' => new \core\output\pix_icon(
+            'info',
+            get_string('settingoverrideactioninfo', 'theme_boost_union'),
+            'theme_boost_union'
+        ),
+        'attributes' => [
+            'class' => 'action-info py-0 pl-0 ml-0 mr-0',
+            'data-action' => 'bumodal',
+            'data-title' => $modaltitle,
+            'data-body' => $modalbody,
+        ],
+    ];
+
+    // Action for flavours.
+    if ($flavoursaction == true) {
+        $actions[] = [
+            'url' => new \core\url('/theme/boost_union/flavours/overview.php'),
+            'icon' => new \core\output\pix_icon(
+                'flavours',
+                get_string('settingoverrideactionflavours', 'theme_boost_union'),
+                'theme_boost_union'
+            ),
+            'attributes' => [
+                'class' => 'action-flavours py-0 ml-0 mr-0 pr-0',
+                'title' => get_string('settingoverrideactionflavours', 'theme_boost_union'),
+                'aria-label' => get_string('settingoverrideactionflavours', 'theme_boost_union'),
+            ],
+        ];
+    }
+
+    // Action for MWP.
+    if ($mwpaction == true) {
+        $actions[] = [
+            'url' => new \core\url('/admin/tool/tenant/index.php'),
+            'icon' => new \core\output\pix_icon(
+                'tenants',
+                get_string('settingoverrideactionmwp', 'theme_boost_union'),
+                'theme_boost_union'
+            ),
+            'attributes' => [
+                'class' => 'action-mwp py-0 ms-0 me-0 pe-0 ps-2',
+                'title' => get_string('settingoverrideactionmwp', 'theme_boost_union'),
+                'aria-label' => get_string('settingoverrideactionmwp', 'theme_boost_union'),
+            ],
+        ];
+    }
+
+    // Compose action icons for all actions.
+    $actionshtml = [];
+    foreach ($actions as $action) {
+        $action['attributes']['role'] = 'button';
+        $actionshtml[] = $OUTPUT->action_icon(
+            $action['url'],
+            $action['icon'],
+            null,
+            $action['attributes']
+        );
+    }
+    $actionshtml = html_writer::span(join('', $actionshtml), 'settings-actions');
+
+    // Render notification body with mustache template.
+    $content = $OUTPUT->render_from_template('theme_boost_union/settingoverridenotification', [
+        'message' => $langstring,
+        'actionshtml' => $actionshtml,
+    ]);
+
+    // Ensure the modal JS is included.
+    theme_boost_union_ensure_modal_js();
+
+    // Render as info notification while preserving action link data-* attributes.
+    // If we would use $OUTPUT->notification(), the action link data-* attributes would be stripped.
+    return $OUTPUT->render_from_template('core/notification_info', [
+        'message' => $content,
+        'closebutton' => false,
+    ]);
+}
+
+/**
+ * Ensure the modal JS is added to the page, but only once per request.
+ */
+function theme_boost_union_ensure_modal_js(): void {
+    global $PAGE;
+
+    // Initialize static variable to track if the JS has already been included.
+    static $initialized = false;
+
+    // If the JS is already included or if $PAGE is not available, do nothing.
+    if ($initialized || empty($PAGE)) {
+        return;
+    }
+
+    // Include the JS module for the modal.
+    $PAGE->requires->js_call_amd('theme_boost_union/modal', 'init');
+
+    // And remember that fact.
+    $initialized = true;
 }

@@ -4,10 +4,260 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
   As admin
   I need to be able to configure the theme Boost Union plugin
 
+  Scenario Outline: Setting: Login container position
+    Given the following config values are set as admin:
+      | config            | value     | plugin            |
+      | loginformposition | <setting> | theme_boost_union |
+    When I am on login page
+    Then the "class" attribute of ".login-wrapper" "css_element" should contain "<class>"
+    And the "class" attribute of ".login-wrapper" "css_element" should not contain "<notclass1>"
+    And the "class" attribute of ".login-wrapper" "css_element" should not contain "<notclass2>"
+
+    Examples:
+      | setting   | class                   | notclass1            | notclass2               |
+      | center    | login-wrapper-center    | login-wrapper-left   | login-wrapper-right     |
+      | left      | login-wrapper-left      | login-wrapper-center | login-wrapper-right     |
+      | right     | login-wrapper-right     | login-wrapper-center | login-wrapper-left      |
+      | semileft  | login-wrapper-semileft  | login-wrapper-center | login-wrapper-semiright |
+      | semiright | login-wrapper-semiright | login-wrapper-center | login-wrapper-semileft  |
+
+  Scenario Outline: Setting: Login form transparency
+    Given the following config values are set as admin:
+      | config                | value     | plugin            |
+      | loginformtransparency | <setting> | theme_boost_union |
+    When I am on login page
+    Then the "class" attribute of ".login-container" "css_element" <shouldcontain> "login-container-80t"
+
+    Examples:
+      | setting | shouldcontain      |
+      | yes     | should contain     |
+      | no      | should not contain |
+
+  @javascript
+  Scenario Outline: Setting: Login container width
+    Given the following config values are set as admin:
+      | config              | value     | plugin            |
+      | logincontainerwidth | <setting> | theme_boost_union |
+    And the theme cache is purged and the theme is reloaded
+    When I am on login page
+    # Reloading the page is necessary to ensure that the CSS is applied, as it might not appear on the first load due to caching.
+    And I reload the page
+    Then DOM element ".login-container" should have computed style "width" "<cssvalue>"
+
+    Examples:
+      | setting | cssvalue |
+      | 600px   | 600px    |
+      |         | 500px    |
+
+  @javascript @_file_upload
+  Scenario Outline: Setting: Login page brand - Show and hide branding elements with logo uploaded
+    Given the following config values are set as admin:
+      | config         | value     | plugin            |
+      | loginpagebrand | <setting> | theme_boost_union |
+    And I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Site branding" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I upload "theme/boost_union/tests/fixtures/moodlelogo.png" file to "Logo" filemanager
+    And I press "Save changes"
+    And Behat debugging is enabled
+    And I log out
+    When I am on login page
+    Then "#loginlogo" "css_element" <logoshouldornot> exist
+    And "h1.login-heading:not(.sr-only)" "css_element" <headingshouldornot> exist
+    And "h1.login-heading.sr-only" "css_element" <headinghiddenshouldornot> exist
+    And ".login-tagline" "css_element" <taglineshouldornot> exist
+
+    Examples:
+      | setting              | logoshouldornot | headingshouldornot | headinghiddenshouldornot | taglineshouldornot |
+      | logootherwiseheading | should          | should not         | should                   | should not         |
+      | logoheadingtagline   | should          | should             | should not               | should             |
+      | logoheading          | should          | should             | should not               | should not         |
+      | logotagline          | should          | should not         | should                   | should             |
+      | headingtagline       | should not      | should             | should not               | should             |
+      | heading              | should not      | should             | should not               | should not         |
+      | tagline              | should not      | should not         | should                   | should             |
+
+  Scenario Outline: Setting: Login page brand - Show and hide branding elements without logo uploaded
+    Given the following config values are set as admin:
+      | config         | value     | plugin            |
+      | loginpagebrand | <setting> | theme_boost_union |
+    When I am on login page
+    Then "#loginlogo" "css_element" should not exist
+    And "h1.login-heading:not(.sr-only)" "css_element" <headingshouldornot> exist
+    And "h1.login-heading.sr-only" "css_element" <headinghiddenshouldornot> exist
+    And ".login-tagline" "css_element" <taglineshouldornot> exist
+
+    # Note: logootherwiseheading shows the heading as fallback when no logo is uploaded.
+    Examples:
+      | setting              | headingshouldornot | headinghiddenshouldornot | taglineshouldornot |
+      | logootherwiseheading | should             | should not               | should not         |
+      | logoheadingtagline   | should             | should not               | should             |
+      | logoheading          | should             | should not               | should not         |
+      | logotagline          | should not         | should                   | should             |
+      | headingtagline       | should             | should not               | should             |
+      | heading              | should             | should not               | should not         |
+      | tagline              | should not         | should                   | should             |
+
+  Scenario Outline: Setting: Login page heading - Show the correct heading text
+    Given the following config values are set as admin:
+      | config           | value     | plugin            |
+      | loginpageheading | <setting> | theme_boost_union |
+    And I log in as "admin"
+    And I navigate to "Site home > Site home settings" in site administration
+    And I set the field "id_s__shortname" to "Boost Union Test"
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then I should see "<text>" in the ".login-heading" "css_element"
+
+    Examples:
+      | setting            | text                            |
+      | logintofullname    | Log in to Acceptance test site  |
+      | logintoshortname   | Log in to Boost Union Test      |
+      | welcometofullname  | Welcome to Acceptance test site |
+      | welcometoshortname | Welcome to Boost Union Test     |
+      | fullname           | Acceptance test site            |
+      | shortname          | Boost Union Test                |
+      | welcome            | Welcome!                        |
+      | welcomeback        | Welcome!                        |
+
+  Scenario Outline: Setting: Login page tagline - Show the correct tagline text
+    Given the following config values are set as admin:
+      | config           | value          | plugin            |
+      | loginpagebrand   | headingtagline | theme_boost_union |
+      | loginpagetagline | <setting>      | theme_boost_union |
+    When I am on login page
+    Then I should see "<text>" in the ".login-tagline" "css_element"
+
+    # We do not want to burn too much CPU time by testing all available options. We just test the default value and one non-default value.
+    Examples:
+      | setting           | text                            |
+      | welcome           | Welcome!                        |
+      | welcometofullname | Welcome to Acceptance test site |
+
+  Scenario: Setting: Login page heading - Show the heading and tagline texts: Show 'Welcome back!' for returning visitors
+    Given the following config values are set as admin:
+      | config           | value          | plugin            |
+      | loginpagebrand   | headingtagline | theme_boost_union |
+      | loginpageheading | welcomeback    | theme_boost_union |
+      | loginpagetagline | welcomeback    | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value |
+      | rememberusername | 1     |
+    When I am on login page
+    And I should see "Welcome!" in the "h1.login-heading" "css_element"
+    And I should not see "Welcome back!" in the "h1.login-heading" "css_element"
+    And I should see "Welcome!" in the ".login-tagline" "css_element"
+    And I should not see "Welcome back!" in the ".login-tagline" "css_element"
+    And I set the field "Username" to "admin"
+    And I set the field "Password" to "admin"
+    And I press "Log in"
+    And I log out
+    And I am on login page
+    Then I should see "Welcome back!" in the "h1.login-heading" "css_element"
+    And I should not see "Welcome!" in the "h1.login-heading" "css_element"
+    And I should see "Welcome back!" in the ".login-tagline" "css_element"
+    And I should not see "Welcome!" in the ".login-tagline" "css_element"
+
+  Scenario: Setting: Login page heading - Show the heading and tagline texts: Show 'Welcome back!' after session timeout
+    Given the following config values are set as admin:
+      | config           | value          | plugin            |
+      | loginpagebrand   | headingtagline | theme_boost_union |
+      | loginpageheading | welcomeback    | theme_boost_union |
+      | loginpagetagline | welcomeback    | theme_boost_union |
+    And the following config values are set as admin:
+      | config                | value |
+      | sessiontimeout        | 1     |
+      | sessiontimeoutwarning | 0     |
+    When I am on login page
+    And I should see "Welcome!" in the "h1.login-heading" "css_element"
+    And I should not see "Welcome back!" in the "h1.login-heading" "css_element"
+    And I should see "Welcome!" in the ".login-tagline" "css_element"
+    And I should not see "Welcome back!" in the ".login-tagline" "css_element"
+    And I log in as "admin"
+    And I wait "3" seconds
+    And I am on login page
+    Then I should see "Your session has timed out. Please log in again."
+    And I should see "Welcome back!" in the "h1.login-heading" "css_element"
+    And I should not see "Welcome!" in the "h1.login-heading" "css_element"
+    And I should see "Welcome back!" in the ".login-tagline" "css_element"
+    And I should not see "Welcome!" in the ".login-tagline" "css_element"
+
+  @javascript @_file_upload
+  Scenario Outline: Setting: Login logo max width and height - Set the maximum width and height
+    Given the following config values are set as admin:
+      | config             | value     | plugin            |
+      | loginlogomaxwidth  | <width> | theme_boost_union |
+      | loginlogomaxheight | <height> | theme_boost_union |
+    And I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Site branding" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I upload "theme/boost_union/tests/fixtures/moodlelogo.png" file to "Logo" filemanager
+    And I press "Save changes"
+    And Behat debugging is enabled
+    And I log out
+    And the theme cache is purged and the theme is reloaded
+    When I am on login page
+    # Reloading the page is necessary to ensure that the CSS is applied, as it might not appear on the first load due to caching.
+    And I reload the page
+    Then DOM element "#logoimage" <shouldornotwidth> have computed style "max-width" "<width>"
+    And DOM element "#logoimage" <shouldornotheight> have computed style "max-height" "<height>"
+
+    Examples:
+      | width | height | shouldornotwidth | shouldornotheight |
+      |       |        | should not       | should not        |
+      | 50px  | 50px   | should           | should            |
+      | 50px  |        | should           | should not        |
+
+  @javascript @_file_upload
+  Scenario Outline: Setting: Login logo alignment - Set the alignment
+    Given the following config values are set as admin:
+      | config             | value     | plugin            |
+      | loginlogoalignment | <setting> | theme_boost_union |
+    And I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Site branding" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I upload "theme/boost_union/tests/fixtures/moodlelogo.png" file to "Logo" filemanager
+    And I press "Save changes"
+    And Behat debugging is enabled
+    And I log out
+    When I am on login page
+    Then the "class" attribute of "#loginlogo" "css_element" should contain "<class>"
+
+    Examples:
+      | setting | class                  |
+      | left    | justify-content-start  |
+      | center  | justify-content-center |
+      | right   | justify-content-end    |
+
+  @javascript @_file_upload
+  Scenario Outline: Setting: Login logo margin bottom - Set the margin bottom
+    Given the following config values are set as admin:
+      | config                | value     | plugin            |
+      | loginlogomarginbottom | <setting> | theme_boost_union |
+    And I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Site branding" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I upload "theme/boost_union/tests/fixtures/moodlelogo.png" file to "Logo" filemanager
+    And I press "Save changes"
+    And Behat debugging is enabled
+    And I log out
+    When I am on login page
+    Then the "class" attribute of "#loginlogo" "css_element" <shouldcontain> "<class>"
+
+    # We do not want to burn too much CPU time by testing all available options. We just test the none value and one set value.
+    Examples:
+      | setting | shouldcontain  | class |
+      | 0       | should contain | mb-0  |
+      | 3       | should contain | mb-3  |
+
   @javascript
   Scenario: Setting: Login page background images - Do not upload any login background image
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then the "class" attribute of "body" "css_element" should contain "path-login"
     And the "class" attribute of "body" "css_element" should not contain "loginbackgroundimage"
     And the "class" attribute of "body" "css_element" should not contain "loginbackgroundimage1"
@@ -23,7 +273,9 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
+    # Reloading the page is necessary to ensure that the background image CSS is applied, as it might not appear on the first load due to caching.
+    And I reload the page
     Then the "class" attribute of "body" "css_element" should contain "path-login"
     And the "class" attribute of "body" "css_element" should contain "loginbackgroundimage"
     And the "class" attribute of "body" "css_element" should contain "loginbackgroundimage1"
@@ -42,7 +294,9 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
+    # Reloading the page is necessary to ensure that the background image CSS is applied, as it might not appear on the first load due to caching.
+    And I reload the page
     Then the "class" attribute of "body" "css_element" should contain "path-login"
     And the "class" attribute of "body" "css_element" should contain "loginbackgroundimage"
     # There isn't a real possibility to test the randomness of the login background picking.
@@ -65,7 +319,9 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
+    # Reloading the page is necessary to ensure that the background image CSS is applied, as it might not appear on the first load due to caching.
+    And I reload the page
     Then DOM element "body.pagelayout-login" should have computed style "background-position" "<cssvalue>"
 
     # We do not want to burn too much CPU time by testing all available options. We just test the default value and one non-default value.
@@ -85,7 +341,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
     Then I should see "Copyright by SplitShire on pexels.com" in the "#loginbackgroundimagetext" "css_element"
 
   @javascript @_file_upload
@@ -99,7 +355,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
     Then "#loginbackgroundimagetext" "css_element" <shouldexistornot>
 
     Examples:
@@ -118,7 +374,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
     And I press "Save changes"
     And Behat debugging is enabled
     And I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
     Then the "class" attribute of "#loginbackgroundimagetext span" "css_element" should contain "text-<csscolor>"
 
     Examples:
@@ -127,42 +383,12 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | light      | light    |
       | wrongcolor | dark     |
 
-  Scenario Outline: Setting: Login form position
-    Given the following config values are set as admin:
-      | config            | value     | plugin            |
-      | loginformposition | <setting> | theme_boost_union |
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
-    Then the "class" attribute of ".login-wrapper" "css_element" should contain "<class>"
-    And the "class" attribute of ".login-wrapper" "css_element" should not contain "<notclass1>"
-    And the "class" attribute of ".login-wrapper" "css_element" should not contain "<notclass2>"
-
-    Examples:
-      | setting | class                | notclass1            | notclass2           |
-      | center  | login-wrapper-center | login-wrapper-left   | login-wrapper-right |
-      | left    | login-wrapper-left   | login-wrapper-center | login-wrapper-right |
-      | right   | login-wrapper-right  | login-wrapper-center | login-wrapper-left  |
-
-  Scenario Outline: Setting: Login form transparency
-    Given the following config values are set as admin:
-      | config                | value     | plugin            |
-      | loginformtransparency | <setting> | theme_boost_union |
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
-    Then the "class" attribute of ".login-container" "css_element" <shouldcontain> "login-container-80t"
-
-    Examples:
-      | setting | shouldcontain      |
-      | yes     | should contain     |
-      | no      | should not contain |
-
-  Scenario Outline: Setting: Login layout
+  Scenario Outline: Setting: Login form layout
     Given the following config values are set as admin:
       | config      | value     | plugin            |
       | loginlayout | <layout>  | theme_boost_union |
     And the theme cache is purged and the theme is reloaded
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then "#login-layout-tabs" "css_element" <tabsshouldornot> exist
     And "#login-layout-accordion" "css_element" <accordionshouldornot> exist
 
@@ -173,29 +399,13 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | accordion | should not      | should               |
 
   @javascript
-  Scenario Outline: Setting: Login container width
-    Given the following config values are set as admin:
-      | config              | value     | plugin            |
-      | logincontainerwidth | <setting> | theme_boost_union |
-    And the theme cache is purged and the theme is reloaded
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
-    Then DOM element ".login-container" should have computed style "width" "<cssvalue>"
-
-    Examples:
-      | setting | cssvalue |
-      | 600px   | 600px    |
-      |         | 500px    |
-
-  @javascript
   Scenario Outline: Setting: Enhanced tabs layout behaviour: Load the javascript module
     Given the following config values are set as admin:
       | config                  | value     | plugin            |
       | loginlayout             | tabs      | theme_boost_union |
       | loginenhancedtabslayout | <setting> | theme_boost_union |
     And the theme cache is purged and the theme is reloaded
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then "#login-layout-tabs" "css_element" should exist
     And "[data-bu-login-spacer='top']" "css_element" <spacershouldornot> exist
     And "[data-bu-login-spacer='bottom']" "css_element" <spacershouldornot> exist
@@ -216,8 +426,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | config                 | value                   | plugin            |
       | logininstructionsabove | Above instructions text | theme_boost_union |
       | logininstructionsbelow | Below instructions text | theme_boost_union |
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then I should see "Above instructions text" in the ".login-instructions-above" "css_element"
     And ".login-instructions-above" "css_element" should appear before ".theme_boost_union-loginmethod  " "css_element"
     And I should see "Below instructions text" in the ".login-instructions-below" "css_element"
@@ -246,8 +455,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     # Verify that login methods exist and appear in the correct DOM order.
     Then "#login-method-local" "css_element" should exist
     And "#login-method-idp" "css_element" should exist
@@ -286,8 +494,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then "#login-method-local" "css_element" <localshouldornot> exist
     And "#login-method-idp" "css_element" <idpshouldornot> exist
     And "#login-method-firsttimesignup" "css_element" <selfregshouldornot> exist
@@ -325,8 +532,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then "#login-method-local h2.login-heading" "css_element" <localshould> exist
     And "#login-method-idp h2.login-heading" "css_element" <idpshould> exist
     And "#login-method-firsttimesignup h2.login-heading" "css_element" <selfregshould> exist
@@ -370,8 +576,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then I should see "<localexpected>" in the "#login-method-local h2.login-heading" "css_element"
     And I should see "<idpexpected>" in the "#login-method-idp h2.login-heading" "css_element"
     And I should see "<selfregexpected>" in the "#login-method-firsttimesignup h2.login-heading" "css_element"
@@ -411,8 +616,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then I should see "<instructionrender>" in the "<instructionselector>" "css_element"
     And I should not see "multilang"
 
@@ -453,8 +657,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then "<instructionselector>" "css_element" should not exist
 
     Examples:
@@ -468,8 +671,85 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | no   | Guest instructions     | #login-method-guest .login-instructions-guest.mb-3                     |
       | guestlogin       | loginguestshowinstruction            | loginguestinstructioncontent            | yes  |                        | #login-method-guest .login-instructions-guest.mb-3                     |
 
+  Scenario Outline: Setting: Login provider button color
+    Given the following config values are set as admin:
+      | config                | value         | plugin            |
+      | login<provider>enable | yes           | theme_boost_union |
+      | <buttoncolorconfig>   | <buttoncolor> | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Testing service   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then the "class" attribute of "<buttonselector>" "css_element" should contain "<expectedclass>"
+
+    # We do not want to burn too much CPU time by testing all available options. We just test the default value and one non-default value.
+    Examples:
+      | provider         | buttoncolorconfig                | buttoncolor         | buttonselector                     | expectedclass           |
+      | locallogin       | loginlocalbuttoncolor            | primary             | #login-method-local .btn           | btn-primary             |
+      | locallogin       | loginlocalbuttoncolor            | outline-secondary   | #login-method-local .btn           | btn-outline-secondary   |
+      | idplogin         | loginidpbuttoncolor              | outline-secondary   | #login-method-idp .btn             | btn-outline-secondary   |
+      | idplogin         | loginidpbuttoncolor              | outline-primary     | #login-method-idp .btn             | btn-outline-primary     |
+      | idplogin         | loginidpbuttoncolor              | outline-lightmoodle | #login-method-idp .btn             | btn-outline-lightmoodle |
+      | selfregistration | loginselfregistrationbuttoncolor | secondary           | #login-method-firsttimesignup .btn | btn-secondary           |
+      | selfregistration | loginselfregistrationbuttoncolor | primary             | #login-method-firsttimesignup .btn | btn-primary             |
+      | guestlogin       | loginguestbuttoncolor            | secondary           | #login-method-guest .btn           | btn-secondary           |
+      | guestlogin       | loginguestbuttoncolor            | outline-primary     | #login-method-guest .btn           | btn-outline-primary     |
+      | guestlogin       | loginguestbuttoncolor            | outline-lightmoodle | #login-method-guest .btn           | btn-outline-lightmoodle |
+
+  Scenario Outline: Setting: Login provider button size
+    Given the following config values are set as admin:
+      | config                | value        | plugin            |
+      | login<provider>enable | yes          | theme_boost_union |
+      | <buttonsizeconfig>    | <buttonsize> | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Testing service   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then the "class" attribute of "<buttonselector>" "css_element" should contain "<expectedclass>"
+    And the "class" attribute of "<buttonselector>" "css_element" should not contain "<notexpectedclass>"
+
+    # We do not want to burn too much CPU time by testing all available options on all login methods.
+    # We just test the small and the large size on the login methods and verify with the local login button that the medium size
+    # (which is the default) does not add any size class at all.
+    Examples:
+      | provider         | buttonsizeconfig                | buttonsize | buttonselector                     | expectedclass | notexpectedclass |
+      | locallogin       | loginlocalbuttonsize            | sm         | #login-method-local .btn           | btn-sm        | btn-lg           |
+      | locallogin       | loginlocalbuttonsize            | lg         | #login-method-local .btn           | btn-lg        | btn-sm           |
+      | locallogin       | loginlocalbuttonsize            | md         | #login-method-local .btn           | btn-primary   | btn-sm           |
+      | locallogin       | loginlocalbuttonsize            | md         | #login-method-local .btn           | btn-primary   | btn-lg           |
+      | idplogin         | loginidpbuttonsize              | sm         | #login-method-idp .btn             | btn-sm        | btn-lg           |
+      | idplogin         | loginidpbuttonsize              | lg         | #login-method-idp .btn             | btn-lg        | btn-sm           |
+      | selfregistration | loginselfregistrationbuttonsize | sm         | #login-method-firsttimesignup .btn | btn-sm        | btn-lg           |
+      | selfregistration | loginselfregistrationbuttonsize | lg         | #login-method-firsttimesignup .btn | btn-lg        | btn-sm           |
+      | guestlogin       | loginguestbuttonsize            | sm         | #login-method-guest .btn           | btn-sm        | btn-lg           |
+      | guestlogin       | loginguestbuttonsize            | lg         | #login-method-guest .btn           | btn-lg        | btn-sm           |
+
   @javascript
-  Scenario Outline: Setting: Login layout tabs - Verify tabs structure and primarylogin functionality
+  Scenario Outline: Setting: Login form layout tabs - Verify tabs structure and primarylogin functionality
     Given the following config values are set as admin:
       | config       | value          | plugin            |
       | loginlayout  | tabs           | theme_boost_union |
@@ -489,8 +769,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     # Verify that tabs navigation exists.
     Then "#login-layout-tabs" "css_element" should exist
     And the "role" attribute of "#login-layout-tabs" "css_element" should contain "tablist"
@@ -528,7 +807,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | guest           | guest           | firsttimesignup |
 
   @javascript
-  Scenario Outline: Setting: Login layout accordion - Verify accordion structure and primarylogin functionality
+  Scenario Outline: Setting: Login form layout accordion - Verify accordion structure and primarylogin functionality
     Given the following config values are set as admin:
       | config       | value          | plugin            |
       | loginlayout  | accordion      | theme_boost_union |
@@ -548,8 +827,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     # Verify that accordion container exists.
     Then "#login-layout-accordion" "css_element" should exist
     And the "class" attribute of "#login-layout-accordion" "css_element" should contain "accordion"
@@ -582,7 +860,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | firsttimesignup | firsttimesignup | guest           | should contain     | should not contain |
       | guest           | guest           | firsttimesignup | should contain     | should not contain |
 
-  Scenario Outline: Setting: Login layout labels
+  Scenario Outline: Setting: Login form layout labels
     Given the following config values are set as admin:
       | config                          | value     | plugin            |
       | loginlayout                     | <layout>  | theme_boost_union |
@@ -611,8 +889,7 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | Client secret | supersecret       |
     And I press "Save changes"
     And I log out
-    When I am on site homepage
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    When I am on login page
     Then I should see "<localexpected>" in the "<localselector>" "css_element"
     And I should see "<idpexpected>" in the "<idpselector>" "css_element"
     And I should see "<selfregexpected>" in the "<selfregselector>" "css_element"
@@ -625,6 +902,226 @@ Feature: Configuring the theme_boost_union plugin for the "Login page" tab on th
       | tabs      | Local A                                                                                               | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-tab                             | #login-method-idp-tab                             | #login-method-firsttimesignup-tab                             | #login-method-guest-tab                             |
       | accordion | Moodle <span class="multilang" lang="en">account</span><span class="multilang" lang="de">Konto</span> |       |           |         | Moodle account | IDP login   | Self registration | Guest login   | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
       | accordion | Local A                                                                                               | IDP A | Selfreg A | Guest A | Local A        | IDP A       | Selfreg A         | Guest A       | #login-method-local-accordion-header .login-heading | #login-method-idp-accordion-header .login-heading | #login-method-firsttimesignup-accordion-header .login-heading | #login-method-guest-accordion-header .login-heading |
+
+  Scenario Outline: Setting: Split per identity provider - Tabs and accordion layouts list one pane per OAuth2 service
+    Given the following config values are set as admin:
+      | config              | value     | plugin            |
+      | loginlayout         | <layout>  | theme_boost_union |
+      | loginidpsplit       | yes       | theme_boost_union |
+      | loginidploginenable | yes       | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Alpha   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Microsoft"
+    And I should see "Create new service: Microsoft"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Beta    |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then "<idp0nav>" "css_element" should exist
+    And "<idp1nav>" "css_element" should exist
+    And "<idp0content>" "css_element" should exist
+    And "<idp1content>" "css_element" should exist
+    And "<idpsinglenav>" "css_element" should not exist
+    And "#login-method-idp" "css_element" should not exist
+    And I should see "Behat IdP Alpha" in the "<idp0headingselector>" "css_element"
+    And I should see "Behat IdP Beta" in the "<idp1headingselector>" "css_element"
+
+    Examples:
+      | layout    | idp0nav                              | idp1nav                              | idp0content                           | idp1content                           | idpsinglenav                        | idp0headingselector                                   | idp1headingselector                                   |
+      | tabs      | #login-method-idp-0-tab              | #login-method-idp-1-tab              | #login-method-idp-0                   | #login-method-idp-1                   | #login-method-idp-tab               | #login-method-idp-0-tab                               | #login-method-idp-1-tab                               |
+      | accordion | #login-method-idp-0-accordion-header | #login-method-idp-1-accordion-header | #login-method-idp-0-accordion-content | #login-method-idp-1-accordion-content | #login-method-idp-accordion-header  | #login-method-idp-0-accordion-header .login-heading   | #login-method-idp-1-accordion-header .login-heading   |
+
+  Scenario: Setting: Split per identity provider - Vertical layout shows one block per OAuth2 service with provider heading
+    Given the following config values are set as admin:
+      | config              | value    | plugin            |
+      | loginlayout         | vertical | theme_boost_union |
+      | loginidpsplit       | yes      | theme_boost_union |
+      | loginidploginenable | yes      | theme_boost_union |
+      | loginidpshowintro   | yes      | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Alpha   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Microsoft"
+    And I should see "Create new service: Microsoft"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Beta    |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then "#login-method-idp-0" "css_element" should exist
+    And "#login-method-idp-1" "css_element" should exist
+    And "#login-method-idp" "css_element" should not exist
+    And "#login-method-idp-0" "css_element" should appear before "#login-method-idp-1" "css_element" in the "#theme_boost_union-loginform" "css_element"
+    And I should see "Behat IdP Alpha" in the "#login-method-idp-0 h2.login-heading" "css_element"
+    And I should see "Behat IdP Beta" in the "#login-method-idp-1 h2.login-heading" "css_element"
+
+  Scenario: Setting: Split per identity provider - Disabled keeps a single identity provider section
+    Given the following config values are set as admin:
+      | config              | value | plugin            |
+      | loginlayout         | tabs  | theme_boost_union |
+      | loginidpsplit       | no    | theme_boost_union |
+      | loginidploginenable | yes   | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value               |
+      | auth             | manual,email,oauth2 |
+      | registerauth     | email               |
+      | guestloginbutton | 1                   |
+    And I log in as "admin"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Google"
+    And I should see "Create new service: Google"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Alpha   |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I navigate to "Server > OAuth 2 services" in site administration
+    And I press "Microsoft"
+    And I should see "Create new service: Microsoft"
+    And I set the following fields to these values:
+      | Name          | Behat IdP Beta    |
+      | Client ID     | thisistheclientid |
+      | Client secret | supersecret       |
+    And I press "Save changes"
+    And I log out
+    When I am on login page
+    Then "#login-method-idp-tab" "css_element" should exist
+    And "#login-method-idp" "css_element" should exist
+    And "#login-method-idp-0-tab" "css_element" should not exist
+    And "#login-method-idp-0" "css_element" should not exist
+
+  Scenario: Setting: Shibboleth internal WAYF on login page - Show organisation selector (based on the 'auth_shibboleth' configuration)
+    Given the following config values are set as admin:
+      | config                      | value    | plugin            |
+      | loginshibbolethinternalwayf | config   | theme_boost_union |
+      | loginidploginenable         | yes      | theme_boost_union |
+      | loginlayout                 | vertical | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value             |
+      | auth             | manual,shibboleth |
+      | registerauth     | email             |
+      | guestloginbutton | 1                 |
+    # Configure Shibboleth auth plugin with values that will make the WAYF form appear and be identifiable in the login page.
+    And the following config values are set as admin:
+      | user_attribute         | REMOTE_USER                                                           | auth_shibboleth |
+      | organization_selection | https://idp.example.org/idp/shibboleth, Behat Shibboleth Organisation | auth_shibboleth |
+      | login_name             | Behat Shibboleth IdP                                                  | auth_shibboleth |
+    When I am on login page
+    Then ".login-shibboleth-wayf-form" "css_element" should exist
+    And "#login-shibboleth-wayf-0-idp" "css_element" should exist
+    And "#login-shibboleth-wayf-0" "css_element" should exist
+    And I should see "Behat Shibboleth Organisation" in the ".login-identityproviders #login-shibboleth-wayf-0-idp" "css_element"
+    And I should not see "Behat Shibboleth IdP" in the ".login-identityproviders" "css_element"
+
+  Scenario: Setting: Shibboleth external WAYF on login page - Show organizsation selector (based on embedded JavaScript code) - Simple check with a placeholder text
+    Given the following config values are set as admin:
+      | config                      | value               | plugin            |
+      | loginshibbolethinternalwayf | code                | theme_boost_union |
+      | loginidploginenable         | yes                 | theme_boost_union |
+      | loginlayout                 | vertical            | theme_boost_union |
+      | internalshibbolethwayfcode  | EMBEDDED-WAYF-START | theme_boost_union |
+      | alt_login                   | off                 | auth_shibboleth   |
+      | user_attribute              | HTTP_UNIQUEID       | auth_shibboleth   |
+    And the following config values are set as admin:
+      | config           | value             |
+      | auth             | manual,shibboleth |
+      | guestloginbutton | 1                 |
+    When I am on login page
+    Then I should see "EMBEDDED-WAYF-START"
+    And ".login-shibboleth-wayf-form" "css_element" should not exist
+    And "#login-shibboleth-wayf-0-idp" "css_element" should not exist
+    And "#login-shibboleth-wayf-0" "css_element" should not exist
+    And "#login-method-idp .btn" "css_element" should not exist
+
+  @javascript
+  Scenario: Setting: Shibboleth external WAYF on login page - Show organizsation selector (based on embedded JavaScript code) - Advances check with SWITCH AAI JS Code
+    Given the following config values are set as admin:
+      | config                      | value               | plugin            |
+      | loginshibbolethinternalwayf | code                | theme_boost_union |
+      | loginidploginenable         | yes                 | theme_boost_union |
+      | loginlayout                 | vertical            | theme_boost_union |
+      | alt_login                   | off                 | auth_shibboleth   |
+      | user_attribute              | HTTP_UNIQUEID       | auth_shibboleth   |
+      | internalshibbolethwayfcode  | EMBEDDED-WAYF-START | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value             |
+      | auth             | manual,shibboleth |
+      | guestloginbutton | 1                 |
+    And I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Login page" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I set the field "Internal WAYF JavaScript code" to multiline:
+"""
+<script type="text/javascript">
+var wayf_URL = "https://wayf.switch.ch/SWITCHaai/WAYF";
+var wayf_sp_entityID = "https://moodle.example.com/shibboleth";
+var wayf_sp_handlerURL = "https://moodle.example.com/Shibboleth.sso";
+var wayf_return_url = "https://moodle.example.com/";
+</script>
+<script type="text/javascript" src="https://wayf.switch.ch/SWITCHaai/WAYF/embedded-wayf.js"></script>
+"""
+    And I press "Save changes"
+    And Behat debugging is enabled
+    And I log out
+    When I am on login page
+    Then "#wayf_div" "css_element" should exist in the ".login-identityproviders" "css_element"
+    And "#user_idp" "css_element" should exist in the ".login-identityproviders" "css_element"
+    And ".login-shibboleth-wayf-form" "css_element" should not exist
+    And "#login-shibboleth-wayf-0-idp" "css_element" should not exist
+    And "#login-shibboleth-wayf-0" "css_element" should not exist
+    And "#login-method-idp .btn" "css_element" should not exist
+
+  Scenario: Setting: Shibboleth internal WAYF on login page - Show standard buttons when disabled (Countercheck)
+    Given the following config values are set as admin:
+      | config                      | value    | plugin            |
+      | loginshibbolethinternalwayf | no       | theme_boost_union |
+      | loginidploginenable         | yes      | theme_boost_union |
+      | loginlayout                 | vertical | theme_boost_union |
+    And the following config values are set as admin:
+      | config           | value             |
+      | auth             | manual,shibboleth |
+      | registerauth     | email             |
+      | guestloginbutton | 1                 |
+    # Configure Shibboleth auth plugin with values that will make the WAYF form appear and be identifiable in the login page.
+    And the following config values are set as admin:
+      | user_attribute         | REMOTE_USER                                                           | auth_shibboleth |
+      | organization_selection | https://idp.example.org/idp/shibboleth, Behat Shibboleth Organisation | auth_shibboleth |
+      | login_name             | Behat Shibboleth IdP                                                  | auth_shibboleth |
+    When I am on login page
+    Then ".login-shibboleth-wayf-form" "css_element" should not exist
+    And "#login-shibboleth-wayf-0-idp" "css_element" should not exist
+    And I should see "Behat Shibboleth IdP" in the "#login-method-idp .btn" "css_element"
 
   Scenario Outline: Setting: Enable side entrance login - View the side entrance login page
     Given the following config values are set as admin:

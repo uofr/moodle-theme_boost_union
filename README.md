@@ -128,9 +128,23 @@ With this setting, you control the positioning of the background image within th
 
 ##### Brand colors
 
-###### Brand color
+###### Primary brand color
 
-This setting is already available in the Moodle core theme Boost. For more information how to use it, please have a look at the official Moodle documentation: http://docs.moodle.org/en/Boost_theme
+This color is used for accent and highlighting purposes across the site and is also used as basis for calculating gradated brand colors. Furthermore, it is used for links and buttons unless you set distinct colors for links and buttons.
+
+###### Use branded gray tones
+
+With this setting, the Bootstrap gray tones used throughout the theme are derived from the primary brand color instead of neutral grays. This creates a subtle color harmony across all gray elements on the page.
+
+##### Link colors
+
+###### Link brand color
+
+With this setting, you can set a dedicated brand color for links. If this setting is empty, Boost Union's primary brand color is used.
+
+###### Button brand color
+
+With this setting, you can define a dedicated brand color for primary buttons. If this setting is empty, Boost Union's primary brand color is used.
 
 ##### Bootstrap colors
 
@@ -149,6 +163,10 @@ If you have a very long sitename and want to prevent it from breaking the navbar
 ###### Navbar color
 
 With this setting, you can change the navbar color from the default light navbar to a dark one or a colored one.
+
+###### Navbar tint
+
+With this setting, you can define the color of the colored navbar. This setting is only effective if the navbar color is set to one of the 'Colored navbar' options above.
 
 #### Tab "Activity Branding"
 
@@ -180,52 +198,23 @@ With these settings, you can set additional colors for the calendar views.
 
 #### Tab "Login page"
 
+##### Login page arrangement
+
+With these settings, you can control the way how the login container is presented and positioned within the login page.
+
 ##### Login page background images
 
-###### Login page background images
+With these settings, you can set a background image like you can already in the Moodle core theme Boost.
+But in addition to that, you can set an arbitrary number of files as a background image for the login page. One of these images will be picked randomly and shown when the user visits the login page.
+Furthermore, you can set the login page background image position and a text which is displayed alongside the login background images.
 
-This setting is already available in the Moodle core theme Boost.
-However, in Boost Union you can not only add one but up to 25 files as a background image for the login page. One of these images will be picked randomly and shown when the user visits the login page.
+##### Login page branding
 
-###### Login page background image position
+With these settings, you can influence the visual branding of the login page.
 
-With this setting, you control the positioning of the login page background image within the browser window. The first value is the horizontal position, the second value is the vertical position.
+##### Login form layout
 
-###### Display text for login background images
-
-With this optional setting you can add text, e.g. a copyright notice to your uploaded login background images.
-Each line consists of the file identifier (the file name) and the text that should be displayed, separated by a pipe character. Each declaration needs to be written in a new line.
-
-For example:
-``background-image-1.jpg|Copyright: CC0|dark``
-
-As text color, you can use the values "dark" or "light".
-
-You can declare texts for an arbitrary amount of your uploaded login background images. The texts will be added only to those images that match their filename with the identifier declared in this setting.
-
-##### Login form
-
-###### Login form position
-
-With this setting, you can optimize the login form to fit to a greater variety of background images. By default, the login form is displayed centered on the login page. Alternatively, you can move it to the left or to the right of the login page to let other parts of the background image shine through. Of course, you can also change this setting if no background images are uploaded at all.
-
-###### Login form transparency
-
-With this setting, you can make the login form slightly transparent to let the background image shine through even more.
-
-###### Login container width
-
-With this setting, you can control the width of the login container. By default, the login container width is set to 500px.
-
-##### Login layout
-
-###### Login layout
-
-With this setting, you can choose how the login providers are displayed on the login page.
-
-###### Login background layout
-
-With this setting, you can choose the background layout for the login page.
+With these settings, you can choose how the login providers are displayed in the login form.
 
 ##### Login order
 
@@ -655,6 +644,10 @@ Boost Union's CSS snippets offer a possibility to add small (or slightly larger)
 
 Smart menus allow site administrators to create customizable menus that can be placed in different locations on the site, such as the site main menu, bottom mobile menu, and user menu. The menus can be configured to display different types of content, including links to other pages or resources, category links, or user profile links. On this page, you can create and manage smart menus.
 
+### Settings page "Recommendations"
+
+Boost Union performs just as well as the entire Moodle instance is configured. On this page, you find recommendations and checks for the optimal Boost Union operation. If you think a particular recommendation does not apply to your instance, you can mute it.
+
 
 Capabilities
 ------------
@@ -728,6 +721,14 @@ To ease such admin tasks as well as the crafting of SCSS Snippet PRs,
 this CLI script can be run and will re-populate the list of built-in SCSS snippets based on the list of snippets
 which exist on disk in the theme/boost_union/snippets/builtin directory.
 
+### cli/validate_scss.php
+
+This script compiles the SCSS of the Boost Union theme exactly as it would happen during a theme cache purge, but without writing any CSS to disk or storing it in any cache.
+
+This is useful for catching SCSS syntax errors in custom SCSS settings, external SCSS files or enabled SCSS snippets before purging the cache on a production system. Any compilation error is reported with its exact error message (including line number) and the script exits with a non-zero exit code. On success, the size of the generated CSS output is reported.
+
+The script replicates the full SCSS stack as it is built during a real cache purge, including pre-SCSS variables and settings, the main SCSS content, external SCSS files and all enabled SCSS snippets.
+
 
 Exceptions to our main design principle
 ---------------------------------------
@@ -773,6 +774,16 @@ There are expert settings without GUI setting which can be defined in config.php
 
 Please note that these expert settings might not be covered by Boost Union's automated tests and upstrade tests.
 If you encounter any problem with one of these expert settings, please raise an issue on https://github.com/moodle-an-hochschulen/moodle-theme_boost_union/issues.
+
+
+Checks API
+----------
+
+This plugin also introduces these additional checks to the System status page:
+
+### \theme_boost_union\check\recommendations
+
+This check fails as soon as at least one recommendations on Boost Union's recommendation page has a status different from OK, MUTED or N/A.
 
 
 Support for other companion plugins
@@ -827,6 +838,9 @@ Having said that, here's the order how all the SCSS code is added to the SCSS st
 3. `theme_boost_union` > `get_pre_scss()`:
    * Adds the Boost Union Pre SCSS from disk\
      (which is located on `/theme/boost_union/scss/boost_union/pre.scss` and which is empty currently)
+   * If we are on Moodle Workplace™:\
+     * Adds the Boost Union MWP Pre SCSS from disk\
+       (which is located on `/local/boost_union_mwp/scss/pre.scss`)
    * Sets several SCSS variables based on Boost Union or Boost Union flavour settings
    * Adds the Boost Union external Pre SCSS\
      (which is set on `/admin/settings.php?section=theme_boost_union_look#theme_boost_union_look_scss`)
@@ -834,13 +848,20 @@ Having said that, here's the order how all the SCSS code is added to the SCSS st
      (which is set within the active flavour on `/theme/boost_union/flavours/overview.php`)
 
 4. `theme_boost_union` > `get_main_scss()`:
-   * Calls the `theme_boost` > `get_main_scss()` function
-     * Adds the Boost Core Preset\
-       (which is set on `/admin/settings.php?section=themesettingboost` and defaults to the `/theme/boost/scss/preset/default.scss` file).
-       With this preset, the FontAwesome library, the Bootstrap library and all the Moodle core stylings are added which means that this preset is the place where all the Moodle core style is added.
+   * If we are on Moodle LMS:
+     * Calls the `theme_boost` > `get_main_scss()` function
+       * Adds the Boost Core Preset\
+         (which is set on `/admin/settings.php?section=themesettingboost` and defaults to the `/theme/boost/scss/preset/default.scss` file).
+         With this preset, the FontAwesome library, the Bootstrap library and all the Moodle core stylings are added which means that this preset is the place where all the Moodle core style is added.
+   * If we are on Moodle Workplace™:\
+     * Calls the `theme_workplace` > `get_main_scss()` function
+       From this parent theme, the FontAwesome library, the Bootstrap library and all the Moodle core and MWP stylings are added which means that this preset is the place where all the Moodle core style is added.
    * Adds the Boost Union Post SCSS from disk\
      (which is located on `/theme/boost_union/scss/boost_union/post.scss`)
      This file holds all the Boost Union specific SCSS code which can be added to the stack without being dependent on specific configurations like configured colors or sizes.
+   * If we are on Moodle Workplace™:\
+     * Adds the Boost Union MWP Post SCSS from disk\
+       (which is located on `/local/boost_union_mwp/scss/post.scss`)
    * Adds the Boost Union external SCSS\
      (which is set on `/admin/settings.php?section=theme_boost_union_look#theme_boost_union_look_scss`)
    * Adds the Boost Union SCSS snippets\
@@ -854,6 +875,9 @@ Having said that, here's the order how all the SCSS code is added to the SCSS st
 
 6. `theme_boost_union` > `get_extra_scss()`:
    * Overrides / enhances the background images which have been set before
+   * If we are on Moodle Workplace™:\
+     * Adds the MWP tenant branding Custom SCSS\
+       (which is set within the active tenant on `/admin/tool/tenant/index.php`)
    * Adds the Boost Union flavour Post SCSS\
      (which is set within the active flavour on `/theme/boost_union/flavours/overview.php`)
    * Adds the Boost Union features' SCSS.
@@ -925,6 +949,16 @@ This plugin has not been tested with Moodle's support for right-to-left (RTL) la
 If you want to use this plugin with a RTL language and it doesn't work as-is, you are free to send us a pull request on Github with modifications.
 
 
+Moodle Workplace™ support
+-------------------------
+
+This theme is installable on [Moodle Workplace™](https://moodle.com/products/workplace), but will lack essential Moodle Workplace™ widgets and won't have any support for tenants.
+
+But don't worry, there is the Boost Union MWP edition which provides full Moodle Workplace™ support and which is maintained by Boost Union co-maintainer bdecent. If you want to use Boost Union on Moodle Workplace™, you can find all details on the [bdecent product presentation page](https://bdecent.de/union).
+
+Technical note: The Boost Union MWP edition comes as an additional plugin which is included in / called from all relevant places in this theme's code. Thus, if you like, you can generally evaluate this theme on Moodle Workplace™ directly and order the Boost Union MWP edition as soon as you are ready to.
+
+
 Maintainers
 -----------
 
@@ -959,9 +993,11 @@ This theme is a successor of and heavily inspired by the former theme theme_boos
 Contributors
 ------------
 
-This theme is a collaboration result of multiple organisations.
+This theme is a collaboration result of numerous organisations and individuals.
 
-Moodle an Hochschulen e.V. would like to thank these main contributors (in alphabetical order of the institutions) for their work:
+Moodle an Hochschulen e.V. would like to thank these contributors for their contributions to the codebase:
+
+#### Institutional contributors (in alphabetical order)
 
 * Academic Moodle Cooperation (AMC): Ideating, Code
 * Adapta, Daniel Neis Araujo: Code
@@ -978,6 +1014,7 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * FernUniversität in Hagen, Daniel Poggenpohl: Code, Ideating
 * Friedrich Schiller University Jena: Funding, Ideating
 * Hochschule Hannover - University of Applied Sciences and Arts: Code, Funding, Ideating
+* Hochschule München - University of Applied Sciences: Funding
 * Käferfreie Software, Nina Herrmann: Code
 * lern.link GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
 * lern.link GmbH, Beata Waloszczyk: Code
@@ -988,13 +1025,13 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * Moodle.NRW / Ruhr University Bochum, Matthias Buttgereit: Code, Ideating
 * Moodle.NRW / Ruhr University Bochum, Tim Trappen: Code, Ideating
 * moodleSCHULE e.V., Ralf Krause: German translation and curation, Ideating
+* Open Source Development Network Lower Saxony: Funding, Ideating
 * Plakos GmbH, Waldemar Erdmann: Funding, Ideating
 * Ruhr University Bochum, Thorsten Bartel: Code
 * Ruhr University Bochum, Melanie Treitinger: Code, Ideating
 * RWTH Aachen, Amrita Deb Dutta: Code
 * RWTH Aachen, Josha Bartsch: Code
 * RWTH Aachen, Tim Schröder: Code
-* Self-employed: Alberto Lara Hernández: Code
 * Solent University, Mark Sharp: Code
 * ssystems GmbH, Alexander Bias: Code, Peer Review, Ideating, Funding
 * ssystems GmbH, Sangyul Cha: Code
@@ -1006,4 +1043,16 @@ Moodle an Hochschulen e.V. would like to thank these main contributors (in alpha
 * University of Lübeck, Christian Wolters: Code, Peer Review, Ideating
 * Zurich University of Applied Sciences (ZHAW): Code, Funding, Ideating
 
-Additionally, we thank all other contributors who contributed ideas, feedback and code snippets within the Github issues and pull requests as well as all contributors who contributed additional translations in AMOS, the Moodle translation tool.
+#### Individual contributors (in alphabetical order)
+
+* Alberto Lara Hernández: Code
+* Krishna Sai Rohith Vadla: Code
+* Sai Asish Yamani: Code
+
+#### Furthermore
+
+Additionally, we thank all the countless contributors who
+
+* contributed ideas, feedback and code snippets within the Github issues and pull requests,
+* participated in the Boost Union discussions in the moodle.org forums,
+* contributed additional translations in AMOS, the Moodle translation tool.

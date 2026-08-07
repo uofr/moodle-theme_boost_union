@@ -31,7 +31,7 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
     When I am on "Course 1" course homepage
     Then "#themeboostunionadvtile1" "css_element" should not exist
     When I log out
-    And I click on "Log in" "link" in the ".logininfo" "css_element"
+    And I am on login page
     Then "#themeboostunionadvtile1" "css_element" should not exist
 
   Scenario Outline: Setting: Advertisement tiles - Display the advertisement tile wrapper and the individual advertisement tile only if it is enabled
@@ -193,8 +193,7 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
     And I am on site homepage
     And Behat debugging is enabled
     And I log out
-    And I am on site homepage
-    And I follow "Log in"
+    And I am on login page
     And I log in as "teacher1"
     And I am on site homepage
     Then "//div[@id='themeboostunionadvtile1']/*[1][contains(@style, 'pluginfile.php/1/theme_boost_union/tilebackgroundimage1/0/login_bg1.png')]" "xpath_element" should exist
@@ -232,8 +231,7 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
     And I am on site homepage
     And Behat debugging is enabled
     And I log out
-    And I am on site homepage
-    And I follow "Log in"
+    And I am on login page
     And I log in as "teacher1"
     And I am on site homepage
     Then "//div[@id='themeboostunionadvtile1']/*[1][contains(@class, 'card') and contains(@style, 'background-position: <position>')]" "xpath_element" should exist
@@ -243,6 +241,34 @@ Feature: Configuring the theme_boost_union plugin for the "Advertisement tiles" 
       | position      |
       | center center |
       | left top      |
+
+  @javascript @_file_upload
+  Scenario Outline: Setting: Advertisement tiles - Define the background image size.
+    Given the following config values are set as admin:
+      | config                   | value                             | plugin            |
+      | tile1enabled             | yes                               | theme_boost_union |
+      | tile1content             | This is a test content for tile 1 | theme_boost_union |
+      | tile1backgroundimagesize | <size>                            | theme_boost_union |
+    When I log in as "admin"
+    And Behat debugging is disabled
+    And I navigate to "Appearance > Boost Union > Content" in site administration
+    And I click on "Advertisement tiles" "link" in the "#adminsettings .nav-tabs" "css_element"
+    And I upload "theme/boost_union/tests/fixtures/login_bg1.png" file to "Advertisement tile 1 background image" filemanager
+    And I press "Save changes"
+    And I am on site homepage
+    And Behat debugging is enabled
+    And I log out
+    And I am on login page
+    And I log in as "teacher1"
+    And I am on site homepage
+    Then "//div[@id='themeboostunionadvtile1']/*[1][contains(@class, 'card') and contains(@style, 'background-size: <size>')]" "xpath_element" should exist
+
+    # We do not want to burn too much CPU time by testing all available options. We just test the default value, one non-default value and one percentage value.
+    Examples:
+      | size    |
+      | auto    |
+      | cover   |
+      | 75%     |
 
   @javascript
   Scenario: Setting: Advertisement tiles - Show and hide the admin settings based on the main "Enable advertisement tile x" setting

@@ -4,6 +4,117 @@ moodle-theme_boost_union
 Changes
 -------
 
+### v4.5-r46
+
+* 2026-07-19 - Bugfix: Prevent a redirect for flavour files when users have not accepted the policy yet, resolves #684
+* 2026-07-19 - Glitch: The login link in the navbar was missing a right padding before the off-canvar button, resolves #1193
+* 2026-07-18 - Bugfix: Do not throw a TypeError if an info banner start or end date is stored as an empty string, resolves #1370
+* 2026-07-14 - Bugfix: Surround the dividers between the static page links in the footnote with equal spacing, resolves #1237
+* 2026-07-14 - Bugfix: In dynamic courses smart menus, fix second line font color on mouse over, resolves #1342
+* 2026-07-13 - Bugfix: Do not break the SCSS compilation if an activity icon purpose is still set to the deprecated 'interface' purpose, resolves #1331.
+               Please note: This change will reset any activity icon purpose which is still set to 'interface' to its original purpose.
+* 2026-07-10 - Bugfix: Do not purge theme_boost_union_touchiconsios cache before refilling it to avoid race conditions with asynchronous cache purging configurations, resolves #1361
+
+### v4.5-r45
+
+* 2026-07-08 - Bugfix: Show the icon inline with the title in dynamic courses submenus instead of on its own line, regression of #1300, resolves #1347
+* 2026-07-08 - Bugfix: Filter courses correctly in starred courses popover, resolves #1332
+* 2026-07-08 - Upstream change: Adopt changes from Moodle core in MDL-88528
+
+### v4.5-r44
+
+* 2026-06-13 - Tests: Use Behat slicing to bring Behat runtime down and reduce GHA container outages, resolves #1016
+* 2026-06-10 - Improvement: Support Bootstrap large and small buttons on the login page, resolves #1321
+* 2026-06-10 - Improvement: Support Moodle's color for the secondary outline buttons on the login page, resolves #1319
+* 2026-06-10 - Bugfix: Solve a debugging message when expanding a course category (when the Boost Union course/category listing presentation is activated), resolves #1317
+
+### v4.5-r43
+
+* 2026-06-09 - MWP: Avoid the 'class theme_boost_union\local\mwp not found' exception when upgrading the plugin, resolves #1314
+* 2026-06-08 - Cleanup: Remove unused strings from the language pack, resolves #1311
+* 2026-06-08 - Internal change: Replace $notification->set_show_closebutton(false) with the third parameter of new \core\output\notification(), resolves #1310
+* 2026-06-08 - Improvement: Align the flavours, smart menus and snippets table with the recommendations table, resolves #1309
+* 2026-06-08 - Glitch: Flavours actions tooltips were wrong, resolves #1307
+
+### v4.5-r42
+
+* 2026-06-06 - Tests: Fix PHPUnit Failure about missing SVGs for newly added FontAwesome mappings, resolves #1301
+* 2026-06-04 - Settings: Correct the 'Possible setting overrides' banners regarding the logo and the loginbackground settings
+* 2026-06-04 - MWP: Postprocess the default for the loginformposition setting, resolves #1302
+* 2026-06-03 - Improvement: Smart menus: Refine the "Number of words" option to only process the course full name, but neither the course short name nor the custom course fields.
+* 2026-06-03 - Improvement: Smart menus: Add more versatile course name presentation options to the dynamic courses, resolves #448
+* 2026-06-01 - Improvement: Improve the outer margins of the left-aligned and right-aligned login forms on smaller and of larger screens
+* 2026-06-01 - Improvement: Add a semi-left and semi-right option to the loginformposition setting, resolves #1296
+* 2026-05-31 - MWP: Add support for a Moodle Workplace™ extension for Boost Union, resolves #409
+
+### v4.5-r41
+
+* 2026-05-26 - Bugfix: Additional login background images may be not have been recognized directly after upload, resolved #1290
+* 2026-05-25 - Bugfix: Fix the default value of the courseoverviewshowcourseimages setting, resolves #1288
+* 2026-05-25 - Improvement: Use the real page layout names in the 'Additional block regions for xxx layout' setting labels as well.
+* 2026-05-25 - Improvement: Allow the admin to set the page layouts where the footnote is shown, helps to resolve #1279
+* 2026-05-24 - Improvement: Enhance recommendations to only show in the list if an action is needed, resolves #1285
+* 2026-05-24 - Improvement: Transform settings_overview.php into an admin_externalpage, resolves #1281
+
+### v4.5-r40
+
+* 2026-05-21 - Improvement: Add detail information about the current recommendation status and possible actions to the recommendation info modal, helps to resolve #1277
+* 2026-05-21 - Improvement: Add type class 'usability' and status class 'check' to the recommendations subsystem, helps to resolve #1277
+* 2026-05-21 - Improvement: Allow recommendation notifications to use arguments, helps to resolve #1277
+* 2026-05-21 - Internal change: Transform recommendation interface to a base class, helps to resolve #1277
+* 2026-05-19 - Bugfix: The loginselfregistrationshowintrosetting_desc and the loginguestshowintrosetting_desc strings described their default setting in the wrong way, resolves #1276
+* 2026-05-19 - Improvement: Add some explanation to the "Welcome back!" login brand option, resolves #1275
+
+### v4.5-r39
+
+* 2026-05-18 - Improvement: Add notifications to each of the global settings which can be overridden by flavours, resolves #1269
+* 2026-05-18 - Improvement: The flavours/styles.php file should use a per-flavour fallback stylesheet, resolves #1267
+* 2026-05-12 - Improvement: Allow the admin to further control the logo, heading, and tagline presentation on the login page, resolves #1262
+* 2026-05-12 - Improvement: Allow the admin to set the login page logo max-width and max-height as well as a margin-bottom and the horizontal alignment for the logo, resolves #1260
+* 2026-05-12 - Improvement: Add admin settings to set the button colors on the login page, resolves #1225.
+               Please note: Boost Union used to present the IDP login button with a secondary color button instead of an outline button as Moodle core does. This behaviour was hardcoded and undocumented. With the introduction of this setting, we set the default back to an outline button. Please set the IDP login button color to the presentation type of your choice during the plugin update.
+* 2026-04-11 - Internal change: Move theme_boost_union_is_active_theme() and theme_boost_union_is_active_childtheme() from locallib.php to lib.php
+* 2026-04-11 - Internal change: In the flavours edit form, use setDefault instead of setSelected.
+* 2026-05-11 - Settings: Re-arrange the login page settings as preparation for Boost Union 5.2
+* 2026-05-09 - Feature: Add a Boost Union recommendation page for admins and replace some notification boxes in the settings pages with it, resolves #1254
+* 2026-05-09 - Feature: Add a Checks API check to add the results of the Boost Union recommendations to the system status.
+
+### v4.5-r38
+
+* 2026-05-05 - Glitch: Make sure that the bottom border under the Reset user tours link in the footer is shown, resolves #1253
+* 2026-05-01 - Tests: Rephrase some smart menu scenarios as preparation for Boost Union 5.2
+* 2026-05-01 - Tests: Fix a glitch in the mobile scss branding scenario as preparation for Boost Union 5.2
+* 2026-05-01 - Tests: Rephrase the calendar branding scenarios as preparation for Boost Union 5.2
+* 2026-05-01 - Internal change: Compose self enrolment instance for the showhintcourseselfenrol setting differently as preparation for Boost Union 5.2
+* 2026-05-01 - Tests: Do not use the 'I am on the "Acceptance test site" "Course" page' steps anymore as preparation for Boost Union 5.2
+* 2026-05-01 - Tests: Use the 'I navigate to site home settings' step throughout the whole code base as preparation for Boost Union 5.2
+* 2026-05-01 - Tests: Use the 'I am on login page' step throughout the whole code base as preparation for Boost Union 5.2
+* 2026-05-01 - Improvement: Add setting for background-size to advertisement tiles, resolves #1195
+* 2026-04-30 - Cleanup: Drop overwritten templates/theme_boost/drawer.mustache, resolves #1246
+
+### v4.5-r37
+
+* 2026-04-26 - Feature: Allow not only internal WAYF services based on the Shibboleth config, but also based on JavaScript code, resolves #1230
+* 2026-04-08 - Improvement: Add dedicated color picker for setting the navbar color, resolves #1224
+* 2026-04-08 - Improvement: Filter additionalhtmlfooter as does Moodle core from Moodle 5.2 on (MDL-88210 / MDL-85498), resolves #847
+* 2026-04-08 - Bugfix: The login page label settings lacked a hide_if, resolves #1229
+* 2026-04-08 - Feature: Setting to split multiple IDP login buttons into individual tabs / accordeon elements / vertical sections, resolves #1130
+* 2026-04-08 - Feature: Setting to show Shibboleth internal WAYF (IdP list) on the main login page instead of the default Shibboleth button, resolves #1130
+* 2026-04-08 - Improvement: Add admin setting to tint grey colors, resolves #1220
+
+### v4.5-r36
+
+* 2026-04-07 - Tests: Fix pending steps on Moodle 4.5, resolves #1222
+* 2026-04-07 - Tests: Add a test to view a user tour
+* 2026-04-03 - Improvement: Add CLI script to validate the SCSS compilation and to see SCSS compilation errors, resolves #1217
+* 2026-04-03 - Bugfix: SCSS could not be compiled on 4.5 after backporting the internal variable name change, resolves #1217
+* 2026-03-31 - Improvement: Allow the footnote text to be set in flavours as well, resolves #1216
+* 2026-03-31 - Internal change: Prefix all custom Boost Union SCSS variables which are set by Boost Union settings with 'bu-' for the sake of consistency
+* 2026-03-30 - Feature: Add admin settings to tint links and buttons separate from the primary brand color, resolves #709
+* 2026-03-30 - Improvement: SmartMenus: Improve mailto menu items with predefined email content, resolves #1122
+* 2026-03-28 - Tests: Fix a broken test related to breadcrumbs, resolves #1207
+* 2026-03-24 - Improvement: Remove the 25 images limit for login background images, resolves #815
+
 ### v4.5-r35
 
 * 2026-03-08 - Improvement: Add additional block regions on the 'mycourses' page layout to show sticky blocks at least, resolves #1141

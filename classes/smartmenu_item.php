@@ -186,6 +186,12 @@ class smartmenu_item {
     const BACKGROUND_OPACITY = 5;
 
     /**
+     * Display the course fullname as title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_FULLNAME = 0;
+
+    /**
      * Display the course shortname as title in menu for dynamic menu item.
      *
      * @var int
@@ -193,10 +199,40 @@ class smartmenu_item {
     const FIELD_SHORTNAME = 1;
 
     /**
-     * Display the course fullname as title in menu for dynamic menu item.
+     * Display the course fullname with shortname in brackets as title in menu for dynamic menu item.
      * @var int
      */
-    const FIELD_FULLNAME = 0;
+    const FIELD_FULLNAME_SHORTNAME = 2;
+
+    /**
+     * Display the course shortname with fullname in brackets as title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_SHORTNAME_FULLNAME = 3;
+
+    /**
+     * Display a custom course field as title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_CUSTOMFIELD = 4;
+
+    /**
+     * Display the course full name with a custom course field value in brackets as title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_FULLNAME_CUSTOMFIELD = 5;
+
+    /**
+     * Display the course short name with a custom course field value in brackets as title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_SHORTNAME_CUSTOMFIELD = 6;
+
+    /**
+     * Do not display any title in menu for dynamic menu item.
+     * @var int
+     */
+    const FIELD_NONE = -1;
 
     /**
      * Sort the course list alphabetically by fullname ascending for dynamic menu item.
@@ -632,6 +668,97 @@ class smartmenu_item {
     }
 
     /**
+     * Get the course display name based on the configured display field.
+     *
+     * @param \stdClass $record The course record.
+     * @return string The course name to display.
+     */
+    protected function get_course_displayname($record): string {
+        // Get the text count for shortening the course name if configured.
+        $textcount = (int) ($this->item->textcount ?? 0);
+
+        // Determine the display name based on the configured display field.
+        switch ($this->item->displayfield) {
+            case self::FIELD_SHORTNAME:
+                return $record->shortname;
+            case self::FIELD_FULLNAME_SHORTNAME:
+                $fullname = $textcount ? $this->shorten_words($record->fullname, $textcount) : $record->fullname;
+                return $fullname . ' (' . $record->shortname . ')';
+            case self::FIELD_SHORTNAME_FULLNAME:
+                $fullname = $textcount ? $this->shorten_words($record->fullname, $textcount) : $record->fullname;
+                return $record->shortname . ' (' . $fullname . ')';
+            case self::FIELD_CUSTOMFIELD:
+                return $this->get_course_customfield_value($record, (int) ($this->item->displayfieldcustomfield ?? 0));
+            case self::FIELD_FULLNAME_CUSTOMFIELD:
+                $customvalue = $this->get_course_customfield_value($record, (int) ($this->item->displayfieldcustomfield ?? 0));
+                $fullname = $textcount ? $this->shorten_words($record->fullname, $textcount) : $record->fullname;
+                return $customvalue !== '' ? $fullname . ' (' . $customvalue . ')' : $fullname;
+            case self::FIELD_SHORTNAME_CUSTOMFIELD:
+                $customvalue = $this->get_course_customfield_value($record, (int) ($this->item->displayfieldcustomfield ?? 0));
+                return $customvalue !== '' ? $record->shortname . ' (' . $customvalue . ')' : $record->shortname;
+            case self::FIELD_FULLNAME:
+            default:
+                return $textcount ? $this->shorten_words($record->fullname, $textcount) : $record->fullname;
+        }
+    }
+
+    /**
+     * Get the second line text for a course in the dynamic menu item.
+     *
+     * @param \stdClass $record The course record.
+     * @return string The second line text, or empty string if not configured.
+     */
+    protected function get_course_displaynamesecond($record): string {
+        // If the second display field is not configured, return an empty string.
+        if (
+            !isset($this->item->displayfieldsecond) || $this->item->displayfieldsecond === null
+                || $this->item->displayfieldsecond == self::FIELD_NONE
+        ) {
+            return '';
+        }
+
+        // Get the text count for shortening the second line text if configured.
+        $textcountsecond = (int) ($this->item->textcountsecond ?? 0);
+
+        // Determine the second line text based on the configured second display field.
+        switch ($this->item->displayfieldsecond) {
+            case self::FIELD_FULLNAME:
+                return $textcountsecond ? $this->shorten_words($record->fullname, $textcountsecond) : $record->fullname;
+            case self::FIELD_SHORTNAME:
+                return $record->shortname;
+            case self::FIELD_CUSTOMFIELD:
+                return $this->get_course_customfield_value($record, (int) ($this->item->displayfieldsecondcustomfield ?? 0));
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Get the custom field value for a course menu item.
+     *
+     * @param \stdClass $record The course record.
+     * @param int $fieldid The ID of the custom field to retrieve.
+     * @return string The custom field value, or empty string if not found.
+     */
+    protected function get_course_customfield_value($record, int $fieldid): string {
+        // If the custom field ID is not configured, return an empty string.
+        if (empty($fieldid)) {
+            return '';
+        }
+
+        // Fetch the custom field value for the course.
+        $handler = \core_customfield\handler::get_handler('core_course', 'course');
+        $customfields = $handler->get_instance_data($record->id);
+        foreach ($customfields as $data) {
+            if ($data->get_field()->get('id') == $fieldid) {
+                $value = $data->export_value();
+                return $value !== null ? (string) $value : '';
+            }
+        }
+        return '';
+    }
+
+    /**
      * Returns the URL of the image associated with the given course ID,
      * or a placeholder image URL if no image is associated with the course.
      *
@@ -699,13 +826,115 @@ class smartmenu_item {
     }
 
     /**
+     * Split a comma-separated list of email addresses (optional whitespace around commas).
+     *
+     * @param string|null $raw The raw comma-separated string of email addresses.
+     * @return string[] An array of trimmed email addresses, or an empty array if the input is null or empty.
+     */
+    public static function parse_mailto_address_list(?string $raw): array {
+        // If the input is null or empty, return an empty array.
+        if ($raw === null || trim($raw) === '') {
+            return [];
+        }
+
+        // Split the string by commas, allowing for optional whitespace around the commas.
+        $parts = preg_split('/\s*,\s*/', $raw, -1, PREG_SPLIT_NO_EMPTY);
+
+        // Trim each part and filter out any empty strings that may result from consecutive commas or leading/trailing commas.
+        $addresses = [];
+        foreach ($parts as $part) {
+            $trimmed = trim($part);
+            if ($trimmed !== '') {
+                $addresses[] = $trimmed;
+            }
+        }
+
+        // Return the array of email addresses.
+        return $addresses;
+    }
+
+    /**
+     * Check whether every address in the list is valid for Moodle.
+     *
+     * @param string[] $addresses The list of email addresses to validate.
+     * @return bool True if all addresses are valid, false otherwise.
+     */
+    public static function validate_mailto_address_list(array $addresses): bool {
+        // Validate each address using Moodle's validate_email function.
+        foreach ($addresses as $addr) {
+            // If any address is invalid, return false.
+            if (!validate_email($addr)) {
+                return false;
+            }
+        }
+
+        // If we get here, all addresses are valid.
+        return true;
+    }
+
+    /**
+     * Build a mailto: URL (RFC 6068) with percent-encoded subject, body, cc, and bcc header fields.
+     *
+     * @param string $to Comma-separated To addresses
+     * @param string|null $cc Comma-separated Cc addresses
+     * @param string|null $bcc Comma-separated Bcc addresses
+     * @param string|null $subject Plain subject (encoded when building the URL)
+     * @param string|null $body Plain body (encoded when building the URL)
+     * @return string
+     */
+    public static function build_mailto_href(
+        string $to,
+        ?string $cc = null,
+        ?string $bcc = null,
+        ?string $subject = null,
+        ?string $body = null
+    ): string {
+        // Build the to part.
+        $toaddrs = self::parse_mailto_address_list($to);
+        $topart = implode(',', $toaddrs);
+
+        // Build the query part with cc, bcc, subject and body.
+        $queryparts = [];
+        $ccaddrs = self::parse_mailto_address_list($cc);
+        if (!empty($ccaddrs)) {
+            $queryparts[] = 'cc=' . rawurlencode(implode(',', $ccaddrs));
+        }
+        $bccaddrs = self::parse_mailto_address_list($bcc);
+        if (!empty($bccaddrs)) {
+            $queryparts[] = 'bcc=' . rawurlencode(implode(',', $bccaddrs));
+        }
+        if ($subject !== null && $subject !== '') {
+            $queryparts[] = 'subject=' . rawurlencode($subject);
+        }
+        if ($body !== null && $body !== '') {
+            $queryparts[] = 'body=' . rawurlencode($body);
+        }
+
+        // Combine the to part and query part to build the mailto URL.
+        $mailto = 'mailto:' . $topart;
+        if (!empty($queryparts)) {
+            $mailto .= '?' . implode('&', $queryparts);
+        }
+
+        // Return the built mailto URL.
+        return $mailto;
+    }
+
+    /**
      * Generate the item as mailto menu item.
      *
      * @return string
      */
     protected function generate_mailto_item() {
 
-        $mailto = 'mailto:' . $this->item->email;
+        // Build the mailto link from the item data.
+        $mailto = self::build_mailto_href(
+            $this->item->email,
+            $this->item->email_cc ?? null,
+            $this->item->email_bcc ?? null,
+            $this->item->email_subject ?? null,
+            $this->item->email_body ?? null
+        );
 
         return $this->generate_node_data(
             $this->item->title, // Title.
@@ -792,9 +1021,8 @@ class smartmenu_item {
             // Get the course image from overview files.
             $itemimage = $this->get_course_image($record);
             // Generate the navigation node for this course and add the node to items list.
-            $coursename = ($this->item->displayfield == self::FIELD_SHORTNAME) ? $record->shortname : $record->fullname;
-            // Short the course text name. used custom end (2) dots instead of three dots to display more words from coursenames.
-            $coursename = ($this->item->textcount) ? $this->shorten_words($coursename, $this->item->textcount) : $coursename;
+            $coursename = $this->get_course_displayname($record);
+            $coursenamesecond = $this->get_course_displaynamesecond($record);
             // Store the string which should be used for sorting within the item.
             switch ($this->item->listsort) {
                 case self::LISTSORT_FULLNAME_ASC:
@@ -837,7 +1065,8 @@ class smartmenu_item {
                 [],
                 $itemimage,
                 $sortdata,
-                $itemclasses
+                $itemclasses,
+                $coursenamesecond
             );
         }
 
@@ -1345,6 +1574,7 @@ class smartmenu_item {
      * @param string $itemimage Card image url for item.
      * @param array $sortdata The string to be used for sorting the items.
      * @param array $itemclasses List of additional css classes for the menu item node.
+     * @param string|null $secondline The second line text for the item, used for dynamic course menu items.
      *
      * @return array An associative array of node data for the item.
      */
@@ -1358,12 +1588,37 @@ class smartmenu_item {
         $children = [],
         $itemimage = '',
         $sortdata = [],
-        $itemclasses = []
+        $itemclasses = [],
+        $secondline = null
     ) {
 
         global $OUTPUT;
 
-        $title = format_string($title);
+        // Format the title string.
+        $title = \html_writer::tag(
+            'span',
+            format_string($title),
+            ['class' => 'boost-union-smartmenu-firstline']
+        );
+
+        // Append the second line to the title if configured.
+        if (!empty($secondline)) {
+            // The second line is dimmed with an opacity instead of a muted text color as the latter would set a fixed
+            // color which would not invert together with the menu item's color when the item is hovered.
+            $title .= \html_writer::tag(
+                'span',
+                format_string($secondline),
+                ['class' => 'boost-union-smartmenu-secondline small opacity-75']
+            );
+        }
+
+        // Wrap the title in a wrapper (to allow it to be positioned in one piece near the icon).
+        $title = \html_writer::tag(
+            'div',
+            $title,
+            ['class' => 'd-flex flex-column']
+        );
+
         // Icon not shown in moodle 4.x, added the icon with text.
         if ($this->item->menuicon) {
             $icon = explode(':', $this->item->menuicon);
@@ -1374,7 +1629,10 @@ class smartmenu_item {
 
             switch ($this->item->display) {
                 case self::DISPLAY_SHOWTITLEICON:
-                    $title = $icon . $title;
+                    // Place the icon next to the (possibly multi-line) title on the same line.
+                    // As the title is wrapped in a block-level element (to stack the first and second line),
+                    // simply prepending the inline icon would push the title onto its own line.
+                    $title = html_writer::tag('div', $icon . $title, ['class' => 'd-flex align-items-center']);
                     break;
                 case self::DISPLAY_HIDETITLE:
                     $title = $icon;
@@ -1705,7 +1963,43 @@ class smartmenu_item {
         return [
             self::FIELD_FULLNAME => get_string('smartmenusmenuitemdisplayfieldcoursefullname', 'theme_boost_union'),
             self::FIELD_SHORTNAME => get_string('smartmenusmenuitemdisplayfieldcourseshortname', 'theme_boost_union'),
+            self::FIELD_CUSTOMFIELD => get_string('smartmenusmenuitemdisplayfieldcustomfield', 'theme_boost_union'),
+            self::FIELD_FULLNAME_SHORTNAME => get_string('smartmenusmenuitemdisplayfieldfullnameshortname', 'theme_boost_union'),
+            self::FIELD_SHORTNAME_FULLNAME => get_string('smartmenusmenuitemdisplayfieldshortnamefullname', 'theme_boost_union'),
+            self::FIELD_FULLNAME_CUSTOMFIELD =>
+                    get_string('smartmenusmenuitemdisplayfieldfullnamecustomfield', 'theme_boost_union'),
+            self::FIELD_SHORTNAME_CUSTOMFIELD =>
+                    get_string('smartmenusmenuitemdisplayfieldshortnamecustomfield', 'theme_boost_union'),
         ];
+    }
+
+    /**
+     * Return the options for the second line setting.
+     *
+     * @return array
+     * @throws \coding_exception
+     */
+    public static function get_displayfieldsecond_options(): array {
+        return [
+            self::FIELD_NONE => get_string('smartmenusmenuitemdisplayfieldsecondnone', 'theme_boost_union'),
+            self::FIELD_FULLNAME => get_string('smartmenusmenuitemdisplayfieldcoursefullname', 'theme_boost_union'),
+            self::FIELD_SHORTNAME => get_string('smartmenusmenuitemdisplayfieldcourseshortname', 'theme_boost_union'),
+            self::FIELD_CUSTOMFIELD => get_string('smartmenusmenuitemdisplayfieldcustomfield', 'theme_boost_union'),
+        ];
+    }
+
+    /**
+     * Get the available course custom fields as options for the second line selector.
+     *
+     * @return array The options array with id => name.
+     */
+    public static function get_customfield_options(): array {
+        $options = [0 => get_string('choosedots')];
+        $handler = \core_customfield\handler::get_handler('core_course', 'course');
+        foreach ($handler->get_fields() as $field) {
+            $options[$field->get('id')] = $field->get('name');
+        }
+        return $options;
     }
 
     /**
@@ -1765,6 +2059,17 @@ class smartmenu_item {
         global $DB;
 
         $record = $formdata;
+
+        // Do not persist mailto-only fields for other menu item types.
+        // While the values should be stored as null by default for other types as well,
+        // this is a measure to ensure that no mailto values are stored for other types in any case..
+        if ($record->type != self::TYPEMAILTO) {
+            $record->email = null;
+            $record->email_cc = null;
+            $record->email_bcc = null;
+            $record->email_subject = null;
+            $record->email_body = null;
+        }
 
         // Convert the multiple valueable item types to JSON.
         $record->category = json_encode($formdata->category);

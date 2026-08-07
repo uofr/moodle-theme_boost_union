@@ -109,11 +109,40 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->hideIf('url', 'type', 'neq', smartmenu_item::TYPESTATIC);
         $mform->addHelpButton('url', 'smartmenusmenuitemurl', 'theme_boost_union');
 
-        // Add menu item email (for the mailto menu item type) as input element.
+        // Add menu item email to (for the mailto menu item type) as input element.
         $mform->addElement('text', 'email', get_string('smartmenusmenuitememail', 'theme_boost_union'));
-        $mform->setType('email', PARAM_EMAIL);
+        $mform->setType('email', PARAM_TEXT);
         $mform->hideIf('email', 'type', 'neq', smartmenu_item::TYPEMAILTO);
         $mform->addHelpButton('email', 'smartmenusmenuitememail', 'theme_boost_union');
+
+        // Add menu item email cc (for the mailto menu item type) as input element.
+        $mform->addElement('text', 'email_cc', get_string('smartmenusmenuitememail_cc', 'theme_boost_union'));
+        $mform->setType('email_cc', PARAM_TEXT);
+        $mform->hideIf('email_cc', 'type', 'neq', smartmenu_item::TYPEMAILTO);
+        $mform->addHelpButton('email_cc', 'smartmenusmenuitememail_cc', 'theme_boost_union');
+
+        // Add menu item email bcc (for the mailto menu item type) as input element.
+        $mform->addElement('text', 'email_bcc', get_string('smartmenusmenuitememail_bcc', 'theme_boost_union'));
+        $mform->setType('email_bcc', PARAM_TEXT);
+        $mform->hideIf('email_bcc', 'type', 'neq', smartmenu_item::TYPEMAILTO);
+        $mform->addHelpButton('email_bcc', 'smartmenusmenuitememail_bcc', 'theme_boost_union');
+
+        // Add menu item email subject (for the mailto menu item type) as input element.
+        $mform->addElement('text', 'email_subject', get_string('smartmenusmenuitememail_subject', 'theme_boost_union'));
+        $mform->setType('email_subject', PARAM_TEXT);
+        $mform->hideIf('email_subject', 'type', 'neq', smartmenu_item::TYPEMAILTO);
+        $mform->addHelpButton('email_subject', 'smartmenusmenuitememail_subject', 'theme_boost_union');
+
+        // Add menu item email body (for the mailto menu item type) as textarea element.
+        $mform->addElement(
+            'textarea',
+            'email_body',
+            get_string('smartmenusmenuitememail_body', 'theme_boost_union'),
+            ['rows' => 5, 'cols' => 60]
+        );
+        $mform->setType('email_body', PARAM_TEXT);
+        $mform->hideIf('email_body', 'type', 'neq', smartmenu_item::TYPEMAILTO);
+        $mform->addHelpButton('email_body', 'smartmenusmenuitememail_body', 'theme_boost_union');
 
         // Add mode as select element.
         $modeoptions = smartmenu_item::get_mode_options();
@@ -415,7 +444,26 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->hideIf('displayfield', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
         $mform->addHelpButton('displayfield', 'smartmenusmenuitemdisplayfield', 'theme_boost_union');
 
-        // Add number of words (for the dynamic courses menu item type) as input element.
+        // Add custom field selector for first line (for the dynamic courses menu item type).
+        $customfieldoptionsfirst = smartmenu_item::get_customfield_options();
+        $mform->addElement(
+            'select',
+            'displayfieldcustomfield',
+            get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union') . ': ' .
+            get_string('smartmenusmenuitemdisplayfieldcustomfieldfirst', 'theme_boost_union'),
+            $customfieldoptionsfirst
+        );
+        $mform->setType('displayfieldcustomfield', PARAM_INT);
+        $mform->hideIf('displayfieldcustomfield', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->hideIf('displayfieldcustomfield', 'displayfield', 'in', [
+            smartmenu_item::FIELD_FULLNAME,
+            smartmenu_item::FIELD_SHORTNAME,
+            smartmenu_item::FIELD_FULLNAME_SHORTNAME,
+            smartmenu_item::FIELD_SHORTNAME_FULLNAME,
+        ]);
+        $mform->addHelpButton('displayfieldcustomfield', 'smartmenusmenuitemdisplayfieldcustomfieldfirst', 'theme_boost_union');
+
+        // Add number of words for first line (for the dynamic courses menu item type) as input element.
         $mform->addElement(
             'text',
             'textcount',
@@ -425,7 +473,61 @@ class smartmenu_item_edit_form extends \moodleform {
         $mform->setType('textcount', PARAM_INT);
         $mform->addRule('textcount', get_string('err_numeric', 'form'), 'numeric', null, 'client');
         $mform->hideIf('textcount', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->hideIf('textcount', 'displayfield', 'in', [
+            smartmenu_item::FIELD_SHORTNAME,
+            smartmenu_item::FIELD_CUSTOMFIELD,
+            smartmenu_item::FIELD_SHORTNAME_CUSTOMFIELD,
+        ]);
         $mform->addHelpButton('textcount', 'smartmenusmenuitemtextcount', 'theme_boost_union');
+
+        // Add second line presentation (for the dynamic courses menu item type) as select element.
+        $displayfieldsecondoptions = smartmenu_item::get_displayfieldsecond_options();
+        $mform->addElement(
+            'select',
+            'displayfieldsecond',
+            get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union') . ': ' .
+            get_string('smartmenusmenuitemdisplayfieldsecond', 'theme_boost_union'),
+            $displayfieldsecondoptions
+        );
+        $mform->setDefault('displayfieldsecond', smartmenu_item::FIELD_NONE);
+        $mform->setType('displayfieldsecond', PARAM_INT);
+        $mform->hideIf('displayfieldsecond', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->addHelpButton('displayfieldsecond', 'smartmenusmenuitemdisplayfieldsecond', 'theme_boost_union');
+
+        // Add custom field selector for second line (for the dynamic courses menu item type).
+        $customfieldoptions = smartmenu_item::get_customfield_options();
+        $mform->addElement(
+            'select',
+            'displayfieldsecondcustomfield',
+            get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union') . ': ' .
+            get_string('smartmenusmenuitemdisplayfieldcustomfieldsecond', 'theme_boost_union'),
+            $customfieldoptions
+        );
+        $mform->setType('displayfieldsecondcustomfield', PARAM_INT);
+        $mform->hideIf('displayfieldsecondcustomfield', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->hideIf('displayfieldsecondcustomfield', 'displayfieldsecond', 'neq', smartmenu_item::FIELD_CUSTOMFIELD);
+        $mform->addHelpButton(
+            'displayfieldsecondcustomfield',
+            'smartmenusmenuitemdisplayfieldcustomfieldsecond',
+            'theme_boost_union'
+        );
+
+        // Add number of words for second line (for the dynamic courses menu item type) as input element.
+        $mform->addElement(
+            'text',
+            'textcountsecond',
+            get_string('smartmenusmenuitemtypedynamiccourses', 'theme_boost_union') . ': ' .
+            get_string('smartmenusmenuitemtextcountsecond', 'theme_boost_union')
+        );
+        $mform->setType('textcountsecond', PARAM_INT);
+        $mform->addRule('textcountsecond', get_string('err_numeric', 'form'), 'numeric', null, 'client');
+        $mform->hideIf('textcountsecond', 'type', 'neq', smartmenu_item::TYPEDYNAMIC);
+        $mform->hideIf('textcountsecond', 'displayfieldsecond', 'in', [
+            smartmenu_item::FIELD_NONE,
+            smartmenu_item::FIELD_SHORTNAME,
+            smartmenu_item::FIELD_CUSTOMFIELD,
+        ]);
+        $mform->addHelpButton('textcountsecond', 'smartmenusmenuitemtextcount', 'theme_boost_union');
 
         // If the menu is configured to be presented as cards.
         if (isset($this->_customdata['menutype']) && $this->_customdata['menutype'] == smartmenu::TYPE_CARD) {
@@ -710,10 +812,22 @@ class smartmenu_item_edit_form extends \moodleform {
             }
         }
 
+        // If the menu item type is mailto.
         if ($data['type'] == smartmenu_item::TYPEMAILTO) {
-            // Verify that the email field is not empty.
-            if (empty($data['email'])) {
+            // Verify that the email to field is not empty and contains valid email addresses.
+            $toaddresses = smartmenu_item::parse_mailto_address_list($data['email'] ?? '');
+            if (empty($toaddresses)) {
                 $errors['email'] = get_string('smartmenusmenuitememail_required', 'theme_boost_union');
+            } else if (!smartmenu_item::validate_mailto_address_list($toaddresses)) {
+                $errors['email'] = get_string('smartmenusmenuitememail_invalid', 'theme_boost_union');
+            }
+
+            // Verify that the email cc and bcc fields, if not empty, contain valid email addresses.
+            foreach (['email_cc', 'email_bcc'] as $field) {
+                $list = smartmenu_item::parse_mailto_address_list($data[$field] ?? '');
+                if (!empty($list) && !smartmenu_item::validate_mailto_address_list($list)) {
+                    $errors[$field] = get_string('smartmenusmenuitememail_invalid', 'theme_boost_union');
+                }
             }
         }
 

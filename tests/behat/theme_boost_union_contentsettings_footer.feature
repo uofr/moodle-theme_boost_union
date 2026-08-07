@@ -39,12 +39,33 @@ Feature: Configuring the theme_boost_union plugin for the "Footer" tab on the "C
     And I should not see "<span lang=\"en\" class=\"multilang\">Footnote</span>" in the "#footnote" "css_element"
     And I should not see "FootnoteFussnote" in the "#footnote" "css_element"
     And I log out
-    And I follow "Log in"
+    And I am on login page
     Then "#footnote" "css_element" should exist
     And ".text_to_html" "css_element" should not exist in the "#footnote" "css_element"
     And I should see "Footnote" in the "#footnote" "css_element"
     And I should not see "<span lang=\"en\" class=\"multilang\">Footnote</span>" in the "#footnote" "css_element"
     And I should not see "FootnoteFussnote" in the "#footnote" "css_element"
+
+  Scenario Outline: Setting: Page layouts for footnote - Set the layouts
+    Given the following config values are set as admin:
+      | config          | value         | plugin            |
+      | footnote        | Footnote text | theme_boost_union |
+      | footnotelayouts | <layouts>     | theme_boost_union |
+    When I log in as "admin"
+    And I follow "Dashboard"
+    Then "#footnote" "css_element" <dashboardshouldornot> exist
+    And I am on "Course 1" course homepage
+    Then "#footnote" "css_element" <courseshouldornot> exist
+    And I log out
+    And I am on login page
+    Then "#footnote" "css_element" <loginshouldornot> exist
+
+    # We do not want to burn too much CPU time by testing all available layouts. We just test three important layouts.
+    Examples:
+      | layouts                  | dashboardshouldornot | courseshouldornot | loginshouldornot |
+      | mydashboard              | should               | should not        | should not       |
+      | login                    | should not           | should not        | should           |
+      | mydashboard,login,course | should               | should            | should           |
 
   @javascript
   Scenario Outline: Setting: Footer - Enable and disable the footer button
@@ -63,7 +84,7 @@ Feature: Configuring the theme_boost_union plugin for the "Footer" tab on the "C
     And I change viewport size to "mobile"
     Then ".btn-footer-popover" "css_element" <mobileshouldornot> <visibleorexist>
     And I log out
-    And I follow "Log in"
+    And I am on login page
     And I change viewport size to "large"
     Then ".btn-footer-popover" "css_element" <desktopshouldornot> <visibleorexist>
     And I change viewport size to "mobile"
@@ -406,3 +427,27 @@ Feature: Configuring the theme_boost_union plugin for the "Footer" tab on the "C
       | value | shouldornot |
       | no    | should      |
       | yes   | should not  |
+
+  @javascript
+  Scenario: View a user tour under Boost Union
+    Given I log in as "admin"
+    And I navigate to "Appearance > User tours" in site administration
+    And I click on "Enable" "link" in the "Course editing" "table_row"
+    And I click on "//a[@title=\"Edit\"]" "xpath_element" in the "Course editing" "table_row"
+    And I set the field "id_filter_theme" to "Boost Union"
+    And I press "Save changes"
+    When I am on the "C1" "Course" page logged in as "teacher1"
+    Then I should see "Reset user tour on this page"
+
+  @javascript
+  Scenario: Support multilang additionalhtmlfooter content (backport of MDL-88210 / MDL-85498)
+    Given the following config values are set as admin:
+      | config               | value                                                                                                                                                                                |
+      | additionalhtmlfooter | <div id="custom-footer-html"><p><span lang="en" class="multilang">Custom Footer Content</span><span lang="de" class="multilang">Benutzerdefinierter Fußzeileninhalt</span></p></div> |
+    And the "multilang" filter is "on"
+    And the "multilang" filter applies to "content and headings"
+    And I log in as "admin"
+    When I am on homepage
+    And I click on ".btn-footer-popover" "css_element" in the "#page-footer" "css_element"
+    Then I should see "Custom Footer Content" in the ".popover-body" "css_element"
+    But I should not see "Benutzerdefinierter Fußzeileninhalt" in the ".popover-body" "css_element"

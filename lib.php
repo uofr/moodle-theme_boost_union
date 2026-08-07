@@ -52,6 +52,13 @@ define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COUNT', 12);
 define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_COLUMN_COUNT', 4);
 define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_FRONTPAGEPOSITION_BEFORE', 1);
 define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_FRONTPAGEPOSITION_AFTER', 2);
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_AUTO', 'auto');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_CONTAIN', 'contain');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_COVER', 'cover');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_90PERCENT', '90%');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_75PERCENT', '75%');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_50PERCENT', '50%');
+define('THEME_BOOST_UNION_SETTING_ADVERTISEMENTTILES_BACKGROUNDSIZE_25PERCENT', '25%');
 
 define('THEME_BOOST_UNION_SETTING_SLIDES_COUNT', 6);
 define('THEME_BOOST_UNION_SETTING_SLIDER_ANIMATIONTYPE_NONE', 0);
@@ -106,18 +113,40 @@ define('THEME_BOOST_UNION_SETTING_LINKTARGET_NEWTAB', 'new');
 define('THEME_BOOST_UNION_SETTING_LOGINFORMPOS_CENTER', 'center');
 define('THEME_BOOST_UNION_SETTING_LOGINFORMPOS_LEFT', 'left');
 define('THEME_BOOST_UNION_SETTING_LOGINFORMPOS_RIGHT', 'right');
+define('THEME_BOOST_UNION_SETTING_LOGINFORMPOS_SEMILEFT', 'semileft');
+define('THEME_BOOST_UNION_SETTING_LOGINFORMPOS_SEMIRIGHT', 'semiright');
 
 define('THEME_BOOST_UNION_SETTING_LOGINLAYOUT_VERTICAL', 'vertical');
 define('THEME_BOOST_UNION_SETTING_LOGINLAYOUT_TABS', 'tabs');
 define('THEME_BOOST_UNION_SETTING_LOGINLAYOUT_ACCORDION', 'accordion');
+
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_LOGOHEADINGTAGLINE', 'logoheadingtagline');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_LOGOOTHERWISEHEADING', 'logootherwiseheading');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_LOGOHEADING', 'logoheading');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_LOGOTAGLINE', 'logotagline');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_HEADINGTAGLINE', 'headingtagline');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_HEADING', 'heading');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGEBRAND_TAGLINE', 'tagline');
+
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_LOGINTOFULLNAME', 'logintofullname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_LOGINTOSHORTNAME', 'logintoshortname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_WELCOMETOFULLNAME', 'welcometofullname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_WELCOMETOSHORTNAME', 'welcometoshortname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_FULLNAME', 'fullname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_SHORTNAME', 'shortname');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_WELCOME', 'welcome');
+define('THEME_BOOST_UNION_SETTING_LOGINPAGELABEL_WELCOMEBACK', 'welcomeback');
+
+define('THEME_BOOST_UNION_SETTING_SHIBBOLETH_CONFIG', 'config');
+define('THEME_BOOST_UNION_SETTING_SHIBBOLETH_CODE', 'code');
 
 define('THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BETWEEN', 'between');
 define('THEME_BOOST_UNION_SETTING_LOGININSTRUCTIONPOSITION_BELOW', 'below');
 
 define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_LIGHT', 'light');
 define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_DARK', 'dark');
-define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_PRIMARYLIGHT', 'primarylight');
-define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_PRIMARYDARK', 'primarydark');
+define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_COLOREDLIGHT', 'coloredlight');
+define('THEME_BOOST_UNION_SETTING_NAVBARCOLOR_COLOREDDARK', 'coloreddark');
 
 define('THEME_BOOST_UNION_SETTING_OUTSIDEREGIONSPLACEMENT_NEXTMAINCONTENT', 'nextmaincontent');
 define('THEME_BOOST_UNION_SETTING_OUTSIDEREGIONSPLACEMENT_NEARWINDOW', 'nearwindowedges');
@@ -164,7 +193,64 @@ define('THEME_BOOST_UNION_SETTING_COURSEPROGRESSSTYLE_BAR', 'bar');
 define('THEME_BOOST_UNION_SETTING_SHOWAS_BADGE', 'badge');
 define('THEME_BOOST_UNION_SETTING_SHOWAS_TEXT', 'text');
 
+define('THEME_BOOST_UNION_SETTING_BUTTONCOLOR_PRIMARYFILLED', 'primary');
+define('THEME_BOOST_UNION_SETTING_BUTTONCOLOR_SECONDARYFILLED', 'secondary');
+define('THEME_BOOST_UNION_SETTING_BUTTONCOLOR_PRIMARYOUTLINE', 'outline-primary');
+define('THEME_BOOST_UNION_SETTING_BUTTONCOLOR_SECONDARYOUTLINE', 'outline-secondary');
+define('THEME_BOOST_UNION_SETTING_BUTTONCOLOR_MOODLELIGHTOUTLINE', 'outline-lightmoodle');
+
+define('THEME_BOOST_UNION_SETTING_BUTTONSIZE_SMALL', 'sm');
+define('THEME_BOOST_UNION_SETTING_BUTTONSIZE_MEDIUM', 'md');
+define('THEME_BOOST_UNION_SETTING_BUTTONSIZE_LARGE', 'lg');
+
+define('THEME_BOOST_UNION_SETTING_HORIZONTALALIGNMENT_LEFT', 'left');
+define('THEME_BOOST_UNION_SETTING_HORIZONTALALIGNMENT_CENTER', 'center');
+define('THEME_BOOST_UNION_SETTING_HORIZONTALALIGNMENT_RIGHT', 'right');
+
+define('THEME_BOOST_UNION_SETTING_TARGETPLATFORM_LMS', 0);
+define('THEME_BOOST_UNION_SETTING_TARGETPLATFORM_LMSMWP', 1);
+define('THEME_BOOST_UNION_SETTING_TARGETPLATFORM_MWP', 2);
+
 use theme_boost_union\snippets;
+
+/**
+ * Helper function to check if Boost Union or a child theme of Boost Union is active.
+ * This is needed at multiple locations to avoid that callbacks in Boost Union affect other active themes.
+ *
+ * @return bool
+ */
+function theme_boost_union_is_active_theme(): bool {
+    global $CFG, $PAGE;
+
+    // During PHPUnit tests or when $PAGE theme is not yet initialised,
+    // fall back to check $CFG->theme to avoid triggering theme initialisation.
+    // This will not recognize Boost Union child themes as active, but this is acceptable in this case.
+    if ((defined('PHPUNIT_TEST') && PHPUNIT_TEST) || !$PAGE->has_set_url()) {
+        return ($CFG->theme === 'boost_union');
+    }
+
+    if ($PAGE->theme->name == 'boost_union' || in_array('boost_union', $PAGE->theme->parents)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Helper function to check if a child theme of Boost Union (and _not_ Boost Union itself) is active.
+ * This is needed at multiple locations to improve child theme support in Boost Union already.
+ *
+ * @return bool
+ */
+function theme_boost_union_is_active_childtheme(): bool {
+    global $PAGE;
+
+    if ($PAGE->theme->name != 'boost_union') {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 /**
  * Returns the main SCSS content.
@@ -181,12 +267,35 @@ function theme_boost_union_get_main_scss_content($theme) {
     // Initialize SCSS code.
     $scss = '';
 
-    // Get and include the main SCSS from Boost Core.
-    // This particularly covers the theme preset which is set in Boost Core and not Boost Union.
-    $scss .= theme_boost_get_main_scss_content(\core\output\theme_config::load('boost'));
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the MWP function only if the function exists.
+        if (function_exists('theme_workplace_get_main_scss_content')) {
+            // Get and include the main SCSS from Theme Workplace.
+            $scss .= theme_workplace_get_main_scss_content(\core\output\theme_config::load('workplace'));
+        }
+
+        // Otherwise.
+    } else {
+        // Get and include the main SCSS from Boost Core.
+        // This particularly covers the theme preset which is set in Boost Core and not Boost Union.
+        $scss .= theme_boost_get_main_scss_content(\core\output\theme_config::load('boost'));
+    }
 
     // Include post.scss from Boost Union.
     $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/boost_union/post.scss');
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_post_scss')
+        ) {
+            // Get and include the post SCSS from BU MWP.
+            $scss .= \local_boost_union_mwp\local\branding::get_post_scss();
+        }
+    }
 
     // Get and include the external Post SCSS.
     // This should actually be in theme_boost_union_get_extra_scss().
@@ -263,6 +372,18 @@ function theme_boost_union_get_pre_scss($theme) {
     // Include pre.scss from Boost Union.
     $scss .= file_get_contents($CFG->dirroot . '/theme/boost_union/scss/boost_union/pre.scss');
 
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_pre_scss')
+        ) {
+            // Get and include the pre SCSS from BU MWP.
+            $scss .= \local_boost_union_mwp\local\branding::get_pre_scss();
+        }
+    }
+
     // Add SCSS constants for evaluating select setting values in SCSS code.
     $scss .= '$boostunionsettingyes: ' . THEME_BOOST_UNION_SETTING_SELECT_YES . ";\n";
     $scss .= '$boostunionsettingno: ' . THEME_BOOST_UNION_SETTING_SELECT_NO . ";\n";
@@ -270,6 +391,7 @@ function theme_boost_union_get_pre_scss($theme) {
     $configurable = [
         // Config key => [variableName, ...].
         'brandcolor' => ['primary'],
+        'linkcolor' => ['link-color'],
         'bootstrapcolorsuccess' => ['success'],
         'bootstrapcolorinfo' => ['info'],
         'bootstrapcolorwarning' => ['warning'],
@@ -293,6 +415,7 @@ function theme_boost_union_get_pre_scss($theme) {
     // The key is the configurable and the value is the field name in mdl_theme_boost_union_flavours.
     $flavourconfigurable = [
         'brandcolor' => 'look_brandcolor',
+        'linkcolor' => 'look_linkcolor',
         'bootstrapcolorsuccess' => 'look_bootstrapcolorsuccess',
         'bootstrapcolorinfo' => 'look_bootstrapcolorinfo',
         'bootstrapcolorwarning' => 'look_bootstrapcolorwarning',
@@ -303,6 +426,18 @@ function theme_boost_union_get_pre_scss($theme) {
     foreach ($configurable as $configkey => $targets) {
         // Get the global config value for the given config key.
         $value = get_config('theme_boost_union', $configkey);
+
+        // If we are on MWP.
+        if (\theme_boost_union\local\mwp::extension_present() == true) {
+            // Call the BU MWP class method only if the class and method exist.
+            if (
+                class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                    method_exists('\\local_boost_union_mwp\\local\\branding', 'get_pre_scss_configurable_value')
+            ) {
+                // Get the potentially branding-overridden value for this configurable.
+                $value = \local_boost_union_mwp\local\branding::get_pre_scss_configurable_value($configkey, $value);
+            }
+        }
 
         // If any flavour applies to this page.
         if ($flavourid != null) {
@@ -389,6 +524,117 @@ function theme_boost_union_get_pre_scss($theme) {
         }
     }
 
+    // Set custom Boost Union SCSS variable: Primary button color.
+    // If no dedicated button color is configured, the variable is not added to the stack.
+    // In this case, the default color from Boost (i.e. the primary color) will be applied to the buttons.
+    $buttonbrandcolor = get_config('theme_boost_union', 'buttonbrandcolor');
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_buttonbrandcolor')
+        ) {
+            // Get the potentially branding-overridden value for buttonbrandcolor.
+            $buttonbrandcolor = \local_boost_union_mwp\local\branding::get_overridden_buttonbrandcolor(
+                $buttonbrandcolor
+            );
+        }
+    }
+
+    // If any flavour applies to this page.
+    if ($flavourid != null) {
+        $buttonbrandcolorflavour = theme_boost_union_get_flavour_config_item_for_flavourid($flavourid, 'look_buttonbrandcolor');
+        if (!empty($buttonbrandcolorflavour)) {
+            $buttonbrandcolor = $buttonbrandcolorflavour;
+        }
+    }
+
+    // If a button brand color is set now.
+    if (!empty($buttonbrandcolor)) {
+        $scss .= '$bu-button-brand-color: ' . $buttonbrandcolor . ";\n";
+    }
+
+    // Set custom Boost Union SCSS variables: Branded gray tones.
+    // When enabled, Bootstrap's $gray-100 to $gray-900 are derived from the primary brand color
+    // instead of neutral grays, creating a subtle brand-color harmony across gray elements.
+    $brandedgraytones = get_config('theme_boost_union', 'brandedgraytones');
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_brandedgraytones')
+        ) {
+            // Get the potentially branding-overridden value for brandedgraytones.
+            $brandedgraytones = \local_boost_union_mwp\local\branding::get_overridden_brandedgraytones(
+                $brandedgraytones
+            );
+        }
+    }
+
+    // If any flavour applies to this page.
+    if ($flavourid != null) {
+        $brandedgraytonesflavour = theme_boost_union_get_flavour_config_item_for_flavourid($flavourid, 'look_brandedgraytones');
+        if (!empty($brandedgraytonesflavour) && $brandedgraytonesflavour !== THEME_BOOST_UNION_SETTING_SELECT_NOCHANGE) {
+            $brandedgraytones = $brandedgraytonesflavour;
+        }
+    }
+
+    // If branded gray tones are enabled now.
+    if ($brandedgraytones == THEME_BOOST_UNION_SETTING_SELECT_YES) {
+        // Get the brand color setting.
+        $effectivebrandcolor = get_config('theme_boost_union', 'brandcolor');
+
+        // If we are on MWP.
+        if (\theme_boost_union\local\mwp::extension_present() == true) {
+            // Check if a brand color is set in the MWP tenant.
+            if (
+                class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                    method_exists('\\local_boost_union_mwp\\local\\branding', 'get_pre_scss_configurable_value')
+            ) {
+                $effectivebrandcolor = \local_boost_union_mwp\local\branding::get_pre_scss_configurable_value(
+                    'brandcolor',
+                    $effectivebrandcolor
+                );
+            }
+        }
+
+        // If any flavour applies to this page.
+        if ($flavourid != null) {
+            // Check if a brand color is set in the flavour.
+            $flavourbrandcolor = theme_boost_union_get_flavour_config_item_for_flavourid($flavourid, 'look_brandcolor');
+            if (!empty($flavourbrandcolor)) {
+                $effectivebrandcolor = $flavourbrandcolor;
+            }
+        }
+        // Only add the branded gray tones SCSS if a brand color is actually configured,
+        // because the SCSS functions below require $primary to be defined in the pre-SCSS stack.
+        if (!empty($effectivebrandcolor)) {
+            $scss .= <<<'SCSS'
+// Extract the hue from the primary brand color and use it to tint all
+// Bootstrap gray steps, giving them a subtle brand-color harmony.
+$bu-brand-hue: hue($primary);
+
+@function bu-brand-gray($lightness) {
+    @return hsl($bu-brand-hue, 10%, $lightness);
+}
+
+$gray-100: bu-brand-gray(92%);
+$gray-200: bu-brand-gray(86%);
+$gray-300: bu-brand-gray(80%);
+$gray-400: bu-brand-gray(74%);
+$gray-500: bu-brand-gray(64%);
+$gray-600: bu-brand-gray(42%);
+$gray-700: bu-brand-gray(31%);
+$gray-800: bu-brand-gray(23%);
+$gray-900: bu-brand-gray(15%);
+SCSS;
+        }
+    }
+
     // Set custom Boost Union SCSS variable: The login container width.
     $logincontainerwidth = get_config('theme_boost_union', 'logincontainerwidth');
     // If the setting is not set.
@@ -396,7 +642,7 @@ function theme_boost_union_get_pre_scss($theme) {
         // Set the variable to the default setting to make sure that the SCSS variable does not remain uninitialized.
         $logincontainerwidth = '500px';
     }
-    $scss .= '$logincontainer-width: ' . $logincontainerwidth . ";\n";
+    $scss .= '$bu-logincontainer-width: ' . $logincontainerwidth . ";\n";
 
     // Set custom Boost Union SCSS variable: The block region outside left width.
     $blockregionoutsideleftwidth = get_config('theme_boost_union', 'blockregionoutsideleftwidth');
@@ -405,16 +651,16 @@ function theme_boost_union_get_pre_scss($theme) {
         // Set the variable to the default setting to make sure that the SCSS variable does not remain uninitialized.
         $blockregionoutsideleftwidth = '300px';
     }
-    $scss .= '$blockregionoutsideleftwidth: ' . $blockregionoutsideleftwidth . ";\n";
+    $scss .= '$bu-blockregionoutsideleftwidth: ' . $blockregionoutsideleftwidth . ";\n";
 
-    // Set custom Boost Union SCSS variable: The block region outside left width.
+    // Set custom Boost Union SCSS variable: The block region outside right width.
     $blockregionoutsiderightwidth = get_config('theme_boost_union', 'blockregionoutsiderightwidth');
     // If the setting is not set.
     if (!$blockregionoutsiderightwidth) {
         // Set the variable to the default setting to make sure that the SCSS variable does not remain uninitialized.
         $blockregionoutsiderightwidth = '300px';
     }
-    $scss .= '$blockregionoutsiderightwidth: ' . $blockregionoutsiderightwidth . ";\n";
+    $scss .= '$bu-blockregionoutsiderightwidth: ' . $blockregionoutsiderightwidth . ";\n";
 
     // Add custom Boost Union SCSS variable as goody for designers: $themerev.
     $scss .= '$themerev: ' . $CFG->themerev . ";\n";
@@ -493,6 +739,20 @@ function theme_boost_union_get_extra_scss($theme) {
     // Now, in contrast to Boost core, Boost Union should add the login page background to the body element as well.
     // Thus, check if a login background image is set.
     $loginbackgroundimagepresent = get_config('theme_boost_union', 'loginbackgroundimage');
+
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_loginbackground_present')
+        ) {
+            // Check as well if a login background image is set in the MWP branding settings.
+            [$loginbackgroundimagepresent, $brandingloginbackgroundimagepresent] =
+                    \local_boost_union_mwp\local\branding::get_overridden_loginbackground_present($loginbackgroundimagepresent);
+        }
+    }
+
     if (!empty($loginbackgroundimagepresent)) {
         // We first have to revert the background which is set to #page on the login page by Boost core already.
         // Doing this, we also have to make the background of the #page element transparent on the login page.
@@ -506,8 +766,27 @@ function theme_boost_union_get_extra_scss($theme) {
         $content .= "background-size: cover;";
         $content .= '}';
 
-        // Finally, we add all possible background image urls which will be picked based on the (random) loginpageimage class.
-        $content .= theme_boost_union_get_loginbackgroundimage_scss();
+        // Finally, get all possible background image urls which will be picked based on the (random) loginpageimage class.
+        $loginbackgroundimagescss = theme_boost_union_get_loginbackgroundimage_scss();
+
+        // If we are on MWP.
+        if (\theme_boost_union\local\mwp::extension_present() == true) {
+            // Call the BU MWP class method only if the class and method exist.
+            if (
+                class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                    method_exists('\\local_boost_union_mwp\\local\\branding', 'get_overridden_loginbackground_scss')
+            ) {
+                // Get the login background image SCSS from the MWP branding as well, and add it to the SCSS code.
+                $content .= \local_boost_union_mwp\local\branding::get_overridden_loginbackground_scss(
+                    $loginbackgroundimagescss
+                );
+            }
+
+            // Otherwise.
+        } else {
+            // Add the login background image urls to the SCSS code.
+            $content .= $loginbackgroundimagescss;
+        }
     }
 
     // Boost core has the behaviour that the normal background image is not shown on the login page, only the login background image
@@ -572,6 +851,18 @@ function theme_boost_union_get_extra_scss($theme) {
         }
     }
 
+    // If we are on MWP.
+    if (\theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\branding') &&
+                method_exists('\\local_boost_union_mwp\\local\\branding', 'get_extra_scss_custom_scss')
+        ) {
+            // Get the custom SCSS from the tenant branding and add it to the SCSS code.
+            $content .= \local_boost_union_mwp\local\branding::get_extra_scss_custom_scss();
+        }
+    }
+
     // Now we want to add the custom SCSS from the flavour.
     // If any flavour applies to this page.
     if ($flavourid != null) {
@@ -591,7 +882,10 @@ function theme_boost_union_get_extra_scss($theme) {
     $content .= theme_boost_union_get_scss_for_activity_icon_purpose($theme);
 
     // Setting: Navbar styles.
-    $content .= theme_boost_union_get_scss_navbar($theme);
+    $content .= theme_boost_union_get_scss_navbar($theme, $flavourid);
+
+    // Setting: Login page.
+    $content .= theme_boost_union_get_scss_loginpage();
 
     // Setting: Mark external links.
     $content .= theme_boost_union_get_scss_to_mark_external_links($theme);
@@ -718,17 +1012,8 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
         // Serve the background files from the theme flavours.
         // This code is copied and modified from the best practices in lib/filelib.php.
     } else if ($filearea === 'flavours_look_backgroundimage') {
-        // Flavour files should not be top secret.
-        // Even if they apply to particular contexts or cohorts, we do not do any hard checks if a user should be
-        // allowed to request a file.
-        // We just make sure that the forcelogin setting is respected. This is ok as there isn't any possibility
-        // to apply a flavour to the login page / for non-logged-in users at the moment.
-        if ($CFG->forcelogin) {
-            require_login();
-            $serveoptions = ['cacheability' => 'private'];
-        } else {
-            $serveoptions = ['cacheability' => 'public'];
-        }
+        // Check if the user is allowed to request the file and get the file serving options.
+        $serveoptions = theme_boost_union_flavours_require_login_for_file();
 
         // Get file storage.
         $fs = get_file_storage();
@@ -756,17 +1041,8 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
         $filearea === 'flavours_look_favicon' ||
             $filearea === 'flavours_look_logocompact' || $filearea === 'flavours_look_logo'
     ) {
-        // Flavour files should not be top secret.
-        // Even if they apply to particular contexts or cohorts, we do not do any hard checks if a user should be
-        // allowed to request a file.
-        // We just make sure that the forcelogin setting is respected. This is ok as there isn't any possibility
-        // to apply a flavour to the login page / for non-logged-in users at the moment.
-        if ($CFG->forcelogin) {
-            require_login();
-            $serveoptions = ['cacheability' => 'private'];
-        } else {
-            $serveoptions = ['cacheability' => 'public'];
-        }
+        // Check if the user is allowed to request the file and get the file serving options.
+        $serveoptions = theme_boost_union_flavours_require_login_for_file();
 
         // Get the parameters from the request.
         $filename = clean_param(array_pop($args), PARAM_FILE);
@@ -852,6 +1128,40 @@ function theme_boost_union_pluginfile($course, $cm, $context, $filearea, $args, 
 }
 
 /**
+ * Helper function to check if the user is allowed to request a flavour file and to compose the file serving options.
+ *
+ * Please note: This function may redirect the user (and thus end the request) if he is not logged in yet.
+ *
+ * @return array The options which should be used to serve the flavour file.
+ */
+function theme_boost_union_flavours_require_login_for_file(): array {
+    global $CFG;
+
+    // Flavour files should not be top secret.
+    // Even if they apply to particular contexts or cohorts, we do not do any hard checks if a user should be
+    // allowed to request a file.
+    // We just make sure that the forcelogin setting is respected. This is ok as there isn't any possibility
+    // to apply a flavour to the login page / for non-logged-in users at the moment.
+    if ($CFG->forcelogin) {
+        // Do not enforce the site policy for this file request.
+        // Otherwise, a user who has not accepted the site policy yet would not be able to see the flavour images
+        // on the site policy page itself.
+        if (!defined('NO_SITEPOLICY_CHECK')) {
+            define('NO_SITEPOLICY_CHECK', true);
+        }
+
+        // Do not set the wantsurl session variable for this file request.
+        // Otherwise, if require_login() decided to redirect the user (to the login page, for example), the user would
+        // be redirected to this image file afterwards instead of the page which he wanted to visit initially.
+        require_login(setwantsurltome: false);
+
+        return ['cacheability' => 'private'];
+    }
+
+    return ['cacheability' => 'public'];
+}
+
+/**
  * Define preferences which may be set via the core_user_set_user_preferences external function.
  *
  * @uses \core\user::is_current_user
@@ -902,9 +1212,31 @@ function theme_boost_union_render_navbar_output() {
  *            based on example code by Bas Brands from https://github.com/bmbrands/theme_picture/blob/change_css_urls/lib.php.
  *
  * @param mixed $urls The CSS URLs (passed as reference).
+ * @param bool $skipmwpcheck Whether to skip the check if we are on MWP.
+ *                           This is needed as this function is also called from local_boost_union_mwp and we want to avoid a loop.
  */
-function theme_boost_union_alter_css_urls(&$urls) {
+function theme_boost_union_alter_css_urls(&$urls, $skipmwpcheck = false) {
     global $CFG;
+
+    // During the initial installation, do not care about flavours yet.
+    if (during_initial_install()) {
+        return;
+    }
+
+    // If we are on MWP (and the MWP check is not skipped).
+    if (!$skipmwpcheck && \theme_boost_union\local\mwp::extension_present() == true) {
+        // Call the BU MWP class method only if the class and method exist.
+        if (
+            class_exists('\\local_boost_union_mwp\\local\\mwp') &&
+                method_exists('\\local_boost_union_mwp\\local\\mwp', 'lib_alter_css_urls')
+        ) {
+            // Handover the processing to local_boost_union_mwp.
+            \local_boost_union_mwp\local\mwp::lib_alter_css_urls($urls);
+
+            // And return directly as everything is handled by the MWP function.
+            return;
+        }
+    }
 
     // Require flavours library.
     require_once($CFG->dirroot . '/theme/boost_union/flavours/flavourslib.php');
@@ -991,6 +1323,16 @@ function theme_boost_union_get_fontawesome_icon_map() {
     // Init icon mapping with icons which are included in any case.
     $iconmapping = [
         'theme_boost_union:info' => 'fa-info-circle',
+        'theme_boost_union:viewall' => 'fa-list-check',
+        'theme_boost_union:autofix' => 'fa-wand-magic-sparkles',
+        'theme_boost_union:muted' => 'fa-bell-slash',
+        'theme_boost_union:unmuted' => 'fa-bell',
+        'theme_boost_union:flavours' => 'fa-pepper-hot',
+        'theme_boost_union:tenants' => 'fa-shapes',
+        // DEVELOPER NOTE:
+        // If you add any new icons to this mapping,
+        // do not forget to add a SVG fallback as well to avoid that the
+        // test_get_fontawesome_icon_map unit test in Moodle core breaks.
     ];
 
     // Get the FontAwesome icons which are used by smart menus currently.
@@ -1032,4 +1374,78 @@ function theme_boost_union_reset_fontawesome_icon_map() {
     $cache->delete($mapkey);
     // And rebuild it brutally.
     $instance->get_icon_name_map();
+}
+
+/**
+ * Add Boost Union status checks to Moodle Checks API.
+ *
+ * @return \core\check\check[]
+ */
+function theme_boost_union_status_checks(): array {
+    return [
+        new \theme_boost_union\check\recommendations(),
+    ];
+}
+
+/**
+ * Callback for MWP tenant get css config.
+ * {@see \tool_tenant\manager::get_css_config()}
+ *
+ * @param array $info
+ * @param int $tenantid
+ * @param array $filemanageroptions
+ */
+function theme_boost_union_tenant_get_css_config(array &$info, int $tenantid, array $filemanageroptions): void {
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    // Additionally, if we are not on MWP, return directly as well.
+    if (theme_boost_union_is_active_theme() != true || \theme_boost_union\local\mwp::extension_present() == false) {
+        return;
+    }
+}
+
+/**
+ * Callback to add extra element to MWP tenant branding settings.
+ * {@see \tool_tenant\form\edit_css_form::definition()}
+ *
+ * @param tool_tenant\form\edit_css_form $form
+ * @param MoodleQuickForm $mform
+ * @param array $ajaxformdata
+ */
+function theme_boost_union_extend_tenant_edit_css_form(
+    tool_tenant\form\edit_css_form $form,
+    MoodleQuickForm $mform,
+    array $ajaxformdata
+): void {
+    global $CFG;
+
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    // Additionally, if we are not on MWP, return directly as well.
+    if (theme_boost_union_is_active_theme() != true || \theme_boost_union\local\mwp::extension_present() == false) {
+        return;
+    }
+
+    // Call the BU MWP class method only if the class and method exist.
+    if (
+        class_exists('\\local_boost_union_mwp\\local\\settings') &&
+            method_exists('\\local_boost_union_mwp\\local\\settings', 'extend_tenant_edit_css_form')
+    ) {
+        \local_boost_union_mwp\local\settings::extend_tenant_edit_css_form($form, $mform, $ajaxformdata);
+    }
+}
+
+/**
+ * Callback for MWP tenant CSS form submission.
+ * {@see \tool_tenant\form\edit_css_form::process_dynamic_submission()}
+ *
+ * @param stdClass $data
+ */
+function theme_boost_union_process_tenant_edit_css_requests(stdClass $data): void {
+    // If a theme other than Boost Union or a child theme of it is active, return directly.
+    // This is necessary as the callback is called regardless of the active theme.
+    // Additionally, if we are not on MWP, return directly as well.
+    if (theme_boost_union_is_active_theme() != true || \theme_boost_union\local\mwp::extension_present() == false) {
+        return;
+    }
 }

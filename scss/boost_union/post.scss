@@ -1,4 +1,35 @@
 /*=======================================
+ * General styles
+ ======================================*/
+
+/* Replicate the Moodle Boost default login button style (from .login-identityprovider-btn)
+   for the btn-outline-lightmoodle variant: white background with a light gray border.
+   Replicating the styles is necessary as we cannot re-use the existing class without side-effects here. */
+.btn-outline-lightmoodle {
+    background-color: $white;
+    border-color: $gray-400;
+    color: $gray-600;
+
+    &:hover,
+    &:focus {
+        background-color: $gray-100;
+        border-color: $gray-500;
+        color: $gray-700;
+    }
+}
+
+/* Replicate the BS5 opacity classes which do not exist in BS4 yet.
+   This helps us with backporting. */
+$opacities: (0, 25, 50, 75, 100);
+
+@each $value in $opacities {
+    .opacity-#{$value} {
+        opacity: $value / 100 !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+
+/*=======================================
  * Settings: Look -> Site branding
  ======================================*/
 
@@ -14,6 +45,20 @@
     height: 100%;
     width: auto;
 }
+
+/*---------------------------------------
+ * Setting: Button brand color
+ --------------------------------------*/
+
+/* Apply a dedicated color for primary buttons, if the variable is set.
+   Reuse Bootstrap's own variant mixin so hover/active/focus/disabled states
+   are calculated exactly like core button variants, just with the configured color. */
+@if variable-exists(bu-button-brand-color) {
+    .btn-primary {
+        @include button-variant($bu-button-brand-color, $bu-button-brand-color);
+    }
+}
+
 
 /*---------------------------------------
  * Setting: Navbar color
@@ -264,21 +309,34 @@
  ======================================*/
 
 /*---------------------------------------
- * Setting: Login form position
+ * Setting: Login container position
  --------------------------------------*/
 
-/* Move the login window to the side based on the theme settings.
-   While the classes login-wrapper-left and login-wrapper-right are set here,
+/* On larger screens, move the login window to the side based on the theme settings.
+   While the classes login-wrapper-left, -right, -semileft, -semiright are set here,
    the class login-wrapper-center is not set here as the login form is already centered by Moodle core. */
-.login-wrapper.login-wrapper-left {
-    justify-content: left;
-}
-.login-wrapper.login-wrapper-right {
-    justify-content: right;
+@include media-breakpoint-up(md) {
+    .login-wrapper.login-wrapper-left {
+        justify-content: left;
+        padding-left: 1rem;
+    }
+    .login-wrapper.login-wrapper-right {
+        justify-content: right;
+        padding-right: 1rem;
+    }
+    .login-wrapper.login-wrapper-semileft {
+        justify-content: left;
+        padding-left: 10rem;
+    }
+    .login-wrapper.login-wrapper-semiright {
+        justify-content: right;
+        padding-right: 10rem;
+    }
 }
 
+
 /*---------------------------------------
- * Setting: Login form transparency
+ * Setting: Login container transparency
  --------------------------------------*/
 
 /* Make background of login panel slightly transparent. */
@@ -293,29 +351,31 @@
 /* Override the fixed 500px width from Boost core with the custom width setting. */
 @include media-breakpoint-up(md) {
     .login-container {
-        width: $logincontainer-width !important; /* stylelint-disable-line declaration-no-important */
+        width: $bu-logincontainer-width !important; /* stylelint-disable-line declaration-no-important */
     }
 
     /* Allow login-container to expand when tabs need more space. */
     body.pagelayout-login .login-container:has(#login-layout-tabs) {
         width: auto !important; /* stylelint-disable-line declaration-no-important */
-        min-width: $logincontainer-width;
+        min-width: $bu-logincontainer-width;
         max-width: 100%;
 
         /* Prevent instructions from expanding the container to full width.
            (The max-width will be adapted by JS (if enabled by the admin)
-           if the tabs width is wider than the $logincontainer-width. */
+           if the tabs width is wider than the $bu-logincontainer-width. */
         .login-heading,
-        .login-instructions {
+        .login-instructions,
+        .login-shibboleth-wayf-form .form-text,
+        .login-shibboleth-wayf-form .form-label {
             width: auto;
-            max-width: $logincontainer-width;
+            max-width: $bu-logincontainer-width;
             overflow-wrap: break-word;
         }
     }
 }
 
 /*---------------------------------------
- * Setting: Login layout: Accordion
+ * Setting: Login form layout: Accordion
  --------------------------------------*/
 
 /* Change the white background color to support semi-transparent login containers as well. */
@@ -364,7 +424,7 @@
 }
 
 /*---------------------------------------
- * Setting: Login layout: Tabs
+ * Setting: Login form layout: Tabs
  --------------------------------------*/
 
 /* Align the look to the Moodle navigation tabs.
@@ -1198,6 +1258,17 @@ body.theme-boost-union-commincourse {
     }
 }
 
+/* Add a right padding to the login link in the navbar if the offcanvas region is enabled.
+   Moodle core adds a left padding to the login link only (with .ps-2 in the core/user_menu template).
+   As long as the login link is the last element in the navbar, this is fine. But as soon as the offcanvas
+   region is enabled, the offcanvas divider and toggle icon follow directly after the login link and the
+   login link would stick to the divider without this padding.
+   A logged-in user's usermenu does not need this treatment as it is rendered as a .btn element which
+   already brings its own horizontal padding. */
+#usernavigation:has(.drawer-offcanvas-toggle) .login {
+    padding-right: map-get($spacers, 2);
+}
+
 
 /*---------------------------------------
  * Settings: Additional block regions - The outside-left and outside-right regions.
@@ -1234,33 +1305,33 @@ body.theme-boost-union-commincourse {
         /* On pages where only the outside-left region is enabled:
            Reduce the size of the main column to make space for the outside-left column. */
         .main-inner-outside-left .main-inner {
-            width: calc(98% - #{$blockregionoutsideleftwidth});
+            width: calc(98% - #{$bu-blockregionoutsideleftwidth});
         }
 
         /* On pages where only the outside-right region is enabled:
            Reduce the size of the main column to make space for the outside-right column. */
         .main-inner-outside-right .main-inner {
-            width: calc(98% - #{$blockregionoutsiderightwidth});
+            width: calc(98% - #{$bu-blockregionoutsiderightwidth});
         }
 
         /* On pages where the outside-left and the outside-right region are enabled:
            Reduce the size of the main column to make space for the outside-left and outside-right columns. */
         .main-inner-outside-left-right .main-inner {
-            width: calc(98% - #{$blockregionoutsiderightwidth} - #{$blockregionoutsideleftwidth});
+            width: calc(98% - #{$bu-blockregionoutsiderightwidth} - #{$bu-blockregionoutsideleftwidth});
         }
 
         /* Set the width and margin of the outside-left region. */
         #theme-block-region-outside-left {
             margin-right: 1rem;
             margin-top: 1.5rem;
-            width: $blockregionoutsideleftwidth;
+            width: $bu-blockregionoutsideleftwidth;
         }
 
         /* Set the width of the outside-right region. */
         #theme-block-region-outside-right {
             margin-left: 1rem;
             margin-top: 1.5rem;
-            width: $blockregionoutsiderightwidth;
+            width: $bu-blockregionoutsiderightwidth;
         }
 
         /* If the admin configured outside blocks to be shown next to the main content. */
@@ -1442,12 +1513,20 @@ body.limitedwidth .theme-block-region-footer-coursecontentwidth {
  * Settings: Footnote.
  --------------------------------------*/
 
-/* Static pages links dividers. */
+/* Static pages links dividers.
+   The links live in a flex container (see footnote.mustache), so we draw the divider on the inner,
+   inline <a> element rather than on the flex item itself. Otherwise the border would be stretched to
+   the full height of the flex line (the line-height, i.e. 24px) instead of just the text height.
+   The spacing around the divider is added here as well (instead of as pe-2 / me-2 utility classes in
+   the template): the padding puts a gap between the link text and the divider, the margin puts a gap
+   between the divider and the next link. */
 #footnote {
     .theme_boost_union_footnote_link {
-        border-right: 2px solid $nav-divider-color;
+        padding-right: 0.5rem;
+        border-right: 2px solid $breadcrumb-divider-color;
+        margin-right: 0.5rem;
     }
-    .theme_boost_union_footnote_link:last-of-type {
+    .theme_boost_union_footnote_link:last-of-type a {
         border-right: none;
     }
 }
@@ -1670,6 +1749,12 @@ body.theme_boost-union-footerbuttonnone.jsenabled {
     border-bottom: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
+/* This rule is necessary to make sure that the user tourse section really has a bottom border as the previous rule removes
+   it unfortunately due to the way how SASS @extend works. */
+#page-footer .popover-body .tool_usertours-resettourcontainer .usertour:last-child {
+    border-bottom: var(--bs-border-width) solid var(--bs-border-color) !important; /* stylelint-disable-line declaration-no-important,max-line-length */
+}
+
 
 /*=======================================
  * Settings: Content -> Info banner.
@@ -1724,6 +1809,9 @@ body.theme_boost-union-footerbuttonnone.jsenabled {
     /* Remove the 1px border which is added around the card by default and which looks strange
        with a background image. */
     border: none;
+
+    /* Do not repeat the background image in any case. */
+    background-repeat: no-repeat;
 
     /* Add a more solid background color so that the title remains readable. */
     .card-header {
@@ -3194,6 +3282,16 @@ body.theme_boost-union-footerbuttonnone.jsenabled {
 
 img.theme_boost_union-sortorderspacer {
     width: 1.25em;
+}
+
+/*---------------------------------------
+ * Settings: Recommendation notifications.
+ --------------------------------------*/
+
+/* Make notifications in mform static form elements fully wide and set a smaller font size. */
+.form-control-static[data-name$="_recommendation"] {
+    font-size: .875em;
+    width: 100%;
 }
 
 

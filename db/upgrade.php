@@ -134,8 +134,7 @@ function xmldb_theme_boost_union_upgrade($oldversion) {
         // Show the notification.
         // (If this notification is shown during a CLI upgrade, the p and strong HTML tags are shown as well.
         // We accept this glitch as it's just a one-time glitch and the admin can still read the notification.
-        $notification = new \core\output\notification($message, \core\output\notification::NOTIFY_SUCCESS);
-        $notification->set_show_closebutton(false);
+        $notification = new \core\output\notification($message, \core\output\notification::NOTIFY_SUCCESS, false);
         echo $OUTPUT->render($notification);
 
         // Boost_union savepoint reached.
@@ -681,6 +680,235 @@ function xmldb_theme_boost_union_upgrade($oldversion) {
 
         // Savepoint reached.
         upgrade_plugin_savepoint(true, 2024100757, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100770) {
+        // Define fields email* to be added to theme_boost_union_menuitems.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+        $field = new xmldb_field('email_cc', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('email_bcc', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email_cc');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('email_subject', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email_bcc');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('email_body', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email_subject');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100770, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100771) {
+        // Define table theme_boost_union_flavours to be altered.
+        $table = new xmldb_table('theme_boost_union_flavours');
+
+        // Define field look_linkcolor to be added.
+        $field = new xmldb_field('look_linkcolor', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'look_brandcolor');
+
+        // Conditionally launch add field look_linkcolor.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field look_buttonbrandcolor to be added.
+        $field = new xmldb_field(
+            'look_buttonbrandcolor',
+            XMLDB_TYPE_CHAR,
+            '32',
+            null,
+            null,
+            null,
+            null,
+            'look_linkcolor'
+        );
+
+        // Conditionally launch add field look_buttonbrandcolor.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100771, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100772) {
+        // Define table theme_boost_union_flavours to be altered.
+        $table = new xmldb_table('theme_boost_union_flavours');
+
+        // Define field content_footnote to be added.
+        $field = new xmldb_field('content_footnote', XMLDB_TYPE_TEXT, null, null, null, null, null, 'look_navbarcolor');
+
+        // Conditionally launch add field content_footnote.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field content_footnote_format to be added.
+        $field = new xmldb_field('content_footnote_format', XMLDB_TYPE_INTEGER, '2', null, null, null, null, 'content_footnote');
+
+        // Conditionally launch add field content_footnote_format.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100772, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100774) {
+        // Define table theme_boost_union_flavours to be altered.
+        $table = new xmldb_table('theme_boost_union_flavours');
+
+        // Define field look_brandedgraytones to be added.
+        $field = new xmldb_field('look_brandedgraytones', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'look_brandcolor');
+
+        // Conditionally launch add field look_brandedgraytones.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100774, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100776) {
+        // Define table theme_boost_union_flavours to be altered.
+        $table = new xmldb_table('theme_boost_union_flavours');
+
+        // Define field look_navbartint to be added.
+        $field = new xmldb_field('look_navbartint', XMLDB_TYPE_CHAR, '32', null, null, null, null, 'look_navbarcolor');
+
+        // Conditionally launch add field look_navbartint.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Track if any navbarcolor value was migrated from the old primary color options.
+        $tintmigrated = false;
+
+        // Migrate the global navbarcolor setting from old 'primarylight'/'primarydark' to new 'coloredlight'/'coloreddark'.
+        $navbarcolor = get_config('theme_boost_union', 'navbarcolor');
+        if ($navbarcolor === 'primarylight') {
+            set_config('navbarcolor', 'coloredlight', 'theme_boost_union');
+            $tintmigrated = true;
+        } else if ($navbarcolor === 'primarydark') {
+            set_config('navbarcolor', 'coloreddark', 'theme_boost_union');
+            $tintmigrated = true;
+        }
+
+        // If the global navbarcolor was migrated, copy the primary brand color to the navbar tint setting.
+        if ($tintmigrated) {
+            $brandcolor = get_config('theme_boost_union', 'brandcolor');
+            if (!empty($brandcolor)) {
+                set_config('navbartint', $brandcolor, 'theme_boost_union');
+            }
+        }
+
+        // Migrate all flavours where look_navbarcolor is 'primarylight' or 'primarydark'.
+        $flavours = $DB->get_records_select(
+            'theme_boost_union_flavours',
+            "look_navbarcolor IN ('primarylight', 'primarydark')"
+        );
+        foreach ($flavours as $flavour) {
+            if ($flavour->look_navbarcolor === 'primarylight') {
+                $flavour->look_navbarcolor = 'coloredlight';
+            } else if ($flavour->look_navbarcolor === 'primarydark') {
+                $flavour->look_navbarcolor = 'coloreddark';
+            }
+            // If the flavour has a brand color set and no navbar tint set yet, copy the brand color to the navbar tint.
+            if (!empty($flavour->look_brandcolor) && empty($flavour->look_navbartint)) {
+                $flavour->look_navbartint = $flavour->look_brandcolor;
+            }
+            $DB->update_record('theme_boost_union_flavours', $flavour);
+            $tintmigrated = true;
+        }
+
+        // If any navbarcolor value was migrated, show an upgrade notice.
+        if ($tintmigrated) {
+            // Show an upgrade notice about this change.
+            $message = get_string('upgradenotice_2025100623', 'theme_boost_union');
+            echo $OUTPUT->notification($message, 'info');
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100776, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100777) {
+        // Migrate old yes/no value to the new Shibboleth source selector values.
+        $oldsetting = get_config('theme_boost_union', 'loginshibbolethinternalwayf');
+        if ($oldsetting === THEME_BOOST_UNION_SETTING_SELECT_YES) {
+            set_config('loginshibbolethinternalwayf', THEME_BOOST_UNION_SETTING_SHIBBOLETH_CONFIG, 'theme_boost_union');
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100777, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100789) {
+        // Define field displayfieldcustomfield to be added to theme_boost_union_menuitems.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+        $field = new xmldb_field('displayfieldcustomfield', XMLDB_TYPE_INTEGER, '18', null, null, null, null, 'displayfield');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field displayfieldsecond to be added to theme_boost_union_menuitems.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+        $field = new xmldb_field('displayfieldsecond', XMLDB_TYPE_INTEGER, '9', null, null, null, null, 'displayfield');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field displayfieldsecondcustomfield to be added to theme_boost_union_menuitems.
+        $field = new xmldb_field(
+            'displayfieldsecondcustomfield',
+            XMLDB_TYPE_INTEGER,
+            '18',
+            null,
+            null,
+            null,
+            null,
+            'displayfieldsecond'
+        );
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field textcountsecond to be added to theme_boost_union_menuitems.
+        $table = new xmldb_table('theme_boost_union_menuitems');
+        $field = new xmldb_field('textcountsecond', XMLDB_TYPE_INTEGER, '9', null, null, null, null, 'textcount');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100789, 'theme', 'boost_union');
+    }
+
+    if ($oldversion < 2024100795) {
+        // Remove all activitypurpose* settings from Boost Union which are still set to the deprecated 'interface' purpose.
+        // This purpose has been deprecated in Moodle 4.4 and has been removed in Moodle 5.2. As Moodle core does not hold a color
+        // for this purpose in the $activity-icon-colors SCSS map since Moodle 4.4, these settings would break the SCSS
+        // compilation of the whole theme.
+        // The affected activities will simply fall back to their default purpose again.
+        $boostunionconfig = get_config('theme_boost_union');
+        foreach ($boostunionconfig as $name => $value) {
+            if (str_starts_with($name, 'activitypurpose') && $value === 'interface') {
+                unset_config($name, 'theme_boost_union');
+            }
+        }
+
+        // Boost Union savepoint reached.
+        upgrade_plugin_savepoint(true, 2024100795, 'theme', 'boost_union');
     }
 
     // Load the builtin SCSS snippets into the database.

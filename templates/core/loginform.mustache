@@ -41,14 +41,17 @@
     * sitename - Name of site.,
     * logintoken - Random token to protect login request.,
     * maintenance - Maintenance message
+    * guestloginbtnclass - Bootstrap btn classes (color and size) for the guest login button,
     * guestlogininstructions - Custom guest login instructions (optional),
     * guestlogininstructionsbetween - Flag, show guest instructions between heading and form,
     * guestlogininstructionsbelow - Flag, show guest instructions below form,
     * guestloginintrotext - Custom guest login intro text (optional),
+    * idploginbtnclass - Bootstrap btn classes (color and size) for IDP login buttons (e.g. btn-secondary btn-lg),
     * idplogininstructions - Custom IDP login instructions (optional),
     * idplogininstructionsbetween - Flag, show IDP instructions between heading and provider list,
     * idplogininstructionsbelow - Flag, show IDP instructions below provider list,
     * idploginintrotext - Custom IDP login intro text (optional),
+    * localloginbtnclass - Bootstrap btn classes (color and size) for the local login button (e.g. btn-primary btn-lg),
     * locallogininstructions - Custom local login instructions (optional),
     * locallogininstructionsbetween - Flag, show local instructions between heading and form,
     * locallogininstructionsbelow - Flag, show local instructions below form,
@@ -59,10 +62,12 @@
     * loginlayouttabs - Flag used to check if elements should be displayed for the tabs layout type,
     * loginlayoutvertical - Flag used to check if elements should be displayed for the vertical layout type,
     * loginmethods - Array used to iterate over the login methods, each with: id, name, order, type, islocal, isidp, isfirsttimesignup, isguest, isfirst, label, active,
+    * selfregistrationloginbtnclass - Bootstrap btn classes (color and size) for the self registration button,
     * selfregistrationlogininstructions - Custom self registration instructions (optional),
     * selfregistrationlogininstructionsbetween - Flag, show self registration instructions between heading and button,
     * selfregistrationlogininstructionsbelow - Flag, show self registration instructions below button,
     * selfregistrationloginintrotext - Custom self registration intro text (optional),
+    * shibbolethembeddedwayfcode - Custom Shibboleth embedded WAYF JavaScript code (optional),
     * showguestlogin - Should guest login be shown? (theme + core),
     * showguestloginintro - Should the guest login intro be shown?,
     * showguestlogininstruction - Should the guest login instructions be shown?,
@@ -75,6 +80,12 @@
     * showselfregistration - Should self registration be shown? (theme + core),
     * showselfregistrationloginintro - Should the self registration intro be shown?
     * showselfregistrationlogininstruction - Should the self registration instructions be shown?,
+    * showshibbolethembeddedwayfcode - Should the Shibboleth embedded WAYF code be shown?,
+    * loginbrandshowlogo - Flag, whether to show the logo on the login page (controlled by loginpagebrand setting),
+    * loginbrandshowheading - Flag, whether to show the heading on the login page (controlled by loginpagebrand setting),
+    * loginbrandshowtagline - Flag, whether to show the tagline on the login page (controlled by loginpagebrand setting),
+    * loginheadingtext - Heading text for the login page (controlled by loginpageheading setting),
+    * logintaglinetext - Tagline text for the login page (controlled by loginpagetagline setting)
 
     Example context (json):
     {
@@ -188,7 +199,12 @@
         "showguestlogininstruction": false,
         "showselfregistration": true,
         "showselfregistrationloginintro": true,
-        "showselfregistrationlogininstruction": true
+        "showselfregistrationlogininstruction": true,
+        "showshibbolethembeddedwayfcode": false,
+        "localloginbtnclass": "btn-primary",
+        "idploginbtnclass": "btn-secondary",
+        "selfregistrationloginbtnclass": "btn-secondary",
+        "guestloginbtnclass": "btn-secondary"
     }
 }}
 {{!
@@ -196,11 +212,15 @@
 
     Modifications compared to the original template:
     * Add btn-secondary class to identityprovider login buttons.
-    * Added the possibility to change the login layout from a vertical to a tabbed layout or accordion layout.
+    * Added the possibility to change the login form layout from a vertical to a tabbed layout or accordion layout.
+    * Added the option to show each identity provider in its own tab, accordion panel, or vertical block.
     * Added the possibility to hide each login provider (with Boost Union).
     * Removed the possibility to hide the local login form (with Moodle Core from Moodle 4.5 on).
     * Added the possibility to show or hide the login provider intros.
     * Added the possibility to change the login method order.
+    * Added the possibility to show an embedded WAYF (based on configuration or based on custom JS code)
+    * Added the possibility to align the login logo.
+    * Added the possibility to control login page branding (logo, heading, tagline) via the loginpagebrand setting.
 
     This template supports three layout options (vertical, tabs, accordion) and renders multiple
     login methods (local, IDP, firsttimesignup, guest) in a sorted order. The broad structure of this document
@@ -212,15 +232,24 @@
 }}
 
 <div class="loginform">
-    {{#logourl}}
-        <div id="loginlogo" class="login-logo">
-            <img id="logoimage" src="{{logourl}}" class="img-fluid" alt="{{sitename}}"/>
-            <h1 class="login-heading sr-only">{{#str}} loginto, core, {{sitename}} {{/str}}</h1>
-        </div>
-    {{/logourl}}
-    {{^logourl}}
-        <h1 class="login-heading mb-4">{{#str}} loginto, core, {{sitename}} {{/str}}</h1>
-    {{/logourl}}
+    {{#loginbrandshowlogo}}
+        {{#logourl}}
+            <div id="loginlogo" class="login-logo{{#loginlogoclasses}} {{loginlogoclasses}}{{/loginlogoclasses}}">
+                <img id="logoimage" src="{{logourl}}" class="img-fluid" alt="{{sitename}}"/>
+            </div>
+        {{/logourl}}
+    {{/loginbrandshowlogo}}
+    {{#loginbrandshowheading}}
+        <h1 class="login-heading mb-{{#loginbrandshowtagline}}2{{/loginbrandshowtagline}}{{^loginbrandshowtagline}}4{{/loginbrandshowtagline}}">{{loginheadingtext}}</h1>
+    {{/loginbrandshowheading}}
+    {{^loginbrandshowheading}}
+        <h1 class="login-heading sr-only">{{loginheadingtext}}</h1>
+    {{/loginbrandshowheading}}
+    {{#loginbrandshowtagline}}
+        {{#logintaglinetext}}
+            <p class="login-tagline text-muted mb-4">{{logintaglinetext}}</p>
+        {{/logintaglinetext}}
+    {{/loginbrandshowtagline}}
     {{#maintenance}}
         <div class="alert alert-danger login-maintenance">
             {{{maintenance}}}
@@ -328,7 +357,7 @@
                 </div>
             {{/recaptcha}}
             <div class="login-form-submit mb-3">
-                <button class="btn btn-primary btn-lg" type="submit" id="loginbtn">{{#str}}login{{/str}}</button>
+                <button class="btn {{localloginbtnclass}}" type="submit" id="loginbtn">{{#str}}login{{/str}}</button>
             </div>
             <div class="login-form-forgotpassword mb-3">
                 <a href="{{forgotpasswordurl}}">{{#str}}forgotaccount{{/str}}</a>
@@ -356,9 +385,21 @@
     {{>theme_boost_union/loginform-partial-method-start}}
 
         <div class="login-identityproviders">
-            {{! Intro heading }}
+            {{! Intro heading (For the vertical layout with split IDP, this is the provider name. Otherwise, it is the intro text) }}
             {{#showidploginintro}}
-            <h2 class="login-heading {{#loginlayoutaccordion}}text-break w-100{{/loginlayoutaccordion}}">{{#idploginintrotext}}{{{idploginintrotext}}}{{/idploginintrotext}}{{^idploginintrotext}}{{#str}} potentialidps, auth {{/str}}{{/idploginintrotext}}</h2>
+            <h2 class="login-heading {{#loginlayoutaccordion}}text-break w-100{{/loginlayoutaccordion}}{{#loginlayoutvertical}}{{#idpsplit}} text-break w-100{{/idpsplit}}{{/loginlayoutvertical}}">
+                {{#loginlayoutvertical}}
+                    {{#idpsplit}}
+                        {{label}}
+                    {{/idpsplit}}
+                    {{^idpsplit}}
+                        {{#idploginintrotext}}{{{idploginintrotext}}}{{/idploginintrotext}}{{^idploginintrotext}}{{#str}} potentialidps, auth {{/str}}{{/idploginintrotext}}
+                    {{/idpsplit}}
+                {{/loginlayoutvertical}}
+                {{^loginlayoutvertical}}
+                    {{#idploginintrotext}}{{{idploginintrotext}}}{{/idploginintrotext}}{{^idploginintrotext}}{{#str}} potentialidps, auth {{/str}}{{/idploginintrotext}}
+                {{/loginlayoutvertical}}
+            </h2>
             {{/showidploginintro}}
 
             {{! Instructions (between heading and form) }}
@@ -370,14 +411,44 @@
             {{/idplogininstructionsbetween}}
             {{/showidplogininstruction}}
 
-            {{#identityproviders}}
-                <a class="btn login-identityprovider-btn btn-block btn-secondary" href="{{url}}">
-                    {{#iconurl}}
-                        <img src="{{iconurl}}" alt="" width="24" height="24"/>
-                    {{/iconurl}}
-                    {{name}}
-                </a>
-            {{/identityproviders}}
+            {{! If not using embedded WAYF code. }}
+            {{^showshibbolethembeddedwayfcode}}
+                {{#identityproviders}}
+                    {{! Use internal WAYF for Shibboleth }}
+                    {{#useinternalwayf}}
+                    <form class="login-shibboleth-wayf-form mb-2" action="{{shibbolethloginurl}}" method="post" id="{{wayfformid}}">
+                        <div class="mb-3">
+                            <label for="{{wayfformid}}-idp" class="form-label">{{#str}}auth_shibboleth_select_organization, auth_shibboleth{{/str}}</label>
+                            <select id="{{wayfformid}}-idp" name="idp" class="form-control w-100">
+                                <option value="-">{{#str}}auth_shibboleth_select_member, auth_shibboleth{{/str}}</option>
+                                {{#shibbidps}}
+                                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                                {{/shibbidps}}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn {{idploginbtnclass}} w-100" accesskey="s">
+                            {{#str}}login{{/str}}
+                        </button>
+                        <p class="form-text text-muted mt-2 mb-0 text-break">
+                            {{#str}}auth_shib_contact_administrator, auth_shibboleth, {{adminemail}}{{/str}}
+                        </p>
+                    </form>
+                    {{/useinternalwayf}}
+                    {{! Use standard IDP button }}
+                    {{^useinternalwayf}}
+                    <a class="btn {{idploginbtnclass}} btn-block " href="{{url}}">
+                        {{#iconurl}}
+                            <img src="{{iconurl}}" alt="" width="24" height="24"/>
+                        {{/iconurl}}
+                        {{name}}
+                    </a>
+                    {{/useinternalwayf}}
+                {{/identityproviders}}
+            {{/showshibbolethembeddedwayfcode}}
+            {{! Otherwise, if using embedded WAYF code, display the configured JavaScript code. }}
+            {{#showshibbolethembeddedwayfcode}}
+                {{{shibbolethembeddedwayfcode}}}
+            {{/showshibbolethembeddedwayfcode}}
         </div>
 
         {{! Instructions (below form) }}
@@ -417,7 +488,7 @@
         </div>
 
         <div class="login-signup">
-            <a class="btn btn-secondary" href="{{signupurl}}">{{#str}}startsignup{{/str}}</a>
+            <a class="btn {{selfregistrationloginbtnclass}}" href="{{signupurl}}">{{#str}}startsignup{{/str}}</a>
         </div>
 
         {{! Instructions (below form) }}
@@ -458,7 +529,7 @@
             <input type="hidden" name="logintoken" value="{{logintoken}}">
             <input type="hidden" name="username" value="guest" />
             <input type="hidden" name="password" value="guest" />
-            <button class="btn btn-secondary" type="submit" id="loginguestbtn">{{#str}}loginguest{{/str}}</button>
+            <button class="btn {{guestloginbtnclass}}" type="submit" id="loginguestbtn">{{#str}}loginguest{{/str}}</button>
         </form>
 
         {{! Instructions (below form) }}

@@ -10,8 +10,8 @@ Feature: Configuring the theme_boost_union plugin as admin
     And I follow "Site administration"
     And I navigate to "Appearance > Themes" in site administration
     And I click on "#theme-settings-boost_union" "css_element" in the "#theme-card-boost_union" "css_element"
-    And I should see "Look" in the ".card-body" "css_element"
-    And I should see "Settings for branding your Moodle site"
+    And I should see "Look" in the "#region-main" "css_element"
+    And I should see "Settings for branding your Moodle site" in the "#region-main" "css_element"
     And I should see "Settings overview" in the ".breadcrumb" "css_element"
 
   @javascript
@@ -68,6 +68,13 @@ Feature: Configuring the theme_boost_union plugin as admin
     And ".admin_settingspage_tabs_with_tertiary" "css_element" should be visible
     And I should see "Smart menus" in the ".admin_settingspage_tabs_with_tertiary .dropdown-toggle" "css_element"
     And "h2:has(+ .admin_settingspage_tabs_with_tertiary)" "css_element" should not be visible
+    # And we have to test the 'recommendations' page as well as this is an external admin page.
+    And I set the field "List of Boost Union settings pages" to "Recommendations"
+    Then "body#page-admin-theme-boost_union-recommendations-overview" "css_element" should exist
+    And ".admin_settingspage_tabs_with_tertiary" "css_element" should exist
+    And ".admin_settingspage_tabs_with_tertiary" "css_element" should be visible
+    And I should see "Recommendations" in the ".admin_settingspage_tabs_with_tertiary .dropdown-toggle" "css_element"
+    And "h2:has(+ .admin_settingspage_tabs_with_tertiary)" "css_element" should not be visible
     # And we have to test the 'all settings on one page' page as well as this is an individual page.
     And Behat debugging is disabled
     # The remaining steps cannot be executed on Github actions due to a timeout error due to the massive amount of Tiny editors
@@ -121,6 +128,9 @@ Feature: Configuring the theme_boost_union plugin as admin
     # Smart menus
     When I navigate to "Appearance > Boost Union > Smart menus" in site administration
     Then "Boost Union (or a child theme of Boost Union) is currently not the active theme" "text" should appear after ".admin_settingspage_tabs_with_tertiary" "css_element"
+    # Recommendations
+    And I navigate to "Appearance > Boost Union > Recommendations" in site administration
+    Then "Boost Union (or a child theme of Boost Union) is currently not the active theme" "text" should appear after ".admin_settingspage_tabs_with_tertiary" "css_element"
 
   @javascript
   Scenario: Switch to the active Boost Union admin sub-tab after saving a setting and the following page reload
@@ -137,3 +147,22 @@ Feature: Configuring the theme_boost_union plugin as admin
     And "#theme_boost_union_look_page.tab-pane:not(.active)" "css_element" should not exist
     And "#theme_boost_union_look_general.tab-pane.active" "css_element" should not exist
     And "#theme_boost_union_look_general.tab-pane:not(.active)" "css_element" should exist
+
+  @javascript
+  Scenario: Show and use possible setting overrides notification actions
+    Given I log in as "admin"
+    And Behat debugging is disabled
+    When I navigate to "Appearance > Boost Union > Look" in site administration
+    And I click on "Site branding" "link" in the "#adminsettings .nav-tabs" "css_element"
+    Then I should see "Possible setting overrides" in the "#admin-logo .theme-boost-union-settingoverridenotification" "css_element"
+    And ".action-info" "css_element" should exist in the "#admin-logo .theme-boost-union-settingoverridenotification" "css_element"
+    And ".action-flavours" "css_element" should exist in the "#admin-logo .theme-boost-union-settingoverridenotification" "css_element"
+    When I click on ".action-info" "css_element" in the "#admin-logo .theme-boost-union-settingoverridenotification" "css_element"
+    Then ".modal-dialog" "css_element" should be visible
+    And I should see "Manage flavours" in the ".modal-dialog" "css_element"
+    When I click on ".modal-dialog .btn-close" "css_element"
+    Then ".modal-dialog" "css_element" should not be visible
+    And Behat debugging is enabled
+    When I click on ".action-flavours" "css_element" in the "#admin-logo .theme-boost-union-settingoverridenotification" "css_element"
+    Then "body#page-admin-theme-boost_union-flavours-overview" "css_element" should exist
+    And I should see "Flavours" in the ".admin_settingspage_tabs_with_tertiary .dropdown-toggle" "css_element"
