@@ -1634,20 +1634,33 @@ class core_renderer extends core_renderer_intermediate {
 
         $output = '';
         if ($this->page->pagelayout !== 'embedded' && !empty($CFG->additionalhtmlfooter)) {
-            // The following code is part of Moodle core from Moodle 5.2 on (MDL-88210 / MDL-85498).
-            // It was backported to Boost Union to allow admins to use that feature already on legacy versions.
+            // Get the setting.
+            $additionalhtmlfooterfilterssetting = get_config('theme_boost_union', 'additionalhtmlfooterfilters');
 
-            // The additional HTML footer content needs to also support JS so it supports things like analytics or other tooling.
-            // It is controlled via config so is considered trusted for this.
-            // We use format_text rather than injecting directly, to support features like multi-lang.
-            $formatoptions = [
-                'trusted' => true,
-                'clean' => false,
-                'context' => $this->page->context,
-                'para' => false,
-                'allowid' => true,
-            ];
-            $output .= "\n" . format_text($CFG->additionalhtmlfooter, FORMAT_HTML, $formatoptions);
+            // If the admin has enabled the processing of the additional HTML footer with the Moodle filters.
+            if (
+                isset($additionalhtmlfooterfilterssetting) &&
+                    $additionalhtmlfooterfilterssetting == THEME_BOOST_UNION_SETTING_SELECT_YES
+            ) {
+                // Process the additional HTML footer with format_text to support features like multi-lang.
+                // This code was part of Moodle core from Moodle 5.2 on, but was removed again there in MDL-89237,
+                // but Boost Union still allows the admin to enable it.
+                // The additional HTML footer content needs to also support JS so it supports things like analytics or other
+                // tooling. It is controlled via config so is considered trusted for this.
+                $formatoptions = [
+                    'trusted' => true,
+                    'clean' => false,
+                    'context' => $this->page->context,
+                    'para' => false,
+                    'allowid' => true,
+                ];
+                $output .= "\n" . format_text($CFG->additionalhtmlfooter, FORMAT_HTML, $formatoptions);
+
+                // Otherwise.
+            } else {
+                // Add the additional HTML footer as-is, as Moodle core does.
+                $output .= "\n" . $CFG->additionalhtmlfooter;
+            }
         }
         return $output;
     }
@@ -1865,5 +1878,25 @@ class core_renderer extends core_renderer_intermediate {
         $attributes += $customattribs;
 
         return html_writer::tag('a', $content, $attributes);
+    }
+
+    /**
+     * Returns standard navigation between activities in a course.
+     *
+     * This renderer function is copied and modified from /lib/classes/output/core_renderer.php
+     *
+     * @return string the navigation HTML.
+     */
+    public function activity_navigation() {
+        // If the activity navigation should be hidden.
+        // Moodle core would show the navigation in course formats which do not use the course index
+        // or on pages with the 'frametop' layout, regardless of the theme.
+        $activitynavigation = get_config('theme_boost_union', 'activitynavigation');
+        if ($activitynavigation == THEME_BOOST_UNION_SETTING_ACTIVITYNAVIGATION_HIDE) {
+            return '';
+        }
+
+        // Otherwise, return the parent function.
+        return parent::activity_navigation();
     }
 }

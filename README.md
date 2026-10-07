@@ -416,9 +416,13 @@ With this setting a back to top button will appear in the bottom right corner of
 
 With this setting, upon toggling edit mode on and off, the scroll position at where the user was when performing the toggle is preserved.
 
-###### Activity navigation elements
+###### Activity & section navigation elements
 
-With this setting the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource become displayed. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0. With Boost Union, you can bring them back.
+With this setting, you can control the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0 in favour of the course index. With Boost Union, you can bring them back or hide them completely. The setting has three options:
+
+* No change: The elements are displayed as Moodle core decides. Moodle core does not display them in course formats which use the course index (like the 'Custom sections' and 'Weekly sections' formats), but it still displays them in course formats which do not use the course index (like the 'Social' format or third party course formats with a disabled course index) and on activity pages which are embedded in a frame.
+* Show: The elements are displayed in all courses. Furthermore, within courses using the 'one section per page' mode, similar elements for the previous and next section are displayed as well.
+* Hide: The elements are hidden in all courses, even in courses where Moodle core would display them. Course formats which render their own section navigation elements will still display them as these are not controlled by this setting.
 
 ###### Show navigation on policy overview page
 
@@ -494,6 +498,12 @@ In this tab there are the following settings:
 
 With this setting, a hint will appear at the top of the Moodle page if JavaScript is not enabled. This is particularly helpful as several Moodle features do not work without JavaScript.
 
+##### Additional HTML
+
+###### Process additional HTML footer with filters
+
+With this setting, you can enable that the content of the Moodle core setting 'Before BODY is closed' on the Additional HTML settings page is processed by the Moodle text filters before it is added to the page. This is useful if you use that setting to show visible content, like a short text or a list of links, at the end of the footer popover and want to use, for example, the multi-language content filter there. But before you enable this setting, please consider that there is a much better way to show visible content in the footer popover: The 'Additional content at the beginning of the footer popover' and 'Additional content at the end of the footer popover' settings in the Content -> Footer tab are made exactly for this purpose. Their content is shown in separate sections of the footer popover and is processed with the Moodle text filters anyway. If you still want to enable this setting, please note that Moodle core processed this content with the text filters temporarily in some Moodle versions, but removed this processing again due to problems: All enabled text filters will process the whole content and might break raw HTML and JavaScript code, like analytics or tracking code. Thus, please enable this setting only if you really need it and test your additional HTML footer content thoroughly afterwards.
+
 ### Settings page "Content"
 
 #### Tab "Footer"
@@ -523,6 +533,14 @@ With these settings, you can entirely suppress particular links in the footer.
 ###### Suppress footer output by plugin ...
 
 With this setting, you can entirely suppress the footer output by particular plugins.
+
+###### Additional content at the beginning of the footer popover
+
+Whatever you add to this textarea will be displayed in a separate section at the beginning of the footer popover, i.e. above all other links and information in the footer popover.
+
+###### Additional content at the end of the footer popover
+
+Whatever you add to this textarea will be displayed in a separate section at the end of the footer popover, i.e. below all other links and information in the footer popover.
 
 #### Tab "Static pages"
 

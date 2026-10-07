@@ -4,6 +4,28 @@ moodle-theme_boost_union
 Changes
 -------
 
+### Unreleased
+
+* 2026-10-07 - Improvement: Add a 'Hide' option to the activity & section navigation elements setting to hide the activity navigation also in course formats which do not use the course index, and clarify the setting description, resolves #1403
+
+### v4.5-r48
+
+* 2026-10-05 - Tests: Fix stylelint issue for theme/boost_union/tests/fixtures/extscss-invalid.scss, resolves #695
+* 2026-10-05 - Bugfix: The login background images were fetched in an undefined order which could result in a mismatch between the displayed image and its image text and in a sporadically failing Behat test, resolves #950
+* 2026-10-05 - Tests: Stabilize the activity icon color Behat tests which failed sporadically as the CSS filter comparison was stricter than the rounding of the generated filter values, resolves #793
+* 2026-10-05 - Tests: Stabilize the smart menu dynamic courses test which failed sporadically on Github actions, resolves #949
+* 2026-10-04 - Tests: Stabilize the flavour SCSS test in theme designer mode which failed sporadically on Github actions, resolves #1415
+* 2026-10-04 - Bugfix: ESLint error in drawers.mustache: Trailing spaces not allowed, resolves #1413
+* 2026-10-03 - Tests: Fix the pending steps in the file serving Behat tests by creating the flavour in the UI instead of using the Behat generator which does not exist in Boost Union 4.5, resolves #1412
+* 2026-10-02 - Improvement: Allow custom additions at the beginning and at the end of the footer popover (globally and within flavours), resolves #531
+* 2026-10-02 - Upstream change: Adopt changes from Moodle core in MDL-89237 and roll back the filter support in the additional HTML footer, but add a setting to re-enable it if needed, resolves #1384
+* 2026-10-02 - Tests: Handle mustache shortcomings from Boost Core and allow Boost Union mustache shortcomings to let moodle-plugin-ci fail again, resolves #152
+
+### v4.5-r47
+
+* 2026-10-01 - Backport: The 'completed' and 'failed' completion icons in the course index were shifted to the right, resolves #1340
+* 2026-09-29 - Upstream change: Adopt changes from Moodle core in MDL-88948 and re-align the activity icons in the course index drawer, resolves #1405
+
 ### v4.5-r46
 
 * 2026-07-19 - Bugfix: Prevent a redirect for flavour files when users have not accepted the policy yet, resolves #684

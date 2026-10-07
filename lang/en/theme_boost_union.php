@@ -41,6 +41,8 @@ $string['always'] = 'Always';
 $string['auto'] = 'Automatically';
 $string['bycapability'] = 'Controlled by capability';
 $string['nochange'] = 'No change';
+$string['show'] = 'Show';
+$string['hide'] = 'Hide';
 $string['forguestsonly'] = 'Only for guests and non-logged-in users';
 $string['showastext'] = 'Show as text';
 $string['showasbadge'] = 'Show as badge';
@@ -900,7 +902,11 @@ $string['scrollspysetting'] = 'Scroll-spy';
 $string['scrollspysetting_desc'] = 'With this setting, upon toggling edit mode on and off, the scroll position at where the user was when performing the toggle is preserved.';
 // ... ... Setting: Activity & section navigation
 $string['activitynavigationsetting'] = 'Activity & section navigation elements';
-$string['activitynavigationsetting_desc'] = 'With this setting, the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource become displayed. Furthermore, within courses using the \'one section per page\' mode, similar elements for the previous and next section are displayed as well. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0. With Boost Union, you can bring them back.';
+$string['activitynavigationsetting_desc'] = 'With this setting, you can control the elements to jump to the previous and next activity/resource as well as the pull down menu to jump to a distinct activity/resource. UI elements like this existed already on Boost in Moodle Core until Moodle 3.11, but were removed in 4.0 in favour of the course index. With Boost Union, you can bring them back or hide them completely.<br />
+<br />
+\'No change\': The elements are displayed as Moodle core decides. Moodle core does not display them in course formats which use the course index (like the \'Custom sections\' and \'Weekly sections\' formats), but it still displays them in course formats which do not use the course index (like the \'Social\' format or third party course formats with a disabled course index) and on activity pages which are embedded in a frame.<br />
+\'Show\': The elements are displayed in all courses. Furthermore, within courses using the \'one section per page\' mode, similar elements for the previous and next section are displayed as well.<br />
+\'Hide\': The elements are hidden in all courses, even in courses where Moodle core would display them. Please note that course formats which render their own section navigation elements will still display them as these are not controlled by this setting.';
 
 // Settings: Blocks tab.
 $string['blockstab'] = 'Blocks';
@@ -1017,6 +1023,11 @@ $string['javascriptheading'] = 'JavaScript';
 $string['javascriptdisabledhint'] = 'JavaScript disabled hint';
 $string['javascriptdisabledhint_desc'] = 'With this setting, a hint will appear at the top of the Moodle page if JavaScript is not enabled. This is particularly helpful as several Moodle features do not work without JavaScript.';
 $string['javascriptdisabledhinttext'] = 'JavaScript is disabled in your browser.<br />Many features of Moodle will be not usable or will appear to be broken.<br />Please enable JavaScript for the full Moodle experience.';
+// ... Section: Additional HTML.
+$string['additionalhtmlheading'] = 'Additional HTML';
+// ... ... Setting: Process additional HTML footer with filters.
+$string['additionalhtmlfooterfilterssetting'] = 'Process additional HTML footer with filters';
+$string['additionalhtmlfooterfilterssetting_desc'] = 'With this setting, you can enable that the content of the Moodle core setting \'Before BODY is closed\' on the <a href="{$a->additionalhtmlurl}">Additional HTML settings page</a> is processed by the Moodle text filters before it is added to the page.<br />Despite the name of this setting, the content is not just added invisibly to the end of the page, but it is shown at the end of the footer popover (which is opened with the questionmark icon) in Boost Union as well as in Boost Core. For this reason, you might use this setting to show some visible content, like a short text or a list of links, to your users there. If you enable this setting, you can, for example, use the multi-language content filter to show this content in the user\'s current language.<br />But before you enable this setting, please consider that there is a much better way to show visible content in the footer popover: The \'Additional content at the beginning of the footer popover\' and \'Additional content at the end of the footer popover\' settings on the <a href="{$a->footerurl}">Footer settings tab</a> are made exactly for this purpose. Their content is shown in separate sections of the footer popover and is processed with the Moodle text filters anyway, without touching the raw HTML and JavaScript code in the \'Before BODY is closed\' setting.<br />If you still want to enable this setting, please note that Moodle core processed this content with the text filters temporarily in some Moodle versions, but removed this processing again due to problems. Thus, you should be aware of the consequences: All text filters which are enabled on your site will process the whole content, not only the multi-language content filter. As the \'Before BODY is closed\' setting is primarily intended for raw HTML and JavaScript code, like analytics or tracking code, the filters might modify this code unexpectedly and break it. Thus, please enable this setting only if you really need it and test your additional HTML footer content thoroughly afterwards.';
 
 // Settings: Content page.
 $string['configtitlecontent'] = 'Content';
@@ -1075,6 +1086,12 @@ $string['footersuppressstandardfootercore_desc'] = 'With this setting, you can e
 $string['footersuppressstandardfooter'] = 'Suppress footer output by plugin \'{$a}\'';
 $string['footersuppressstandardfooter_desc'] = 'With this setting, you can entirely suppress the footer output by plugin \'{$a}\'. Plugins (even if they are shipped with Moodle core, but are still technically plugins) can add additional content to the footer by implementing a particular hook or function. This plugin has implemented this hook / function and might add content to the footer in certain circumstances.<br />Please note: Due to the way how the suppressing feature is implemented, the setting might not take effect before the second page load after saving the setting.';
 $string['footersuppressstandardfooter_configoverride_desc'] = 'The footer output by plugin \'{$a}\' is already suppressed via <code>$CFG->hooks_callback_overrides</code> in your <code>config.php</code> file. To make this setting configurable here, you need to remove your override in <code>config.php</code> file.';
+// ... ... Settings: Additional content at the beginning and at the end of the footer popover.
+$string['footerpopovercontentstartsetting'] = 'Additional content at the beginning of the footer popover';
+$string['footerpopovercontentendsetting'] = 'Additional content at the end of the footer popover';
+$string['footerpopovercontentsetting_desc'] = 'Whatever you add to this textarea will be displayed in a separate section {$a} all other links and information in the footer popover. You can use this setting to add arbitrary content, like a short text or a list of links, to the footer popover. The content is processed with the Moodle text filters, i.e. you can, for example, use the multi-language content filter to show the content in the user\'s current language.';
+$string['footerpopovercontentsetting_above'] = 'above';
+$string['footerpopovercontentsetting_below'] = 'below';
 
 // Settings: Static pages tab.
 $string['staticpagestab'] = 'Static pages';
@@ -1622,6 +1639,10 @@ $string['flavoursfavicon'] = 'Favicon';
 $string['flavoursfavicon_help'] = 'With this setting, the flavour will override the favicon which is configured in Boost Union\'s look settings.';
 $string['flavoursfootnote'] = 'Footnote';
 $string['flavoursfootnote_help'] = 'With this setting, the flavour will override the footnote which is configured in Boost Union\'s content settings.';
+$string['flavoursfooterpopovercontent'] = 'Additional content at the {$a} of the footer popover';
+$string['flavoursfooterpopovercontent_help'] = 'With this setting, the flavour will override the additional content at the {$a} of the footer popover which is configured in Boost Union\'s content settings.';
+$string['flavoursfooterpopovercontent_beginning'] = 'beginning';
+$string['flavoursfooterpopovercontent_end'] = 'end';
 $string['flavoursflavours'] = 'Flavours';
 $string['flavoursgeneralsettings'] = 'General settings';
 $string['flavoursincludesubcategories'] = 'Include subcategories';

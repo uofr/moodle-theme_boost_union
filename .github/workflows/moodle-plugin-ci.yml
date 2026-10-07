@@ -20,4 +20,5 @@ jobs:
       pr-check-diff-does-not-contain: "theme->settings->"
       behat-suite: "boost_union"
       behat-slices: 4
-      mustache-continue-on-error: true
+      extra-config: |
+        define('THEME_DESIGNER_CACHE_LIFETIME', 0);
